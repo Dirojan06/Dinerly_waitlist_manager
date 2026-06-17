@@ -10,8 +10,8 @@
 
     <div class="header-actions">
       <button class="date-btn">Today, May 28</button>
-      <button class="filter-btn">Filter</button>
-      <button class="add-btn" (click)="modalService.open()">+ Add walk-in</button>
+      <!-- <button class="filter-btn">Filter</button> -->
+      <!-- <button class="add-btn" >Refresh</button> -->
     </div>
   </div>
 
@@ -65,7 +65,7 @@
         </tbody>
       </table> -->
 
-        <div class="notify-card" *ngFor="let guest of pendingGuests; trackBy: trackBypendingGuest">
+        <div class="notify-card" *ngFor="let guest of pagedPendingGuests; trackBy: trackBypendingGuest">
           <div class="avatar" [style.color]="getAvatarColor(guest.id).color">
             {{ (guest.id) }}
           </div>
@@ -90,6 +90,24 @@
         <div class="card-footer">
 
           Pending guests require approval before joining the waitlist.
+
+        </div>
+
+        <div class="pagination-row" *ngIf="pendingGuests.length > itemsPerPage">
+
+          <button (click)="changePage('pending', 'prev')" [disabled]="pendingPage === 1">
+
+            Prev
+
+          </button>
+
+          <span>Page {{ pendingPage }} / {{ pendingTotalPages }}</span>
+
+          <button (click)="changePage('pending', 'next')" [disabled]="pendingPage === pendingTotalPages">
+
+            Next
+
+          </button>
 
         </div>
 
@@ -140,7 +158,7 @@
         </tbody>
       </table> -->
 
-        <div class="notify-card" *ngFor="let guest of waitingGuests; trackBy: trackBywaitingGuest">
+        <div class="notify-card" *ngFor="let guest of pagedWaitingGuests; trackBy: trackBywaitingGuest">
           <div class="avatar" [style.color]="getAvatarColor(guest.id).color">
             {{ (guest.id) }}
           </div>
@@ -160,6 +178,17 @@
         </div>
 
         <div class="card-footer">These guests are waiting for a table.</div>
+      </div>
+      <div class="pagination-row" *ngIf="waitingGuests.length > itemsPerPage">
+        <button (click)="changePage('waiting', 'prev')" [disabled]="waitingPage === 1">
+          Prev
+        </button>
+
+        <span>Page {{ waitingPage }} / {{ waitingTotalPages }}</span>
+
+        <button (click)="changePage('waiting', 'next')" [disabled]="waitingPage === waitingTotalPages">
+          Next
+        </button>
       </div>
     </div>
 
@@ -203,7 +232,7 @@
         </tbody>
       </table> -->
 
-        <div class="notify-card" *ngFor="let guest of notifiedGuests; trackBy: trackBynotifyGuest">
+        <div class="notify-card" *ngFor="let guest of pagedNotifiedGuests; trackBy: trackBynotifyGuest">
           <div class="avatar" [style.color]="getAvatarColor(guest.id).color">
             {{ (guest.id) }}
           </div>
@@ -217,12 +246,23 @@
             </div>
           </div>
           <div class="notify-actions">
-            <button class="seat-btn" (click)="seatedGuestToTable(guest.id)">Seat</button>
+            <button class="seat-btn" (click)="openAvailableTableModal(guest)">Seat</button>
             <button class="delay-btn">Delay</button>
           </div>
         </div>
 
         <div class="card-footer">Guests have been notified. Update wait time if there is a delay.</div>
+      </div>
+      <div class="pagination-row" *ngIf="notifiedGuests.length > itemsPerPage">
+        <button (click)="changePage('notified', 'prev')" [disabled]="notifiedPage === 1">
+          Prev
+        </button>
+
+        <span>Page {{ notifiedPage }} / {{ notifiedTotalPages }}</span>
+
+        <button (click)="changePage('notified', 'next')" [disabled]="notifiedPage === notifiedTotalPages">
+          Next
+        </button>
       </div>
     </div>
 
@@ -260,7 +300,7 @@
         </tbody>
       </table> -->
 
-        <div class="notify-card" *ngFor="let guest of seatedGuests; trackBy: trackByseatedGuest">
+        <div class="notify-card" *ngFor="let guest of pagedSeatedGuests; trackBy: trackByseatedGuest">
           <div class="avatar" [style.color]="getAvatarColor(guest.id).color">
             {{ (guest.id) }}
           </div>
@@ -277,6 +317,17 @@
 
         <div class="card-footer">Guests seated today.</div>
       </div>
+      <div class="pagination-row" *ngIf="seatedGuests.length > itemsPerPage">
+        <button (click)="changePage('seated', 'prev')" [disabled]="seatedPage === 1">
+          Prev
+        </button>
+
+        <span>Page {{ seatedPage }} / {{ seatedTotalPages }}</span>
+
+        <button (click)="changePage('seated', 'next')" [disabled]="seatedPage === seatedTotalPages">
+          Next
+        </button>
+      </div>
     </div>
   </div>
 
@@ -287,7 +338,7 @@
     <div>🕘 Waiting <b>{{ waitingGuests.length }}</b></div>
     <div>🔔 Notified <b>{{ notifiedGuests.length }}</b></div>
     <div>🪑 Seated Today <b>{{ seatedGuests.length }}</b></div>
-    <div>🔄 Auto refresh <b>30s</b></div>
+    <!-- <div>🔄 Auto refresh <b>30s</b></div> -->
   </div>
 </div>
 
@@ -337,6 +388,30 @@
       </button>
       <button class="modal-approve-btn" [disabled]="isRejecting" (click)="rejectGuest(selectedGuest.id)">
         {{ isRejecting ? 'Rejecting...' : 'Reject Guest' }}
+      </button>
+    </div>
+  </div>
+</div>
+
+
+
+<div class="modal-backdrop" *ngIf="showTable">
+  <div class="approve-modal" *ngIf="selectedGuest">
+    <h2>Seat Guest</h2>
+
+    <label class="time-label">Available Tables</label>
+    <div class="time-options">
+      <button *ngFor="let table of openTables" type="button" [class.active]="selectedTable?.id === table.id"
+        (click)="selectedTable = table">
+        {{ table.tableNumber }} · {{ table.capacity}}
+      </button>
+    </div>
+    <div class="modal-actions">
+      <button class="cancel-btn" (click)="closeAvailableTabletModal()">
+        Cancel
+      </button>
+      <button class="modal-approve-btn" [disabled]="!selectedTable" (click)="seatedGuestToTable(selectedGuest.id,selectedTable)">
+        {{ isRejecting ? 'Seating...' : 'Seat Guest' }}
       </button>
     </div>
   </div>

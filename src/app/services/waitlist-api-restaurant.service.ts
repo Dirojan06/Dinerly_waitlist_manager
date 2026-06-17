@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import {JoinWaitlistRequest, PendingGuest, WaitingGuest, ApproveWaitlistRequest, getGuestWaitingStatus, PendingGuestResponse, WaitingGuestResponse, NotifiedGuestResponse, SeatedGuestResponse, DashboardWaitlistResponse, notifiyguestcallRequest, TablelistResponse, addGuestToWaitlistRequest }from '../models/waitlist-api-guest-to-restaurant.model';
+import {JoinWaitlistRequest, PendingGuest, WaitingGuest, ApproveWaitlistRequest, getGuestWaitingStatus, PendingGuestResponse, WaitingGuestResponse, NotifiedGuestResponse, SeatedGuestResponse, DashboardWaitlistResponse, notifiyguestcallRequest, TablelistResponse, addGuestToWaitlistRequest, seatedGuestcallRequest, GuestHistoryResponse }from '../models/waitlist-api-guest-to-restaurant.model';
 import { environment } from 'src/environments/environment.prod';
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
@@ -165,7 +165,7 @@ export class WaitlistApiRestaurantService {
   }
 
   //seated guest api
-  seatedGuest(restaurantId: number,waitlistId: number): Observable<any> {
+  seatedGuest(restaurantId: number,waitlistId: number, payload?:seatedGuestcallRequest): Observable<any> {
 
     const token = this.auth.getToken();
 
@@ -173,7 +173,7 @@ export class WaitlistApiRestaurantService {
       Authorization: `Bearer ${token}`
     });
 
-    return this.http.post(`${this.baseUrl}/restaurants/${restaurantId}/waitlist/${waitlistId}/seat`,{ headers });
+    return this.http.post(`${this.baseUrl}/restaurants/${restaurantId}/waitlist/${waitlistId}/seat`,payload,{ headers });
   }
 
 
@@ -186,6 +186,49 @@ export class WaitlistApiRestaurantService {
     });
 
     return this.http.get<TablelistResponse>(`${this.baseUrl}/restaurants/${restaurantId}/tables`,{ headers });
+  }
+
+  updateTableStatus(restaurantId:number,tableId:number,status:string): Observable<any>{
+     const token = this.auth.getToken();
+
+    const headers = new HttpHeaders({
+      Authorization: `Bearer ${token}`
+    });
+
+    let params = new HttpParams();
+
+    if (status) {
+      params = params.set('status', status);
+    }
+    return this.http.post(`${this.baseUrl}/restaurants/${restaurantId}/tables/${tableId}/status`,null,{ headers,params });
+  }
+
+
+
+  //History API
+
+  getRestaurantGuestHistory(restaurantId:number,page:number,size:number,status:string,date:string):Observable<any>{
+
+    const token = this.auth.getToken();
+
+    const headers = new HttpHeaders({
+      Authorization: `Bearer ${token}`
+    });
+    let params = new HttpParams();
+
+    if (status) {
+      params = params.set('status', status);
+    }
+    if (date) {
+      params = params.set('date', date);
+    }
+    if (page) {
+      params = params.set('page', page);
+    }
+    if (size) {
+      params = params.set('size', size);
+    }
+    return this.http.get<GuestHistoryResponse>(`${this.baseUrl}/restaurants/${restaurantId}/guest-history`,{ headers, params });
   }
 
 

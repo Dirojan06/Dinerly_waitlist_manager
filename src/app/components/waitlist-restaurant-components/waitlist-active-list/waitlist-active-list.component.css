@@ -645,3 +645,47 @@ pending-scroll-container {
     max-height: calc((125px * 5) + (12px * 4));
   }
 }
+
+.waitlist-card {
+  min-height: 730px;
+  display: flex;
+  flex-direction: column;
+}
+
+.notify-card {
+  min-height: 72px;
+}
+
+.card-footer {
+  margin-top: auto;
+}
+
+.pagination-row {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 14px;
+  margin-top: 14px;
+  padding-top: 10px;
+}
+
+.pagination-row button {
+  border: 1px solid #e5e7eb;
+  background: #ffffff;
+  color: #260c9d;
+  font-weight: 800;
+  border-radius: 8px;
+  padding: 6px 12px;
+  cursor: pointer;
+}
+
+.pagination-row button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.pagination-row span {
+  font-size: 13px;
+  color: #6b7280;
+  font-weight: 700;
+}

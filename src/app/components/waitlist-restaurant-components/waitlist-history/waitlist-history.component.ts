@@ -1,6 +1,8 @@
 import { Component } from '@angular/core';
 import { Subscription } from 'rxjs';
+import { GetGuestHistory } from 'src/app/models/waitlist-api-guest-to-restaurant.model';
 import { HistoryEntry } from 'src/app/models/waitlist-restaurant.model';
+import { WaitlistApiRestaurantService } from 'src/app/services/waitlist-api-restaurant.service';
 import { WaitlistRestaurantModalService } from 'src/app/services/waitlist-restaurant-modal.service';
 import { WaitlistRestaurantService } from 'src/app/services/waitlist-restaurant.service';
 
@@ -10,18 +12,131 @@ import { WaitlistRestaurantService } from 'src/app/services/waitlist-restaurant.
   styleUrls: ['./waitlist-history.component.css']
 })
 export class WaitlistHistoryComponent {
-history: HistoryEntry[] = [];
-  private sub = new Subscription();
+ restaurantId = 1;
 
-  get seatedCount(): number { return this.history.filter(h => h.status === 'seated').length; }
-  get noShowCount(): number { return this.history.filter(h => h.status === 'noshow').length; }
+  history: GetGuestHistory[] = [];
 
-  constructor(private waitlistService: WaitlistRestaurantService, public modalService: WaitlistRestaurantModalService) {}
+  isLoading = false;
+
+  selectedStatus = '';
+
+  selectedDate = '';
+
+  currentPage = 0;
+
+  pageSize = 15;
+
+  totalPages = 0;
+
+  totalElements = 0;
+
+  constructor(private waitlistService: WaitlistApiRestaurantService) {}
 
   ngOnInit(): void {
-    this.sub.add(this.waitlistService.history$.subscribe(h => this.history = h));
-  }
-  ngOnDestroy(): void { this.sub.unsubscribe(); }
 
-  trackById(_: number, h: HistoryEntry): number { return h.id; }
+    this.loadGuestHistory();
+
+  }
+
+  loadGuestHistory(): void {
+
+    this.isLoading = true;
+
+    this.waitlistService
+
+      .getRestaurantGuestHistory(
+
+        this.restaurantId,
+
+        this.currentPage,
+
+        this.pageSize,
+
+        this.selectedStatus,
+
+        this.selectedDate
+
+      )
+
+      .subscribe({
+
+        next: (res) => {
+
+          this.history = res.data.content || [];
+
+          this.totalPages = res.data.totalPages;
+
+          this.totalElements = res.data.totalElements;
+
+          this.isLoading = false;
+
+        },
+
+        error: () => {
+
+          this.isLoading = false;
+
+          alert('Unable to load history');
+
+        }
+
+      });
+
+  }
+
+  onFilterChange(): void {
+
+    this.currentPage = 0;
+
+    this.loadGuestHistory();
+
+  }
+
+  nextPage(): void {
+
+    if (this.currentPage < this.totalPages - 1) {
+
+      this.currentPage++;
+
+      this.loadGuestHistory();
+
+    }
+
+  }
+
+  previousPage(): void {
+
+    if (this.currentPage > 0) {
+
+      this.currentPage--;
+
+      this.loadGuestHistory();
+
+    }
+
+  }
+
+  getWaitTime(entry: GetGuestHistory): string {
+
+    if (!entry.joinedAt || !entry.seatedAt) {
+
+      return '—';
+
+    }
+
+    const joined = new Date(entry.joinedAt).getTime();
+
+    const seated = new Date(entry.seatedAt).getTime();
+
+    const minutes = Math.round((seated - joined) / 60000);
+
+    return `${minutes} min`;
+
+  }
+
+  trackById(_: number, entry: GetGuestHistory): number {
+
+    return entry.id;
+
+  }
 }
