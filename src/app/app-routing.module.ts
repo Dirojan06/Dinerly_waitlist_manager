@@ -10,6 +10,7 @@ import { WaitlistSettingsComponent } from './components/waitlist-restaurant-comp
 import { WaitlistRestaurantComponentComponent } from './components/waitlist-restaurant-components/waitlist-restaurant-component.component';
 import { WaitlistDashboardComponent } from './components/waitlist-restaurant-components/waitlist-dashboard/waitlist-dashboard.component';
 import { WaitlistAuthGuard } from './auth-guard/waitlist-auth.guard';
+import { WaitlistWaitingScreenComponent } from './components/waitlist-user-component/waitlist-waiting-screen/waitlist-waiting-screen.component';
 
 
 
@@ -18,9 +19,16 @@ const routes: Routes = [
   { path: '', redirectTo: 'login', pathMatch: 'full' },
   { path: 'login', component: WaitlistLoginComponent },
   {
+
     path: 'user',
     component: WaitlistUserComponentComponent
   },
+
+  {
+    path: 'user/waiting',
+    component: WaitlistWaitingScreenComponent
+  },
+
   {
     path: 'restaurant',
     component: WaitlistRestaurantComponentComponent,

@@ -1,24 +1,27 @@
 <div class="app-wrapper">
   <app-waitlist-navbar></app-waitlist-navbar>
-  <ng-container *ngIf="!joinedGuest; else waitingScreen">
 
-    <div class="main-layout">
-      <div class="content-area">
+  <router-outlet *ngIf="isWaitingRoute"></router-outlet>
+
+  <ng-container *ngIf="!isWaitingRoute">
+
+    <div class="guest-page">
+
+      <div class="top-grid">
         <app-waitlist-user-hero></app-waitlist-user-hero>
-        <app-waitlist-user-banner (joinedWaitlist)="onJoinedWaitlist($event)">
-        </app-waitlist-user-banner>
-        <app-waitlist-user-menu></app-waitlist-user-menu>
+
+        <app-waitlist-user-sidebar
+          (joinedWaitlist)="onJoinedWaitlist($event)">
+        </app-waitlist-user-sidebar>
       </div>
 
-      <div class="sidebar-area">
-        <app-waitlist-user-sidebar></app-waitlist-user-sidebar>
-      </div>
+      <app-waitlist-user-banner
+        (joinedWaitlist)="onJoinedWaitlist($event)">
+      </app-waitlist-user-banner>
+
+      <app-waitlist-user-menu></app-waitlist-user-menu>
+
     </div>
-  </ng-container>
-<ng-template #waitingScreen>
-    <app-waitlist-waiting-screen [guest]="joinedGuest" [restaurantId]="restaurantId" (leaveSuccess)="onLeaveSuccess()">
-    </app-waitlist-waiting-screen>
-  </ng-template>
-  
-</div>
 
+  </ng-container>
+</div>

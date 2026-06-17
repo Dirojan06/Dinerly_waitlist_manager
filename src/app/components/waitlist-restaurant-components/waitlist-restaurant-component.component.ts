@@ -1,6 +1,8 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { NavigationEnd, Router } from '@angular/router';
 import { filter, Subscription } from 'rxjs';
+import { DashboardStatus, tableList } from 'src/app/models/waitlist-api-guest-to-restaurant.model';
+import { WaitlistApiRestaurantService } from 'src/app/services/waitlist-api-restaurant.service';
 
 @Component({
   selector: 'app-waitlist-restaurant-component',
@@ -14,9 +16,13 @@ export class WaitlistRestaurantComponentComponent implements OnInit, OnDestroy {
   notifyCount = 0;
   openTablesCount = 0;
   showModal = false;
+  restaurantId = 1;
+  tables: tableList[] = [];
   private subs = new Subscription();
+  isLoading: boolean = false;
+  dashboardStatus: DashboardStatus[] = [];
 
-  constructor(private router: Router) { }
+  constructor(private router: Router, private waitlistService: WaitlistApiRestaurantService) { }
 
   ngOnInit(): void {
 
@@ -28,6 +34,55 @@ export class WaitlistRestaurantComponentComponent implements OnInit, OnDestroy {
           this.setActiveRouteFromUrl(event.urlAfterRedirects);
         })
     );
+    this.getRestaurantTables();
+    this.loadDashboardWaitlist();
+
+  }
+
+  getRestaurantTables() {
+
+    this.waitlistService.getRestaurantTableslist(this.restaurantId).subscribe({
+      next: (res) => {
+        this.tables = res.data;
+        this.openTablesCount = this.tables.filter(
+
+          (table: any) => table.status === 'OPEN'
+
+        ).length;
+      }, error: () => {
+        alert('Unable to load the table');
+      }
+    })
+  }
+
+  loadDashboardWaitlist(): void {
+
+    this.isLoading = true;
+
+
+    this.waitlistService.getDashboardStatus(this.restaurantId).subscribe({
+      next: (response) => {
+        this.isLoading = false;
+        if (response.success) {
+          this.guestCount = response.data.filter(
+
+        (guest: any) =>
+
+          guest.status === 'PENDING' ||
+
+          guest.status === 'WAITING' ||
+
+          guest.status === 'NOTIFIED'
+
+      ).length;
+        }
+      },
+      error: () => {
+        this.isLoading = false;
+        alert('Unable to load dashboard waitlist');
+      }
+    });
+
   }
 
   setActiveRouteFromUrl(url: string): void {

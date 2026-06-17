@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, EventEmitter, Output } from '@angular/core';
 
 @Component({
   selector: 'app-waitlist-user-sidebar',
@@ -7,19 +7,22 @@ import { Component } from '@angular/core';
 })
 export class WaitlistUserSidebarComponent {
 
-  joinWaitlist(): void {
-    alert('Join Waitlist — connect to your waitlist service here.');
+  @Output() joinedWaitlist = new EventEmitter<any>();
+  showModal = false;
+
+  modalType: 'join' | 'status' = 'join';
+
+  openModal(type: 'join' | 'status'): void {
+    this.modalType = type;
+    this.showModal = true;
   }
 
-  checkStatus(): void {
-    alert('Check Status — connect to your backend here.');
+  closeModal(): void {
+    this.showModal = false;
   }
 
-  bookTable(): void {
-    alert('Book a Table — connect to reservation service here.');
-  }
-
-  updatePhone(): void {
-    alert('Update phone number flow.');
+  onJoinedWaitlist(guest: any): void {
+    this.joinedWaitlist.emit(guest);
+    this.showModal = false;
   }
 }

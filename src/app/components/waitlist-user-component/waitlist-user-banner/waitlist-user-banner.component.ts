@@ -7,22 +7,5 @@ import { Component, EventEmitter, Output } from '@angular/core';
 })
 export class WaitlistUserBannerComponent {
 
-  @Output() joinedWaitlist = new EventEmitter<any>();
-  showModal = false;
-
-  modalType: 'join' | 'status' = 'join';
-
-  openModal(type: 'join' | 'status'): void {
-    this.modalType = type;
-    this.showModal = true;
-  }
-
-  closeModal(): void {
-    this.showModal = false;
-  }
-
-  onJoinedWaitlist(guest: any): void {
-    this.joinedWaitlist.emit(guest);
-    this.showModal = false;
-  }
+  
 }

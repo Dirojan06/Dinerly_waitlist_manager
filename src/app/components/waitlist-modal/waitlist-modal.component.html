@@ -103,8 +103,8 @@
                     <button type="button" class="btn-cancel" (click)="close()">Cancel</button>
 
                     <div class="submit-wrap">
-                        <button type="submit" class="btn-primary">
-                            Join Waitlist
+                        <button type="submit" class="btn-primary" [disabled]="isSubmitting">
+                            {{ isSubmitting ? 'Joining...' : 'Join Waitlist' }}
                             <span>→</span>
                         </button>
                         <small>You'll receive SMS updates about your wait time.</small>

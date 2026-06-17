@@ -26,7 +26,7 @@ export class WaitlistApiRestaurantService {
   }
 
   // this is for user or guest api for leave from the joinlist
-  leaveWaitlistTable(restaurantId: number, waitlistId: number):Observable<any>{
+  leaveWaitlistTable(restaurantId: string, waitlistId: number):Observable<any>{
     return this.http.delete(`${this.baseUrl}/waitlist/${restaurantId}/${waitlistId}`);
   }
 

@@ -1,143 +1,127 @@
-<div class="page-wrap" [ngClass]="currentConfig.accentClass">
+<div class="login-page">
 
-  <!-- Background ambient blobs -->
-  <div class="bg-blobs" aria-hidden="true">
-    <div class="blob blob-1"></div>
-    <div class="blob blob-2"></div>
-    <div class="blob blob-3"></div>
+  <div class="brand-header">
+    <h1>🍽️ Dinerly</h1>
+    <p>Restaurant Waitlist & Guest Portal</p>
   </div>
 
-  <!-- Login Card -->
-  <div class="login-card" [@.disabled]="true">
+  <div class="role-grid">
 
-    <!-- Logo -->
-    <div class="logo-section">
-      <div *ngIf="selectedRole !== 'guest'" class="logo-mark" [ngClass]="'mark-' + selectedRole">
-        <span class="logo-icon">{{ currentConfig.icon }}</span>
-      </div>
-      <h1 class="brand-name">WaitMe</h1>
-      <p class="brand-tagline">Restaurant Waitlist &amp; Guest Portal</p>
-    </div>
-
-    <!-- Role Selector -->
-    <div class="role-selector" role="tablist" aria-label="Select login role">
-      <button *ngFor="let role of roles" class="role-btn" [class.active]="selectedRole === role"
-        (click)="selectRole(role)" role="tab" [attr.aria-selected]="selectedRole === role" type="button">
-        <span class="role-btn-icon">{{ roleConfig[role].icon }}</span>
-        <span class="role-btn-label">{{ roleConfig[role].label }}</span>
-      </button>
-    </div>
-
-    <!-- Role Description -->
-    <div class="role-desc" role="status">
-      <p>{{ currentConfig.description }}</p>
-    </div>
-
-    <!-- Login Form -->
-    <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" novalidate>
-
-      <!-- Email Field -->
-      <ng-container *ngIf="selectedRole !== 'guest'">
-        <div class="field-group" [class.has-error]="emailError">
-          <label for="email" class="field-label">Email address</label>
-          <div class="input-wrap">
-            <span class="input-icon">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <rect x="2" y="4" width="20" height="16" rx="2" />
-                <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" />
-              </svg>
-            </span>
-            <input id="email" type="email" formControlName="email" placeholder="Enter your email address"
-              class="field-input" autocomplete="email" />
-          </div>
-          <span id="email-error" class="field-error" *ngIf="emailError" role="alert">{{ emailError }}</span>
-        </div>
-
-        <!-- Password Field -->
-        <div class="field-group" [class.has-error]="passwordError">
-          <label for="password" class="field-label">Password</label>
-          <div class="input-wrap">
-            <span class="input-icon">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <rect x="3" y="11" width="18" height="11" rx="2" />
-                <path d="M7 11V7a5 5 0 0 1 10 0v4" />
-              </svg>
-            </span>
-            <input id="password" [type]="showPassword ? 'text' : 'password'" formControlName="password"
-              placeholder="Enter your password" class="field-input" autocomplete="current-password"
-              [attr.aria-describedby]="passwordError ? 'pw-error' : null" />
-            <button type="button" class="toggle-pw" (click)="togglePassword()"
-              [attr.aria-label]="showPassword ? 'Hide password' : 'Show password'">
-              <svg *ngIf="!showPassword" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                stroke-width="2">
-                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
-                <circle cx="12" cy="12" r="3" />
-              </svg>
-              <svg *ngIf="showPassword" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                stroke-width="2">
-                <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94" />
-                <path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19" />
-                <line x1="1" y1="1" x2="23" y2="23" />
-              </svg>
-            </button>
-          </div>
-          <span id="pw-error" class="field-error" *ngIf="passwordError" role="alert">{{ passwordError }}</span>
-        </div>
-      </ng-container>
-
-
-      <!-- Inline error -->
-      <div class="auth-error" *ngIf="errorMessage" role="alert">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <circle cx="12" cy="12" r="10" />
-          <line x1="12" y1="8" x2="12" y2="12" />
-          <line x1="12" y1="16" x2="12.01" y2="16" />
-        </svg>
-        {{ errorMessage }}
+    <!-- Guest Card -->
+    <div class="role-card">
+      <div class="card-banner guest-banner">
+        <div class="floating-icon">👥</div>
       </div>
 
-      <!-- Submit Button -->
-      <button type="submit" class="submit-btn" [class.loading]="isLoading" [disabled]="isLoading">
-        <span class="btn-text" *ngIf="!isLoading">
-          <ng-container *ngIf="selectedRole === 'guest'; else normalLogin">
-            Sign in as Guest
-          </ng-container>
-          <ng-template #normalLogin>
-            Sign in as {{ currentConfig.label }}
-          </ng-template>
-        </span>
-        <span class="btn-spinner" *ngIf="isLoading" aria-label="Signing in...">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-            <path
-              d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83" />
-          </svg>
-          Signing in...
-        </span>
-      </button>
+      <div class="card-body">
+        <h2>Dinerly</h2>
+        <p>Restaurant Waitlist & Guest Portal</p>
 
-    </form>
+        <div class="role-tabs">
+          <button class="active">👥 Guest</button>
+          <button>🍽️ Restaurant</button>
+          <button>🛡️ Admin</button>
+        </div>
 
+        <span class="role-desc">Check your queue status & browse the menu</span>
 
+        <button class="action-btn guest-btn" (click)="onGuestSubmit()">
+          Sign in as Guest <span>→</span>
+        </button>
 
-    <!-- Role access note -->
-    <div class="access-note">
-      <div class="access-dot" [ngClass]="'dot-' + selectedRole"></div>
-      <span *ngIf="selectedRole === 'guest'">No account needed — join the queue as a guest</span>
-      <span *ngIf="selectedRole === 'restaurant'">Restaurant staff credentials required</span>
-      <span *ngIf="selectedRole === 'admin'">Restricted to WaitMe system administrators</span>
+        <div class="access-note">
+          <span></span>
+          No account needed — join the queue as a guest
+        </div>
+      </div>
+    </div>
+
+    <!-- Restaurant Card -->
+    <div class="role-card active-card">
+      <div class="card-banner restaurant-banner">
+        <div class="floating-icon">🍽️</div>
+      </div>
+
+      <div class="card-body">
+        <h2>Dinerly</h2>
+        <p>Restaurant Waitlist & Guest Portal</p>
+
+        <form [formGroup]="loginForm" (ngSubmit)="onRestaurantSubmit()">
+          <label>Email address</label>
+          <input type="email" formControlName="email" placeholder="Enter your email address">
+
+          <label>Password</label>
+          <input type="password" formControlName="password" placeholder="Enter your password">
+
+          <button class="action-btn restaurant-btn" type="submit" >
+          Sign in as Restaurant <span>→</span>
+        </button>
+        </form>
+
+        
+
+        <div class="access-note">
+          <span></span>
+          Restaurant staff credentials required
+        </div>
+      </div>
+    </div>
+
+    <!-- Admin Card -->
+    <div class="role-card">
+      <div class="card-banner admin-banner">
+        <div class="floating-icon">🛡️</div>
+      </div>
+
+      <div class="card-body">
+        <h2>Dinerly</h2>
+        <p>Restaurant Waitlist & Guest Portal</p>
+
+        <form [formGroup]="loginForm" (ngSubmit)="onAdminSubmit()">
+          <label>Email address</label>
+          <input type="email" formControlName="email" placeholder="Enter your email address">
+
+          <label>Password</label>
+          <input type="password" formControlName="password" placeholder="Enter your password">
+        </form>
+
+        <button class="action-btn admin-btn" type="submit">
+          Sign in as Admin <span>→</span>
+        </button>
+
+        <div class="access-note">
+          <span></span>
+          Restricted to Dinerly system administrators
+        </div>
+      </div>
     </div>
 
   </div>
 
-  <!-- Footer -->
-  <p class="page-footer">© 2024 WaitMe · Restaurant Waitlist Platform</p>
+  <div class="bottom-section">
+    <div class="feature-card">
+      <div class="feature-icon">👥</div>
+      <h4>Easy & Fast</h4>
+      <p>Join in seconds</p>
+    </div>
 
-</div>
+    <div class="feature-card">
+      <div class="feature-icon">🔔</div>
+      <h4>Live Updates</h4>
+      <p>Real-time status</p>
+    </div>
 
-<!-- Toast Notification -->
-<div class="toast-wrap" [class.visible]="toastVisible" role="status" aria-live="polite">
-  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-    <polyline points="20 6 9 17 4 12" />
-  </svg>
-  {{ toastMessage }}
+    <div class="feature-card">
+      <div class="feature-icon">💬</div>
+      <h4>Text Alerts</h4>
+      <p>Stay informed</p>
+    </div>
+
+    <div class="feature-card">
+      <div class="feature-icon">🛡️</div>
+      <h4>Secure & Private</h4>
+      <p>Your data is safe</p>
+    </div>
+  </div>
+
 </div>

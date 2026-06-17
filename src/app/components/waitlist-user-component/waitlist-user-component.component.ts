@@ -1,4 +1,6 @@
 import { Component } from '@angular/core';
+import { NavigationEnd, Router } from '@angular/router';
+import { filter } from 'rxjs';
 
 @Component({
   selector: 'app-waitlist-user-component',
@@ -7,13 +9,22 @@ import { Component } from '@angular/core';
 })
 export class WaitlistUserComponentComponent {
 
-  joinedGuest: any = null;
-  restaurantId = 1;
-  onJoinedWaitlist(guest: any): void {
-    this.joinedGuest = guest;
+   restaurantId = 1;
+  isWaitingRoute = false;
+  constructor(private router: Router) {
+    this.isWaitingRoute = this.router.url.includes('/user/waiting');
+    this.router.events
+      .pipe(filter(event => event instanceof NavigationEnd))
+      .subscribe((event: any) => {
+        this.isWaitingRoute = event.urlAfterRedirects.includes('/user/waiting');
+      });
   }
 
-  onLeaveSuccess(): void {
-    this.joinedGuest = null;
+  onJoinedWaitlist(guest: any): void {
+
+    localStorage.setItem('waitlistGuest', JSON.stringify(guest));
+    localStorage.setItem('waitlistRestaurantId', this.restaurantId.toString());
+    this.router.navigate(['/user/waiting']);
+
   }
 }

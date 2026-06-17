@@ -1,4 +1,4 @@
-:host {
+/* :host {
   display: block;
   font-family: 'DM Sans', sans-serif;
 
@@ -42,5 +42,73 @@
 .sidebar-area {
   @media (max-width: 1024px) {
     display: none;
+  }
+} */
+
+:host {
+  display: block;
+  font-family: 'DM Sans', sans-serif;
+
+  --primary: #4b12c4;
+  --primary-light: #efe7ff;
+  --text: #09051f;
+  --muted: #5f5870;
+  --border: #eee8f7;
+  --card: #ffffff;
+  --bg: #fbf9ff;
+}
+
+.app-wrapper {
+  min-height: 100vh;
+  background: #fbf9ff;
+}
+.guest-page {
+  max-width: 1480px;
+  margin: 0 auto;
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.top-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 420px;
+  gap: 20px;
+  align-items: stretch;
+}
+.main-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 400px;
+  gap: 20px;
+  max-width: 1480px;
+  margin: 0 auto;
+  padding: 18px;
+}
+
+.content-area {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.sidebar-area {
+  min-width: 0;
+}
+
+@media (max-width: 1024px) {
+  .main-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .sidebar-area {
+    display: none;
+  }
+}
+
+@media (max-width: 600px) {
+  .main-layout {
+    padding: 12px;
+    gap: 14px;
   }
 }

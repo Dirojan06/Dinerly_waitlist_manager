@@ -1,49 +1,31 @@
 <section class="waitlist-banner">
-  <div class="banner-item">
-    <div class="banner-icon">
-      <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#3d5a3e" stroke-width="1.8">
-        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
-        <circle cx="9" cy="7" r="4" />
-        <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
-        <path d="M16 3.13a4 4 0 0 1 0 7.75" />
-      </svg>
+
+  <div class="feature-card">
+    <div class="feature-image">📱</div>
+    <div class="feature-content">
+      <h3>Join in seconds</h3>
+      <p>Add your party and we'll text you when your table is ready.</p>
+      <span></span>
     </div>
-    <div class="banner-text">
-      <h3>Want to join the waitlist?</h3>
-      <p>Add your party — we'll text you when ready.</p>
-    </div>
-    <button class="btn-primary" (click)="openModal('join')">
-      Join now
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <line x1="5" y1="12" x2="19" y2="12" />
-        <polyline points="12 5 19 12 12 19" />
-      </svg>
-    </button>
   </div>
 
-  <div class="banner-divider"></div>
-
-  <div class="banner-item">
-    <div class="banner-icon">
-      <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#c47a2a" stroke-width="1.8">
-        <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
-        <circle cx="12" cy="10" r="3" />
-      </svg>
+  <div class="feature-card">
+    <div class="feature-image">💬</div>
+    <div class="feature-content">
+      <h3>Live updates</h3>
+      <p>Get real-time updates about your wait time and position.</p>
+      <span></span>
     </div>
-    <div class="banner-text">
-      <h3>Already on the list?</h3>
-      <p>Check your position and wait time.</p>
-    </div>
-    <button class="btn-outline" (click)="openModal('status')">
-      Check status
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <line x1="5" y1="12" x2="19" y2="12" />
-        <polyline points="12 5 19 12 12 19" />
-      </svg>
-    </button>
   </div>
+
+  <div class="feature-card">
+    <div class="feature-image">🍽️</div>
+    <div class="feature-content">
+      <h3>Dine with ease</h3>
+      <p>Relax! We'll notify you the moment your table is ready.</p>
+      <span></span>
+    </div>
+  </div>
+
 </section>
 
-<app-waitlist-modal *ngIf="showModal" [type]="modalType" (closeModal)="closeModal()"
-  (joinedWaitlist)="onJoinedWaitlist($event)">
-</app-waitlist-modal>

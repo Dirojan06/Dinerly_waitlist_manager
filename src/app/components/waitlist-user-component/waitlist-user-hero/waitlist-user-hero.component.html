@@ -1,51 +1,60 @@
 <section class="hero">
 
-  <div class="live-badge">
-    <span></span>
-    LIVE
-  </div>
+  <div class="hero-left">
 
-  <span class="update-text">Updates in real time</span>
-
-  <div class="hero-content">
-
-    <div class="hero-text">
-      <p class="welcome-label">Welcome to</p>
-
-      <h1 class="restaurant-name">
-        The Maple Bistro
-      </h1>
-
-      <p class="tagline">
-        Great food, warm vibes, and now — smarter waiting.
-      </p>
-
-      <div class="stats-row">
-
-        <div class="stat-card">
-          <div class="stat-icon">
-            👥
-          </div>
-          <div>
-            <strong>{{ partiesWaiting }}</strong>
-            <span>parties waiting</span>
-          </div>
-        </div>
-
-        <div class="stat-card">
-          <div class="stat-icon">
-            ⏱
-          </div>
-          <div>
-            <strong>~{{ waitMinutes }}</strong>
-            <span>min average wait</span>
-          </div>
-        </div>
-
-      </div>
+    <div class="logo-row">
+      <div class="logo-icon">🍴</div>
+      <h2>Dinerly</h2>
     </div>
 
-    <div class="hero-image"></div>
+    <h1>
+      A better table <br />
+      awaits <span>you</span>
+    </h1>
+
+    <div class="title-line"></div>
+
+    <p class="tagline">
+      Skip the wait, not the experience. <br />
+      Join the waitlist and we’ll take care of the rest.
+    </p>
+
+    <div class="stats-card">
+
+      <div class="stat">
+        <div class="stat-icon">👥</div>
+        <strong>{{ partiesWaiting }}</strong>
+        <span>parties waiting</span>
+      </div>
+
+      <div class="stat-divider"></div>
+
+      <div class="stat">
+        <div class="stat-icon">🕒</div>
+        <strong>~{{ waitMinutes }} <small>min</small></strong>
+        <span>average wait</span>
+      </div>
+
+    </div>
+
+  </div>
+
+  <div class="hero-right">
+
+    <div class="live-pill">
+      <span></span>
+      LIVE
+      <b>Live wait times updated in real time</b>
+    </div>
+
+    <div class="restaurant-art">
+      <div class="quote-board">
+        <p>Good food</p>
+        <p>Good mood</p>
+        <p>Great company</p>
+        <span>♥</span>
+      </div>
+    </div>
 
   </div>
 

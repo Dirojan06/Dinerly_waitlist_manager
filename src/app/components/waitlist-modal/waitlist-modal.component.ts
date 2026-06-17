@@ -96,10 +96,17 @@ export class WaitlistModalComponent {
     };
     this.waitlistApi.joinWaitlist(payload).subscribe({
       next: (res: any) => {
-        this.notificationService.increasePendingCount();
-        this.joinedWaitlist.emit(res.data);
         this.isSubmitting = false;
-        this.closeModal.emit();
+        if (res?.success && res?.data) {
+          this.notificationService.increasePendingCount();
+          localStorage.setItem('waitlistGuest', JSON.stringify(res.data));
+          localStorage.setItem('waitlistRestaurantId', this.restaurantId.toString());
+          this.joinedWaitlist.emit(res.data);
+          this.closeModal.emit();
+        } else {
+          alert(res?.message || 'Unable to join waitlist');
+        }
+
       },
       error: () => {
         this.isSubmitting = false;
@@ -126,11 +133,17 @@ export class WaitlistModalComponent {
       next: (response) => {
         this.isSubmitting = false;
         if (response?.success) {
-          this.joinedWaitlist.emit(response.data);
-        this.closeModal.emit();
-      } else {
-        alert(response?.message || 'No waitlist record found');
-      }
+          if (response?.success && response?.data) {
+            localStorage.setItem('waitlistGuest', JSON.stringify(response.data));
+            localStorage.setItem('waitlistRestaurantId', this.restaurantId.toString());
+            this.joinedWaitlist.emit(response.data);
+            this.closeModal.emit();
+          } else {
+            alert(response?.message || 'No waitlist record found');
+          }
+        } else {
+          alert(response?.message || 'No waitlist record found');
+        }
 
       },
       error: () => {

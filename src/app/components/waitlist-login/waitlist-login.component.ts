@@ -80,6 +80,34 @@ export class WaitlistLoginComponent implements OnInit {
 
   }
 
+  onRestaurantSubmit(): void {
+
+    this.selectedRole = 'restaurant';
+
+    this.updateValidatorsByRole();
+
+    this.onSubmit();
+
+  }
+
+  onAdminSubmit(): void {
+
+    this.selectedRole = 'admin';
+
+    this.updateValidatorsByRole();
+
+    this.onSubmit();
+
+  }
+
+  onGuestSubmit(): void {
+
+    this.selectedRole = 'guest';
+
+    this.onSubmit();
+
+  }
+
   private updateValidatorsByRole(): void {
     const email = this.loginForm.get('email');
     const password = this.loginForm.get('password');
