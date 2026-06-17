@@ -1,0 +1,81 @@
+<div class="page">
+  <div class="topbar">
+    <h1 class="page-title">History</h1>
+    <div class="topbar-actions">
+      <div class="search-box">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <span>Search guest...</span>
+      </div>
+      <button class="btn-primary" (click)="modalService.open()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Add guest
+      </button>
+    </div>
+  </div>
+
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-label">Total seated today</div>
+      <div class="stat-value">{{ seatedCount }}</div>
+      <div class="stat-sub">covers</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Avg wait time</div>
+      <div class="stat-value">22 min</div>
+      <div class="stat-sub">↓ 3 min vs yesterday</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">No-shows</div>
+      <div class="stat-value">{{ noShowCount }}</div>
+      <div class="stat-sub">8% no-show rate</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Peak hour</div>
+      <div class="stat-value">7 PM</div>
+      <div class="stat-sub">12 parties added</div>
+    </div>
+  </div>
+
+  <div class="content">
+    <div class="section-header">
+      <span class="section-title">Today's seating log</span>
+      <button class="export-btn">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Export
+      </button>
+    </div>
+
+    <div class="table-wrap">
+      <table class="history-table">
+        <thead>
+          <tr>
+            <th>Guest</th>
+            <th>Party</th>
+            <th>Added</th>
+            <th>Seated</th>
+            <th>Wait</th>
+            <th>Table</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let entry of history; trackBy: trackById">
+            <td>{{ entry.name }}</td>
+            <td>{{ entry.partySize }}</td>
+            <td>{{ entry.addedTime }}</td>
+            <td>{{ entry.seatedTime }}</td>
+            <td>{{ entry.waitMinutes ? entry.waitMinutes + ' min' : '—' }}</td>
+            <td>{{ entry.tableId }}</td>
+            <td>
+              <span class="badge" [ngClass]="'badge-' + entry.status">
+                {{ entry.status === 'seated' ? 'Seated' : entry.status === 'noshow' ? 'No-show' : 'Left queue' }}
+              </span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div *ngIf="history.length === 0" class="empty-state">No history yet</div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,94 @@
+<div class="waiting-screen">
+
+  <div class="card">
+
+    <h2>Your Queue Progress</h2>
+
+    <!-- STEPPER -->
+    <mat-horizontal-stepper class="queue-stepper" [selectedIndex]="activeStepIndex" linear="false"
+      labelPosition="bottom">
+
+      <mat-step>
+        <ng-template matStepLabel>Joined</ng-template>
+      </mat-step>
+      <mat-step>
+        <ng-template matStepLabel>Waiting</ng-template>
+      </mat-step>
+      <mat-step>
+        <ng-template matStepLabel>Notified</ng-template>
+      </mat-step>
+      <mat-step>
+        <ng-template matStepLabel>Seated</ng-template>
+      </mat-step>
+    </mat-horizontal-stepper>
+
+    <!-- PENDING -->
+
+    <ng-container *ngIf="guest?.status === 'PENDING'">
+      <h1 class="timer">
+        {{ timerText }}
+      </h1>
+      <p>
+        Estimated time for restaurant approval
+      </p>
+    </ng-container>
+
+    <!-- WAITING -->
+
+    <ng-container *ngIf="guest?.status === 'WAITING'">
+      <h1 class="wait-time">
+        {{ guest.estimatedWaitTime }}
+      </h1>
+      <p>Estimated Minutes Remaining</p>
+      <div class="info-grid">
+        <div>
+          <small>Position</small>
+          <h3>#{{ guest.position }}</h3>
+        </div>
+        <div>
+          <small>Parties Ahead</small>
+          <h3>{{ partiesAhead }}</h3>
+        </div>
+      </div>
+    </ng-container>
+
+    <!-- NOTIFIED -->
+    <ng-container *ngIf="guest?.status === 'NOTIFIED'">
+      <h1 class="wait-time">
+        {{ guest.estimatedWaitTime }}
+      </h1>
+      <p>Your Table is Ready!</p>
+      <p>Please Visit</p>
+      <!-- <div class="info-grid">
+        <div>
+          <small>Position</small>
+          <h3>#{{ guest.position }}</h3>
+        </div>
+        <div>
+          <small>Parties Ahead</small>
+          <h3>{{ partiesAhead }}</h3>
+        </div>
+      </div> -->
+    </ng-container>
+  </div>
+</div>
+
+<button class="leave-btn" (click)="openLeaveConfirm()">
+  Leave waitlist
+</button>
+
+<div class="modal-backdrop" *ngIf="showLeaveConfirm">
+  <div class="leave-modal">
+    <h2>Leave waitlist?</h2>
+    <p>Do you want to leave the waitlist?</p>
+    <div class="actions">
+      <button class="btn-cancel" (click)="closeLeaveConfirm()">
+        Cancel
+      </button>
+
+      <button class="btn-danger" [disabled]="isLeaving" (click)="confirmLeaveWaitlist()">
+        {{ isLeaving ? 'Leaving...' : 'Leave' }}
+      </button>
+    </div>
+  </div>
+</div>

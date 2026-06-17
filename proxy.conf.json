@@ -1,0 +1,15 @@
+{
+
+  "/api": {
+
+    "target": "https://dinerly.onrender.com",
+
+    "secure": true,
+
+    "changeOrigin": true,
+
+    "logLevel": "debug"
+
+  }
+
+}

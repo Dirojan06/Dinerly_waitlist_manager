@@ -1,0 +1,61 @@
+<div class="page">
+  <div class="topbar">
+    <h1 class="page-title">Settings</h1>
+  </div>
+
+  <div class="content" style="padding-top: 16px;">
+    <!-- Restaurant Info -->
+    <div class="settings-card">
+      <h2 class="card-title">Restaurant info</h2>
+      <form [formGroup]="restaurantForm" (ngSubmit)="saveRestaurant()">
+        <div class="form-row">
+          <div class="form-col">
+            <label class="form-label">Restaurant name</label>
+            <input class="form-input" formControlName="name" type="text">
+          </div>
+          <div class="form-col">
+            <label class="form-label">Max capacity</label>
+            <input class="form-input" formControlName="capacity" type="number">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-col">
+            <label class="form-label">Opening time</label>
+            <input class="form-input" formControlName="openTime" type="text">
+          </div>
+          <div class="form-col">
+            <label class="form-label">Closing time</label>
+            <input class="form-input" formControlName="closeTime" type="text">
+          </div>
+        </div>
+        <button class="btn-save" type="submit">Save changes</button>
+      </form>
+    </div>
+
+    <!-- Notifications -->
+    <div class="settings-card">
+      <h2 class="card-title">Notifications</h2>
+      <form [formGroup]="notificationForm" (ngSubmit)="saveNotifications()">
+        <div class="form-row">
+          <div class="form-col">
+            <label class="form-label">Check-in reminder window (minutes)</label>
+            <input class="form-input" formControlName="reminderWindow" type="number" style="max-width: 120px;">
+          </div>
+        </div>
+        <div class="toggle-row">
+          <label class="toggle-label">
+            <input type="checkbox" formControlName="enableSms">
+            Enable SMS notifications
+          </label>
+        </div>
+        <div class="toggle-row">
+          <label class="toggle-label">
+            <input type="checkbox" formControlName="autoNotify">
+            Auto-notify when table becomes available
+          </label>
+        </div>
+        <button class="btn-save" type="submit">Save changes</button>
+      </form>
+    </div>
+  </div>
+</div>

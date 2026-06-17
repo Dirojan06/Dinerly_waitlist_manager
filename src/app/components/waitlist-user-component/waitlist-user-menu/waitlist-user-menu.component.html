@@ -1,0 +1,59 @@
+<section class="menu-section">
+  <!-- Tab Nav -->
+  <div class="menu-tabs">
+    <div class="tabs-scroll">
+      <button
+        *ngFor="let tab of tabs"
+        class="tab-btn"
+        [class.active]="activeTab === tab.key"
+        (click)="setTab(tab.key)"
+      >
+        <span class="tab-icon" ></span>
+        {{ tab.label }}
+      </button>
+    </div>
+    <span class="made-with">
+      Made with
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="#e05555" stroke="#e05555" stroke-width="0">
+        <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+      </svg>
+      by our chefs
+    </span>
+  </div>
+
+  <!-- Menu Grid -->
+  <div class="menu-grid">
+    <div
+      class="menu-card"
+      *ngFor="let item of currentItems"
+    >
+      <div class="card-image">
+        <img [src]="item.image" [alt]="item.name" loading="lazy" />
+      </div>
+      <div class="card-info">
+        <div class="card-header">
+          <h3 class="item-name">{{ item.name }}</h3>
+          <span class="item-price">${{ item.price }}</span>
+        </div>
+        <p class="item-desc">{{ item.description }}</p>
+        <button class="add-btn" (click)="addToOrder(item)" [attr.aria-label]="'Add ' + item.name">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <line x1="12" y1="5" x2="12" y2="19"/>
+            <line x1="5" y1="12" x2="19" y2="12"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- View Full Menu -->
+  <div class="view-menu-row">
+    <button class="view-menu-btn">
+      View full menu
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <line x1="5" y1="12" x2="19" y2="12"/>
+        <polyline points="12 5 19 12 12 19"/>
+      </svg>
+    </button>
+  </div>
+</section>

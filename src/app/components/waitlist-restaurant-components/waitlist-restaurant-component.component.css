@@ -1,0 +1,246 @@
+.app-shell {
+   --sidebar-width: clamp(230px, 17vw, 300px);
+  min-height: 100vh;
+  background: #f6f7fb;
+}
+
+.sidebar {
+  position: fixed;
+  inset: 0 auto 0 0;
+  width: var(--sidebar-width);
+  height: 100vh;
+  background: #071b3d;
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+  z-index: 1000;
+}
+
+.main-content {
+  margin-left: var(--sidebar-width);
+  min-height: 100vh;
+  background: #f6f7fb;
+  padding: clamp(18px, 2vw, 34px);
+}
+
+.sidebar-logo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 28px 24px;
+}
+
+.logo-icon {
+  width: 36px;
+  height: 36px;
+  background: #5b21d9;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.logo-name {
+  font-size: 26px;
+  font-weight: 800;
+}
+
+.restaurant-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 18px 24px;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+
+.restaurant-img {
+  width: 58px;
+  height: 58px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.restaurant-name {
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.restaurant-status {
+  color: #23c55e;
+  font-size: 13px;
+}
+
+.sidebar-nav {
+  padding: 22px 14px;
+  flex: 1;
+}
+
+.nav-item {
+  width: 100%;
+  height: 56px;
+  border: none;
+  border-radius: 12px;
+  background: transparent;
+  color: #dbe4ff;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 0 16px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  margin-bottom: 8px;
+}
+
+.nav-item.active {
+  background: linear-gradient(90deg, #5528d9, #6d35ec);
+  color: #ffffff;
+}
+
+.nav-badge {
+  margin-left: auto;
+  min-width: 34px;
+  height: 30px;
+  border-radius: 18px;
+  background: rgba(255,255,255,0.18);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.plan-card {
+  margin: 16px;
+  padding: 18px;
+  border-radius: 14px;
+  border: 1px solid rgba(255,255,255,0.08);
+  background: rgba(255,255,255,0.04);
+}
+
+.plan-title {
+  font-size: 16px;
+  font-weight: 700;
+  margin-bottom: 16px;
+}
+
+.capacity-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 13px;
+  margin-bottom: 10px;
+}
+
+.cap-track {
+  height: 8px;
+  background: rgba(255,255,255,0.1);
+  border-radius: 20px;
+  margin-bottom: 12px;
+}
+
+.cap-fill {
+  height: 8px;
+  background: #8b5cf6;
+  border-radius: 20px;
+}
+
+.manage-plan {
+  width: 100%;
+  height: 46px;
+  border: none;
+  border-radius: 9px;
+  background: rgba(255,255,255,0.1);
+  color: #ffffff;
+  font-weight: 700;
+}
+
+.sidebar-user {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 22px;
+  border-top: 1px solid rgba(255,255,255,0.08);
+}
+
+.user-avatar {
+  width: 48px;
+  height: 48px;
+  background: #5b21d9;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+}
+
+/* Tablet */
+@media (max-width: 1024px) {
+  .app-shell {
+    --sidebar-width: 88px;
+  }
+
+  .logo-name,
+  .restaurant-card div,
+  .nav-item span:not(.nav-badge),
+  .plan-card,
+  .sidebar-user div:not(.user-avatar) {
+    display: none;
+  }
+
+  .sidebar-logo,
+  .restaurant-card,
+  .sidebar-user {
+    justify-content: center;
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+
+  .nav-item {
+    justify-content: center;
+    padding: 0;
+  }
+
+  .nav-badge {
+    position: absolute;
+    right: 8px;
+  }
+}
+
+/* Mobile / small tablet */
+@media (max-width: 768px) {
+  .sidebar {
+    position: fixed;
+    width: 100%;
+    height: 72px;
+    bottom: 0;
+    top: auto;
+    flex-direction: row;
+  }
+
+  .main-content {
+    margin-left: 0;
+    padding-bottom: 92px;
+  }
+
+  .sidebar-logo,
+  .restaurant-card,
+  .plan-card,
+  .sidebar-user {
+    display: none;
+  }
+
+  .sidebar-nav {
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    padding: 8px;
+    gap: 8px;
+    overflow-x: auto;
+  }
+
+  .nav-item {
+    min-width: 72px;
+    height: 54px;
+    font-size: 11px;
+    flex-direction: column;
+    gap: 4px;
+  }
+}

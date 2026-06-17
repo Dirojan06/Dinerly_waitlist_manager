@@ -1,0 +1,120 @@
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 32px;
+  background: #ffffff;
+  border-bottom: 1px solid #e8e4dc;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+
+  .header-left {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      .logo-icon {
+          width: 32px;
+          height: 32px;
+          object-fit: contain;
+        }
+
+      .logo-text {
+        font-family: 'Lora', serif;
+        font-size: 20px;
+        font-weight: 700;
+        color: #1a2e1b;
+        letter-spacing: -0.3px;
+      }
+    }
+
+    .guest-badge {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 13px;
+      font-weight: 500;
+      padding: 4px 12px;
+      border-radius: 20px;
+      border: 1px solid #ddd9d0;
+    }
+  }
+
+  guest {
+
+    background: #d1fae5;
+
+    color: #065f46;
+
+  }
+
+  .admin {
+
+    background: #fee2e2;
+
+    color: #991b1b;
+
+  }
+
+  .restaurant {
+
+    background: #e0e7ff;
+
+    color: #3730a3;
+
+  }
+
+  .header-right {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+
+    .icon-btn {
+      width: 40px;
+      height: 40px;
+      border: none;
+      background: transparent;
+      border-radius: 50%;
+      color: #3a3a3a;
+      cursor: pointer;
+      transition: background 0.2s;
+      position: relative;
+
+      &:hover {
+        background: #f0ede6;
+      }
+
+      &.notification-btn .notif-dot {
+        position: absolute;
+        top: 8px;
+        right: 8px;
+        width: 7px;
+        height: 7px;
+        background: #e07b39;
+        border-radius: 50%;
+        border: 1.5px solid #fff;
+      }
+    }
+
+    .sign-out-btn {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 14px;
+      font-weight: 500;
+      color: #3a3a3a;
+      background: transparent;
+      border: 1px solid #ddd9d0;
+      padding: 8px 18px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s;
+
+      &:hover {
+        background: #f0ede6;
+        border-color: #c8c4bb;
+      }
+    }
+  }
+}

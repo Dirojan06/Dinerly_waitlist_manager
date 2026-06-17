@@ -1,0 +1,46 @@
+:host {
+  display: block;
+  font-family: 'DM Sans', sans-serif;
+
+  --primary: #4b12c4;
+  --primary-dark: #2b0b78;
+  --primary-soft: #efe7ff;
+  --text-dark: #09051f;
+  --text-muted: #6f6a7c;
+  --card-bg: #ffffff;
+  --page-bg: #fbf9ff;
+  --border: #eee8f7;
+  --shadow: 0 16px 40px rgba(75, 18, 196, 0.08);
+}
+
+.app-wrapper {
+  min-height: 100vh;
+  background:
+    radial-gradient(circle at top left, #f1e7ff 0, transparent 32%),
+    #fbf9ff;
+}
+
+.main-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 340px;
+  gap: 24px;
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 20px;
+
+  @media (max-width: 1024px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.content-area {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.sidebar-area {
+  @media (max-width: 1024px) {
+    display: none;
+  }
+}

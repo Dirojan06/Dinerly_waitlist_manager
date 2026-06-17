@@ -1,0 +1,59 @@
+<div class="page">
+  <div class="topbar">
+    <h1 class="page-title">Tables</h1>
+    <div class="topbar-actions">
+      <button class="btn-primary" (click)="reloadTableList()">
+        Reload
+      </button>
+      <button class="btn-primary" (click)="modalService.open()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Add Table
+      </button>
+    </div>
+  </div>
+
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-label">Open tables</div>
+      <div class="stat-value">{{ openCount }}</div>
+      <div class="stat-sub">ready to seat</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Occupied</div>
+      <div class="stat-value">{{ seatedCount }}</div>
+      <div class="stat-sub">of {{ tables.length }} tables</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Reserved</div>
+      <div class="stat-value">{{ reservedCount }}</div>
+      <div class="stat-sub">upcoming tonight</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Needs cleaning</div>
+      <div class="stat-value">{{ dirtyCount }}</div>
+      <div class="stat-sub">bussing required</div>
+    </div>
+  </div>
+
+  <div class="content">
+    <div class="section-header">
+      <span class="section-title">Floor map</span>
+      <div class="legend">
+        <div class="legend-item"><div class="legend-dot open"></div> Open</div>
+        <div class="legend-item"><div class="legend-dot seated"></div> Seated</div>
+        <div class="legend-item"><div class="legend-dot reserved"></div> Reserved</div>
+        <div class="legend-item"><div class="legend-dot dirty"></div> Dirty</div>
+      </div>
+    </div>
+
+    <div class="floor-grid">
+      <div class="table-card"
+           *ngFor="let table of tables; trackBy: trackById"
+           [ngClass]="table.status">
+        <div class="table-id">{{ table.tableNumber  }}</div>
+        <div class="table-seats">{{  table.status}}</div>
+        <div class="table-info">{{ table.capacity }} members</div>
+      </div>
+    </div>
+  </div>
+</div>

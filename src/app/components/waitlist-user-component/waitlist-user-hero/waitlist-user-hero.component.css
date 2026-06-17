@@ -1,0 +1,138 @@
+.hero {
+  position: relative;
+  min-height: 430px;
+  border-radius: 18px;
+  overflow: hidden;
+  padding: 40px;
+  background:
+    linear-gradient(
+      90deg,
+      rgba(255, 255, 255, 0.96) 0%,
+      rgba(243, 232, 255, 0.9) 34%,
+      rgba(255, 255, 255, 0.1) 68%
+    ),
+    url('https://images.unsplash.com/photo-1514933651103-005eec06c04b?w=1200&h=700&fit=crop');
+  background-size: cover;
+  background-position: center right;
+  box-shadow: 0 18px 45px rgba(75, 18, 196, 0.12);
+}
+
+.live-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  background: #4b12c4;
+  color: #fff;
+  padding: 8px 14px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 800;
+  margin-right: 14px;
+}
+
+.live-badge span {
+  width: 7px;
+  height: 7px;
+  background: #fff;
+  border-radius: 50%;
+}
+
+.update-text {
+  font-size: 13px;
+  font-weight: 700;
+  color: #12092e;
+}
+
+.hero-content {
+  height: 100%;
+  display: flex;
+  align-items: center;
+}
+
+.hero-text {
+  max-width: 520px;
+  margin-top: 38px;
+}
+
+.welcome-label {
+  font-family: 'Lora', serif;
+  color: #4b12c4;
+  font-size: 24px;
+  font-weight: 700;
+  margin: 0 0 10px;
+}
+
+.restaurant-name {
+  font-family: 'Lora', serif;
+  font-size: clamp(44px, 5vw, 70px);
+  line-height: 1;
+  color: #09051f;
+  margin: 0 0 24px;
+  letter-spacing: -2px;
+}
+
+.tagline {
+  color: #393044;
+  font-size: 18px;
+  line-height: 1.6;
+  max-width: 390px;
+  margin-bottom: 34px;
+}
+
+.stats-row {
+  display: flex;
+  gap: 18px;
+  flex-wrap: wrap;
+}
+
+.stat-card {
+  min-width: 210px;
+  background: rgba(255, 255, 255, 0.86);
+  backdrop-filter: blur(16px);
+  border: 1px solid #eee8f7;
+  border-radius: 16px;
+  padding: 22px;
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  box-shadow: 0 14px 35px rgba(75, 18, 196, 0.08);
+}
+
+.stat-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: #efe7ff;
+  display: grid;
+  place-items: center;
+  font-size: 28px;
+}
+
+.stat-card strong {
+  font-family: 'Lora', serif;
+  font-size: 42px;
+  color: #09051f;
+  line-height: 1;
+  display: block;
+}
+
+.stat-card span {
+  font-size: 14px;
+  color: #4f465f;
+}
+
+@media (max-width: 768px) {
+  .hero {
+    min-height: auto;
+    padding: 28px;
+    background-position: center;
+  }
+
+  .hero-content {
+    display: block;
+  }
+
+  .stat-card {
+    min-width: 100%;
+  }
+}

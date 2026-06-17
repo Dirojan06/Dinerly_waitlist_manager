@@ -1,0 +1,236 @@
+<div class="dashboard-page">
+  <div class="dashboard-header">
+    <div>
+      <h1>Dashboard</h1>
+      <p>Real-time overview of your restaurant</p>
+    </div>
+
+    <div class="header-actions">
+      <button class="date-btn">Today, May 28</button>
+      <div class="notification-wrapper">
+
+        <button class="bell-btn" (click)="toggleNotifications()">
+          🔔
+          <span class="notification-badge" *ngIf="pendingNotificationCount > 0">
+            {{ pendingNotificationCount }}
+          </span>
+        </button>
+
+        <div class="notification-dropdown" *ngIf="showNotificationBox">
+          <h4>Notifications</h4>
+          <p *ngIf="pendingNotificationCount > 0">
+            You have {{ pendingNotificationCount }} new pending request(s)
+          </p>
+
+          <p *ngIf="pendingNotificationCount === 0">
+            No new notifications
+          </p>
+          <button *ngIf="pendingNotificationCount > 0" (click)="clearNotifications()">
+            Mark as read
+          </button>
+        </div>
+
+      </div>
+      <button class="add-btn" (click)="modalService.open()">+ Add guest</button>
+      <button class="date-btn" (click)="logout()">Logout</button>
+    </div>
+  </div>
+
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-icon purple">👥</div>
+      <div>
+        <p>Waiting now</p>
+        <h2>{{ stats.waitingNow }}</h2>
+        <span>parties in queue</span>
+      </div>
+      <small></small>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-icon violet">🕘</div>
+      <div>
+        <p>Avg wait time</p>
+        <h2>{{ stats.avgWait }} min</h2>
+        <span>estimated</span>
+      </div>
+      <small class="green"></small>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-icon green-bg">🪑</div>
+      <div>
+        <p>Seated today</p>
+        <h2>{{ stats.seatedToday }}</h2>
+        <span>covers</span>
+      </div>
+      <small></small>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-icon orange">👤</div>
+      <div>
+        <p>No-shows</p>
+        <h2>{{ stats.noShows }}</h2>
+        <span>today</span>
+      </div>
+      <small class="green"></small>
+    </div>
+  </div>
+
+  <div class="dashboard-grid">
+    <div class="card waitlist-card">
+      <div class="card-title-row">
+        <div class="d-flex">
+          <h2>Current waitlist</h2>
+          <div>
+            <button class="refresh-btn" (click)="loadDashboardWaitlist()" [disabled]="isLoading">🔄 Refresh</button>
+          </div>
+        </div>
+        
+        <button (click)="goToWaitlist()">View all waitlist</button>
+      </div>
+
+      <table>
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Guest</th>
+            <th>Party size</th>
+            <th>Wait time</th>
+            <th>Status</th>
+            <th></th>
+          </tr>
+        </thead>
+
+        <tbody>
+          <tr *ngFor="let guest of dashboardStatus; let i = index">
+            <td>{{ i + 1 }}</td>
+            <td>
+              <b>{{ guest.guestName }}</b>
+              <span>{{ guest.guestPhone }}</span>
+            </td>
+            <td>👥 {{ guest.partySize }}</td>
+            <td>
+
+              <ng-container *ngIf="guest.estimatedWaitTime; else noWaitTime">
+                ~{{ guest.estimatedWaitTime }} min
+              </ng-container>
+
+              <ng-template #noWaitTime>
+                -
+              </ng-template>
+            </td>
+            <td>
+              <span class="status-pill" [ngClass]="guest.status.toLowerCase()">
+                {{ getStatusLabel(guest.status) }}
+              </span>
+            </td>
+            <td>⋮</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="right-column">
+      <div class="card table-card">
+        <div class="card-title-row">
+          <h2>Table overview</h2>
+          <button (click)="goToFloorMap()">View floor map</button>
+        </div>
+
+        <div class="table-overview">
+          <div
+
+    class="donut"
+
+    [style.background]="'conic-gradient(' + donutStyle + ')'">
+
+    <div>
+
+      <h2>{{ tableStats.total }}</h2>
+
+      <p>Total tables</p>
+
+    </div>
+
+  </div>
+
+  <div class="legend">
+
+    <p>
+
+      <span class="dot open"></span>
+
+      <b>{{ tableStats.open }}</b> Open
+
+      <small>ready to seat</small>
+
+    </p>
+
+    <p>
+
+      <span class="dot occupied"></span>
+
+      <b>{{ tableStats.occupied }}</b> Occupied
+
+      <small>being used</small>
+
+    </p>
+
+    <p>
+
+      <span class="dot reserved"></span>
+
+      <b>{{ tableStats.reserved }}</b> Reserved
+
+      <small>upcoming</small>
+
+    </p>
+
+    <p>
+
+      <span class="dot cleaning"></span>
+
+      <b>{{ tableStats.cleaning }}</b> Cleaning
+
+      <small>turnover</small>
+
+    </p>
+
+  </div>
+        </div>
+      </div>
+
+      <div class="card activity-card">
+        <h2>Recent activity</h2>
+
+        <div class="activity-item">
+          <span>🪑</span>
+          <p>Table 7 seated • Party of 4</p>
+          <small>2 min ago</small>
+        </div>
+
+        <div class="activity-item">
+          <span>👥</span>
+          <p>New walk-in added • Party of 3</p>
+          <small>5 min ago</small>
+        </div>
+
+        <div class="activity-item">
+          <span>❄️</span>
+          <p>Table 3 cleaned</p>
+          <small>12 min ago</small>
+        </div>
+
+        <div class="activity-item">
+          <span>🗓️</span>
+          <p>Reservation for 7:00 PM • Party of 4</p>
+          <small>18 min ago</small>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<app-waitlist-restaurant-modal></app-waitlist-restaurant-modal>

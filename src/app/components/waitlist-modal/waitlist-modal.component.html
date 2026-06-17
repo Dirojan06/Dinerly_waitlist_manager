@@ -1,0 +1,158 @@
+<div class="modal-backdrop">
+    <div class="modal-container">
+
+        <button class="close-btn" type="button" (click)="close()">✕</button>
+
+        <!-- JOIN WAITLIST -->
+        <ng-container *ngIf="type === 'join'">
+            <form [formGroup]="waitlistForm" (ngSubmit)="submitJoinWaitlist()">
+
+                <div class="modal-header">
+                    <div class="header-icon">👥</div>
+                    <div>
+                        <h2>Join the Waitlist</h2>
+                        <p>We'll text you when your table is ready.</p>
+                    </div>
+                </div>
+
+                <div class="form-grid">
+                    <div class="field">
+                        <label>Your name</label>
+                        <div class="input-box">
+                            <span class="input-icon">♡</span>
+                            <input type="text" formControlName="name" placeholder="Enter your name">
+                        </div>
+                        <small class="error"
+                            *ngIf="waitlistForm.get('name')?.invalid && waitlistForm.get('name')?.touched">
+                            Name is required
+                        </small>
+                    </div>
+
+                    <div class="field">
+                        <label>Phone number (for SMS)</label>
+                        <div class="input-box phone-box">
+                            <span class="input-icon">📞</span>
+                            <span class="country-code">🇮🇳 +91</span>
+                            <input type="text" formControlName="phone" placeholder="Enter your phone number">
+                        </div>
+                        <small class="error"
+                            *ngIf="waitlistForm.get('phone')?.invalid && waitlistForm.get('phone')?.touched">
+                            Enter valid 10 digit phone number
+                        </small>
+                    </div>
+                </div>
+
+                <div class="form-grid party-section">
+                    <div class="field">
+                        <label>Party size</label>
+
+                        <div class="party-buttons">
+                            <button *ngFor="let size of partySize" type="button"
+                                [class.active]="waitlistForm.value.partySize === size" (click)="selectPartySize(size)">
+                                {{ size }}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="field">
+                    <label>Seating preference <span>(Optional)</span></label>
+
+                    <div class="preference-grid">
+                        <button type="button" class="preference-card"
+                            [class.active]="waitlistForm.value.preference === 'INDOOR'"
+                            (click)="waitlistForm.patchValue({ preference: 'INDOOR' })">
+                            🏠 Indoor
+                            <span>✓</span>
+                        </button>
+
+                        <button type="button" class="preference-card"
+                            [class.active]="waitlistForm.value.preference === 'OUTDOOR'"
+                            (click)="waitlistForm.patchValue({ preference: 'OUTDOOR' })">
+                            ☀️ Outdoor
+                            <span>✓</span>
+                        </button>
+
+                        <button type="button" class="preference-card"
+                            [class.active]="waitlistForm.value.preference === 'NO_PREFERENCE'"
+                            (click)="waitlistForm.patchValue({ preference: 'NO_PREFERENCE' })">
+                            🪑 No preference
+                            <span>✓</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="field">
+                    <label>Special requests <span>(Optional)</span></label>
+
+                    <div class="notes">
+                        <button class="tag-btn" *ngFor="let note of notes" type="button"
+                            [class.active]="isSelectedTag(note.value)" (click)="toggleTag(note.value)">
+                            {{ note.label }}
+                        </button>
+                    </div>
+
+                    <div class="request-input">
+                        <input type="text" placeholder="Any other special requests?">
+                        <span>✎</span>
+                    </div>
+                </div>
+
+
+                <div class="actions">
+                    <button type="button" class="btn-cancel" (click)="close()">Cancel</button>
+
+                    <div class="submit-wrap">
+                        <button type="submit" class="btn-primary">
+                            Join Waitlist
+                            <span>→</span>
+                        </button>
+                        <small>You'll receive SMS updates about your wait time.</small>
+                    </div>
+                </div>
+
+            </form>
+        </ng-container>
+
+        <!-- CHECK STATUS -->
+        <ng-container *ngIf="type === 'status'">
+            <form [formGroup]="statusForm" (ngSubmit)="checkStatus()">
+
+                <div class="modal-header">
+                    <div class="header-icon">🔍</div>
+                    <div>
+                        <h2>Check your status</h2>
+                        <p>Enter the phone number used when joining.</p>
+                    </div>
+                </div>
+
+                <div class="field">
+                    <label>Phone number</label>
+                    <div class="input-box phone-box">
+                        <span class="input-icon">📞</span>
+                        <span class="country-code">🇮🇳 +91</span>
+                        <input type="text" formControlName="phoneNumber" placeholder="Enter your phone number">
+                    </div>
+
+                    <small class="error"
+                        *ngIf="statusForm.get('phoneNumber')?.invalid && statusForm.get('phoneNumber')?.touched">
+                        Enter valid phone number
+                    </small>
+                </div>
+
+                <div class="actions">
+                    <button type="button" class="btn-cancel" (click)="close()">Cancel</button>
+
+                    <div class="submit-wrap">
+                        <button type="submit" class="btn-primary" [disabled]="isSubmitting">
+                            {{ isSubmitting ? 'Checking...' : 'Look up' }}
+                            <span>→</span>
+                        </button>
+                    </div>
+                </div>
+
+            </form>
+        </ng-container>
+
+    </div>
+</div>

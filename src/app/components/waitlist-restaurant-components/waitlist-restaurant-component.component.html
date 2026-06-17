@@ -1,0 +1,82 @@
+<div class="app-shell">
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-icon">▶</div>
+      <div class="logo-name">Dinerly</div>
+    </div>
+
+    <div class="restaurant-card">
+      <img src="assets/images/restaurant.jpg" class="restaurant-img" />
+      <div>
+        <div class="restaurant-name">The Maple Bistro</div>
+        <div class="restaurant-status">● Open</div>
+      </div>
+    </div>
+
+    <nav class="sidebar-nav">
+      <button class="nav-item" [class.active]="activeRoute === 'dashboard'" (click)="navigate('dashboard')">
+        Dashboard
+      </button>
+
+      <button class="nav-item" [class.active]="activeRoute === 'waitlist'" (click)="navigate('waitlist')">
+        Live Waitlist
+        <span class="nav-badge">{{ guestCount }}</span>
+      </button>
+
+      <button class="nav-item" [class.active]="activeRoute === 'tables'" (click)="navigate('tables')">
+        Tables
+        <span class="nav-badge">{{ openTablesCount }}</span>
+      </button>
+
+      <button class="nav-item" [class.active]="activeRoute === 'notify'" (click)="navigate('notify')">
+        Notification
+        <span class="nav-badge">8</span>
+      </button>
+
+      <button class="nav-item" [class.active]="activeRoute === 'history'" (click)="navigate('history')">
+        Today's Log
+      </button>
+
+      <button class="nav-item" [class.active]="activeRoute === 'reports'" (click)="navigate('reports')">
+        Reports
+      </button>
+
+      <button class="nav-item" [class.active]="activeRoute === 'settings'" (click)="navigate('settings')">
+        Settings
+      </button>
+    </nav>
+
+    <div class="plan-card">
+      <div class="plan-title">Plan: Pro</div>
+
+      <div class="capacity-row">
+        <span>Capacity</span>
+        <span>72% used</span>
+      </div>
+
+      <div class="cap-track">
+        <div class="cap-fill" style="width: 72%;"></div>
+      </div>
+
+      <div class="capacity-row">
+        <span>72 / 100 covers</span>
+      </div>
+
+      <button class="manage-plan">Manage Plan</button>
+    </div>
+
+    <div class="sidebar-user">
+      <div class="user-avatar">RM</div>
+      <div>
+        <div class="restaurant-name">Ravi Manager</div>
+        <div class="restaurant-status">Manager</div>
+      </div>
+    </div>
+  </aside>
+
+  <main class="main-content">
+    <router-outlet></router-outlet>
+  </main>
+</div>
+
+<app-waitlist-restaurant-modal></app-waitlist-restaurant-modal>
