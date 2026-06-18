@@ -301,7 +301,7 @@
       </table> -->
 
         <div class="notify-card" *ngFor="let guest of pagedSeatedGuests; trackBy: trackByseatedGuest">
-          <div class="avatar" [style.color]="getAvatarColor(guest.id).color">
+          <div class="avatar"  class="avatar">
             {{ (guest.id) }}
           </div>
           <div class="notify-info">

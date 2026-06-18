@@ -56,7 +56,7 @@ export class WaitlistActiveListComponent implements OnInit, OnDestroy {
 
     this.loadWaitlistData();
 
-  }, 5000);
+  }, 2000);
   }
   loadWaitlistData(): void {
     this.loadPendingGuests();

@@ -11,6 +11,7 @@ import { WaitlistRestaurantComponentComponent } from './components/waitlist-rest
 import { WaitlistDashboardComponent } from './components/waitlist-restaurant-components/waitlist-dashboard/waitlist-dashboard.component';
 import { WaitlistAuthGuard } from './auth-guard/waitlist-auth.guard';
 import { WaitlistWaitingScreenComponent } from './components/waitlist-user-component/waitlist-waiting-screen/waitlist-waiting-screen.component';
+import { WaitlistReportsComponent } from './components/waitlist-restaurant-components/waitlist-reports/waitlist-reports.component';
 
 
 
@@ -42,7 +43,8 @@ const routes: Routes = [
       { path: 'tables', component: WaitlistTablesComponent },
       { path: 'notify', component: WaitlistNotificationComponent },
       { path: 'history', component: WaitlistHistoryComponent },
-      { path: 'settings', component: WaitlistSettingsComponent }
+      { path: 'settings', component: WaitlistSettingsComponent },
+      { path: 'reports', component: WaitlistReportsComponent }
 
     ]
   },

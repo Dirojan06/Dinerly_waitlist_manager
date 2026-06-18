@@ -165,3 +165,19 @@ export interface GuestHistoryResponse {
   message: string;
   data: GuestHistoryPage;
 }
+
+export interface guestReportsPage {
+  averageWaitTime: number,
+        todayGuestsCount: number,
+        todaySeatedCount: number,
+        totalCancelled: number,
+        totalGuests: number,
+        totalNotified: number,
+        totalSeated: number,
+        totalWaiting: number
+}
+export interface guestReportsResponse{
+  success: boolean;
+  message: string;
+  data: guestReportsPage;
+}

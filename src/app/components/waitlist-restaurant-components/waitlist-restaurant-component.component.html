@@ -24,11 +24,15 @@
 
       <button class="nav-item" [class.active]="activeRoute === 'notify'" (click)="navigate('notify')">
         Notification
-        <span class="nav-badge">8</span>
+        <span class="nav-badge">0</span>
       </button>
 
       <button class="nav-item" [class.active]="activeRoute === 'history'" (click)="navigate('history')">
         History
+      </button>
+
+      <button class="nav-item" [class.active]="activeRoute === 'settings'" (click)="navigate('reports')">
+        Reports
       </button>
 
       <button class="nav-item" [class.active]="activeRoute === 'settings'" (click)="navigate('settings')">

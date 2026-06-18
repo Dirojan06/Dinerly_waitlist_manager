@@ -138,18 +138,31 @@ export class WaitlistRestaurantService {
     return name.split(/[\s,]+/).filter(Boolean).map(w => w[0]).join('').slice(0, 2).toUpperCase();
   }
 
-  getAvatarColor(id: number): { bg: string; color: string } {
-    const colors = [
-      { bg: '#EEEDFE', color: '#534AB7' },
-      { bg: '#e1f5ee', color: '#0F6E56' },
-      { bg: '#faeeda', color: '#633806' },
-      { bg: '#fbeaf0', color: '#993556' },
-      { bg: '#E6F1FB', color: '#185FA5' },
-      { bg: '#EAF3DE', color: '#3B6D11' },
-      { bg: '#FCEBEB', color: '#A32D2D' },
-    ];
-    return colors[id % colors.length];
+  getAvatarColor(id?: number): { color: string; bg: string } {
+
+  const colors = [
+
+    { color: '#6d28d9', bg: '#ede9fe' },
+
+    { color: '#0891b2', bg: '#cffafe' },
+
+    { color: '#16a34a', bg: '#dcfce7' },
+
+    { color: '#ea580c', bg: '#ffedd5' },
+
+    { color: '#dc2626', bg: '#fee2e2' }
+
+  ];
+
+  if (id == null) {
+
+    return colors[0];
+
   }
+
+  return colors[id % colors.length];
+
+}
 
   
 }

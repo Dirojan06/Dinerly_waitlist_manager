@@ -1,0 +1,132 @@
+<div class="reports-page">
+
+  <div class="reports-header">
+    <div>
+      <h1>Reports</h1>
+      <p>Restaurant waitlist performance overview</p>
+    </div>
+
+    <div class="filters">
+      <input type="date" [(ngModel)]="fromDate">
+      <input type="date" [(ngModel)]="toDate">
+
+      <button type="button" (click)="loadReports()">
+        Apply
+      </button>
+    </div>
+  </div>
+
+  <div class="stats-grid" *ngIf="reportData">
+
+    <div class="stat-card purple">
+      <div class="icon">👥</div>
+      <p>Total Guests</p>
+      <h2>{{ reportData.totalGuests }}</h2>
+      <span>All time</span>
+    </div>
+
+    <div class="stat-card green">
+      <div class="icon">🧍‍♂️</div>
+      <p>Today Guests</p>
+      <h2>{{ reportData.todayGuestsCount }}</h2>
+      <span>Today</span>
+    </div>
+
+    <div class="stat-card blue">
+      <div class="icon">✓</div>
+      <p>Total Seated</p>
+      <h2>{{ reportData.totalSeated }}</h2>
+      <span>All time</span>
+    </div>
+
+    <div class="stat-card orange">
+      <div class="icon">📣</div>
+      <p>Notified</p>
+      <h2>{{ reportData.totalNotified }}</h2>
+      <span>All time</span>
+    </div>
+
+    <div class="stat-card red">
+      <div class="icon">✕</div>
+      <p>Cancelled</p>
+      <h2>{{ reportData.totalCancelled }}</h2>
+      <span>All time</span>
+    </div>
+
+    <div class="stat-card violet">
+      <div class="icon">🕒</div>
+      <p>Average Wait</p>
+      <h2>{{ reportData.averageWaitTime }} <small>min</small></h2>
+      <span>All time</span>
+    </div>
+
+  </div>
+
+  <div class="chart-card" *ngIf="reportData">
+
+    <div class="chart-title">
+      <h2>Guest Status Distribution</h2>
+      <p>Total guests, seated, waiting, notified and cancelled</p>
+    </div>
+
+    <div class="chart-content">
+
+      <div class="chart-box">
+        <canvas
+          baseChart
+          [type]="doughnutChartType"
+          [data]="doughnutChartData"
+          [options]="doughnutChartOptions">
+        </canvas>
+
+        <div class="chart-center">
+          <strong>{{ reportData.totalGuests }}</strong>
+          <span>Total Guests</span>
+        </div>
+      </div>
+
+      <div class="chart-details">
+
+        <div class="legend-row">
+          <div><i class="dot purple-dot"></i> Seated</div>
+          <strong>{{ reportData.totalSeated }}</strong>
+          <span>{{ getPercent(reportData.totalSeated) }}%</span>
+        </div>
+
+        <div class="legend-row">
+          <div><i class="dot green-dot"></i> Waiting</div>
+          <strong>{{ reportData.totalWaiting }}</strong>
+          <span>{{ getPercent(reportData.totalWaiting) }}%</span>
+        </div>
+
+        <div class="legend-row">
+          <div><i class="dot blue-dot"></i> Notified</div>
+          <strong>{{ reportData.totalNotified }}</strong>
+          <span>{{ getPercent(reportData.totalNotified) }}%</span>
+        </div>
+
+        <div class="legend-row">
+          <div><i class="dot red-dot"></i> Cancelled</div>
+          <strong>{{ reportData.totalCancelled }}</strong>
+          <span>{{ getPercent(reportData.totalCancelled) }}%</span>
+        </div>
+
+        <div class="insight-box">
+          <div class="bulb">💡</div>
+          <p>
+            Great job! {{ getPercent(reportData.totalSeated) }}% of your guests were seated.
+            <br>
+            <small>Keep optimizing your wait times.</small>
+          </p>
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+
+  <div class="loading" *ngIf="isLoading">
+    Loading reports...
+  </div>
+
+</div>

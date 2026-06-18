@@ -1,6 +1,5 @@
 import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
-
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { WaitlistLoginComponent } from './components/waitlist-login/waitlist-login.component';
@@ -26,7 +25,8 @@ import { WaitlistDashboardComponent } from './components/waitlist-restaurant-com
 import { AuthInterceptor } from './interceptor/auth.interceptor';
 import { HTTP_INTERCEPTORS, HttpClientModule } from '@angular/common/http';
 import { MatStepperModule } from "@angular/material/stepper";
-
+import { NgChartsModule } from 'ng2-charts';
+import { WaitlistReportsComponent } from './components/waitlist-restaurant-components/waitlist-reports/waitlist-reports.component';
 
 
 @NgModule({
@@ -48,7 +48,8 @@ import { MatStepperModule } from "@angular/material/stepper";
     WaitlistNotificationComponent,
     WaitlistRestaurantComponentComponent,
     WaitlistRestaurantModalComponent,
-    WaitlistDashboardComponent
+    WaitlistDashboardComponent,
+    WaitlistReportsComponent
   ],
   imports: [
     BrowserModule,
@@ -58,7 +59,8 @@ import { MatStepperModule } from "@angular/material/stepper";
     CommonModule,
     HttpClientModule,
     FormsModule,
-    MatStepperModule
+    MatStepperModule,
+    NgChartsModule
 ],
   providers: [
     {
