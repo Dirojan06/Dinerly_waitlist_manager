@@ -18,6 +18,7 @@ const routes: Routes = [
 
   { path: '', redirectTo: 'login', pathMatch: 'full' },
   { path: 'login', component: WaitlistLoginComponent },
+  { path: 'login/:role', component: WaitlistLoginComponent },
   {
 
     path: 'user',

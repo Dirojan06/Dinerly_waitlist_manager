@@ -78,7 +78,7 @@ export class WaitlistModalComponent {
   }
 
 
-
+// submit join waitlist api
   submitJoinWaitlist(): void {
     if (this.waitlistForm.invalid) {
       this.waitlistForm.markAllAsTouched();
@@ -98,7 +98,6 @@ export class WaitlistModalComponent {
       next: (res: any) => {
         this.isSubmitting = false;
         if (res?.success && res?.data) {
-          this.notificationService.increasePendingCount();
           localStorage.setItem('waitlistGuest', JSON.stringify(res.data));
           localStorage.setItem('waitlistRestaurantId', this.restaurantId.toString());
           this.joinedWaitlist.emit(res.data);

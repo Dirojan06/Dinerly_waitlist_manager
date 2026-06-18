@@ -1,6 +1,7 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { forkJoin, Subscription } from 'rxjs';
 import { NotifiedGuest, PendingGuest, SeatedGuest, tableList, WaitingGuest } from 'src/app/models/waitlist-api-guest-to-restaurant.model';
+import { NotificationService } from 'src/app/services/notification.service';
 import { WaitlistApiRestaurantService } from 'src/app/services/waitlist-api-restaurant.service';
 import { WaitlistRestaurantModalService } from 'src/app/services/waitlist-restaurant-modal.service';
 import { WaitlistRestaurantService } from 'src/app/services/waitlist-restaurant.service';
@@ -31,7 +32,7 @@ export class WaitlistActiveListComponent implements OnInit, OnDestroy {
   selectedStatus = '';
   selectedDate = '';
   showRejectModal: boolean = false;
-
+  private refreshInterval: any;
 
   // pagination
   itemsPerPage = 5;
@@ -46,10 +47,16 @@ export class WaitlistActiveListComponent implements OnInit, OnDestroy {
   selectedTable: tableList | null = null;
   openTables: tableList[] = [];
 
-  constructor(public waitlistService: WaitlistApiRestaurantService, private waitlistUIService: WaitlistRestaurantService, public modalService: WaitlistRestaurantModalService) { }
+  constructor(public waitlistService: WaitlistApiRestaurantService, private waitlistUIService: WaitlistRestaurantService, public modalService: WaitlistRestaurantModalService , private notificationService : NotificationService) { }
 
   ngOnInit(): void {
     this.loadWaitlistData();
+
+    this.refreshInterval = setInterval(() => {
+
+    this.loadWaitlistData();
+
+  }, 5000);
   }
   loadWaitlistData(): void {
     this.loadPendingGuests();
@@ -147,6 +154,7 @@ export class WaitlistActiveListComponent implements OnInit, OnDestroy {
         const approvedGuest = res.data;
         this.pendingGuests = this.pendingGuests.filter(g => g.id !== approvedGuest.id);
         this.waitingGuests = [approvedGuest, ...this.waitingGuests];
+        this.loadWaitlistData();
         this.isApproving = false;
         this.closeApproveModal();
       }, error: () => {
@@ -198,6 +206,7 @@ export class WaitlistActiveListComponent implements OnInit, OnDestroy {
         const notifiedGuest = res.data;
         this.waitingGuests = this.waitingGuests.filter(g => g.id !== notifiedGuest.id);
         this.notifiedGuests = [notifiedGuest, ...this.notifiedGuests];
+        this.loadWaitlistData();
       }, error: () => {
         this.isLoading = false;
         alert('Unable to notify the guests');
@@ -215,21 +224,7 @@ export class WaitlistActiveListComponent implements OnInit, OnDestroy {
     this.showTable = false;
   }
 
-  getRestaurantTables() {
-
-    this.waitlistService.getRestaurantTableslist(this.restaurantId).subscribe({
-      next: (res) => {
-        this.tables = res.data;
-        this.openTables = this.tables.filter(
-
-          (table: any) => table.status === 'OPEN'
-
-        );
-      }, error: () => {
-        alert('Unable to load the table');
-      }
-    })
-  }
+  
 
   seatedGuestToTable(guestid: any, table: tableList | null) {
     if (!table) {
@@ -250,6 +245,8 @@ export class WaitlistActiveListComponent implements OnInit, OnDestroy {
         this.seatedGuests = [guest, ...this.seatedGuests];
         this.showTable = false;
         this.selectedTable = null;
+        this.loadNotifiedGuests()
+        this.notificationService.triggerRestaurantRefresh();
       },
       error: (err) => {
         this.isLoading = false;
@@ -285,6 +282,22 @@ export class WaitlistActiveListComponent implements OnInit, OnDestroy {
 
       }
     });
+  }
+
+  getRestaurantTables() {
+
+    this.waitlistService.getRestaurantTableslist(this.restaurantId).subscribe({
+      next: (res) => {
+        this.tables = res.data;
+        this.openTables = this.tables.filter(
+
+          (table: any) => table.status === 'OPEN'
+
+        );
+      }, error: () => {
+        alert('Unable to load the table');
+      }
+    })
   }
 
   getInitials(name: string): string { return this.waitlistUIService.getInitials(name); }

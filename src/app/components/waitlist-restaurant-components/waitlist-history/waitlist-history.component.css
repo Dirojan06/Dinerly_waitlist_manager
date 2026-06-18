@@ -49,7 +49,7 @@
     color: #2e7d32;
   }
 
-  &.badge-noshow {
+  &.badge-cancelled {
     background: #FCEBEB;
     color: #A32D2D;
   }
@@ -59,36 +59,19 @@
     color: #633806;
   }
 
-  &.badge.pending {
-
+  &.badge-pending {
     background: #fef3c7;
-
     color: #92400e;
-
   }
 
-  &.badge.waiting {
-
+  &.badge-waiting {
     background: #dbeafe;
-
     color: #1d4ed8;
-
   }
 
-  &.badge.notified {
-
+  &.badge-notified {
     background: #ede9fe;
-
     color: #6d28d9;
-
-  }
-
-  &.badge.seated {
-
-    background: #dcfce7;
-
-    color: #15803d;
-
   }
 }
 

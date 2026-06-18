@@ -11,10 +11,10 @@ import { WaitlistApiRestaurantService } from 'src/app/services/waitlist-api-rest
 export class WaitlistWaitingScreenComponent implements OnInit {
 
   @Input() guest: any;
-  restaurantId= '1';
+  restaurantId = '1';
   @Output() leaveSuccess = new EventEmitter<void>();
   pendingSeconds = 120;
-  timerText = '2:00';
+  timerText = '';
   waitingTimerText = '0:00';
   private pendingTimerSub?: Subscription;
   private waitingTimerSub?: Subscription;
@@ -28,19 +28,14 @@ export class WaitlistWaitingScreenComponent implements OnInit {
 
     const guestData = localStorage.getItem('waitlistGuest');
 
-  if (!guestData) {
+    if (!guestData) {
+      this.router.navigate(['/user']);
+      return;
+    }
 
-    this.router.navigate(['/user']);
-
-    return;
-
-  }
-
-  this.guest = JSON.parse(guestData);
-
-  this.loadStatusOnce();
-
-  this.startStatusPolling();
+    this.guest = JSON.parse(guestData);
+    this.loadStatusOnce();
+    this.startStatusPolling();
   }
 
   restoreFromStorage(): void {
@@ -50,9 +45,6 @@ export class WaitlistWaitingScreenComponent implements OnInit {
     if (!this.guest && storedGuest) {
       this.guest = JSON.parse(storedGuest);
     }
-
-    
-
   }
 
   get activeStepIndex(): number {
@@ -69,8 +61,6 @@ export class WaitlistWaitingScreenComponent implements OnInit {
         return 0;
     }
   }
-
-
 
   startStatusPolling(): void {
 
@@ -104,87 +94,153 @@ export class WaitlistWaitingScreenComponent implements OnInit {
     });
   }
   handleStatusTimer(): void {
-
     if (this.guest?.status === 'PENDING') {
       this.startPendingTimer();
       this.waitingTimerSub?.unsubscribe();
+      this.waitingTimerSub = undefined;
       return;
     }
-
     if (this.guest?.status === 'WAITING') {
       this.pendingTimerSub?.unsubscribe();
+      this.pendingTimerSub = undefined;
+      this.removePendingTimerStorage();
       this.startWaitingCountdown();
       return;
     }
-
     if (this.guest?.status === 'NOTIFIED') {
       this.pendingTimerSub?.unsubscribe();
       this.waitingTimerSub?.unsubscribe();
+      this.pendingTimerSub = undefined;
+      this.waitingTimerSub = undefined;
+      this.removePendingTimerStorage();
       return;
     }
-
     if (this.guest?.status === 'SEATED') {
       this.pendingTimerSub?.unsubscribe();
       this.waitingTimerSub?.unsubscribe();
       this.pollingSub?.unsubscribe();
+      this.pendingTimerSub = undefined;
+      this.waitingTimerSub = undefined;
+      this.pollingSub = undefined;
+      this.removePendingTimerStorage();
       return;
     }
+
+  }
+
+  private removePendingTimerStorage(): void {
+    const guestKey = this.getGuestKey();
+    if (!guestKey) return;
+    localStorage.removeItem(`pendingStart_${guestKey}`);
   }
 
   startPendingTimer(): void {
+    if (!this.guest) return;
     if (this.pendingTimerSub) return;
-    const createdTime =
-      this.guest?.createdAt ||
-      this.guest?.joinedAt ||
-      this.guest?.createdDate;
-    let endTime: number;
-    if (createdTime) {
-      endTime = new Date(createdTime).getTime() + 2 * 60 * 1000;
-    } else {
-      const localStartKey = `pendingStart_${this.guest.id || this.guest.guestPhone || this.guest.phone}`;
-      let localStart = localStorage.getItem(localStartKey);
-      if (!localStart) {
-        localStart = Date.now().toString();
-        localStorage.setItem(localStartKey, localStart);
-      }
-      endTime = +localStart + 2 * 60 * 1000;
-    }
+    const guestKey = this.getGuestKey();
+    const localStartKey = `pendingStart_${guestKey}`;
+    let localStart = localStorage.getItem(localStartKey);
 
-    this.pendingTimerSub = interval(1000).subscribe(() => {
+    if (!localStart) {
+      localStart = Date.now().toString();
+      localStorage.setItem(localStartKey, localStart);
+    }
+    const startTime = Number(localStart);
+    const endTime = startTime + this.pendingSeconds * 1000;
+    const updateTimer = () => {
       const remainingMs = endTime - Date.now();
       if (remainingMs <= 0) {
         this.timerText = '0:00';
         this.pendingTimerSub?.unsubscribe();
+        this.pendingTimerSub = undefined;
         return;
       }
       this.timerText = this.formatTime(remainingMs);
-    });
+    };
+
+    updateTimer();
+
+    this.pendingTimerSub = interval(1000).subscribe(updateTimer);
+
+  }
+
+  private getGuestKey(): string {
+    return this.guest?.guestPhone || this.guest?.phone;
   }
 
   startWaitingCountdown(): void {
-    this.waitingTimerSub?.unsubscribe();
+    if (this.waitingTimerSub) return;
+
     const estimatedMinutes = this.guest?.estimatedWaitTime || 0;
-    const approvedAt = this.guest?.approvedAt || this.guest?.approvedTime || this.guest?.waitingStartedAt;
-    if (!approvedAt) {
-      this.waitingTimerText = `${estimatedMinutes}:00`;
-      return;
+
+    const approvedAt =
+      this.guest?.approvedAt ||
+      this.guest?.approvedTime ||
+      this.guest?.waitingStartedAt;
+
+    let startTime = this.parseCreatedTime(approvedAt);
+
+    if (!startTime) {
+      const guestKey = this.guest.id || this.guest.guestPhone || this.guest.phone;
+      const waitingStartKey = `waitingStart_${guestKey}`;
+
+      let localStart = localStorage.getItem(waitingStartKey);
+
+      if (!localStart) {
+        localStart = Date.now().toString();
+        localStorage.setItem(waitingStartKey, localStart);
+      }
+
+      startTime = Number(localStart);
     }
 
-    const endTime = new Date(approvedAt).getTime() + estimatedMinutes * 60 * 1000;
-    this.waitingTimerSub = interval(1000).subscribe(() => {
+    const endTime = startTime + estimatedMinutes * 60 * 1000;
+
+    const updateTimer = () => {
       const remainingMs = endTime - Date.now();
+
       if (remainingMs <= 0) {
         this.waitingTimerText = '0:00';
         this.waitingTimerSub?.unsubscribe();
+        this.waitingTimerSub = undefined;
         return;
       }
-      this.waitingTimerText = this.formatTime(remainingMs);
-    });
 
+      this.waitingTimerText = this.formatTime(remainingMs);
+    };
+
+    updateTimer();
+
+    this.waitingTimerSub = interval(1000).subscribe(() => {
+      updateTimer();
+    });
+  }
+  private parseCreatedTime(createdTime: any): number | null {
+    if (!createdTime) return null;
+
+    // Already timestamp number
+
+    if (typeof createdTime === 'number') {
+      return createdTime;
+    }
+
+    // Timestamp string
+
+    if (!isNaN(Number(createdTime))) {
+      return Number(createdTime);
+    }
+
+    // Try normal JS date parsing
+
+    const normalDate = new Date(createdTime).getTime();
+    if (!isNaN(normalDate)) {
+      return normalDate;
+    }
+    return null;
   }
 
-  formatTime(ms: number): string {
-    const totalSeconds = Math.floor(ms / 1000);
+  private formatTime(ms: number): string {
+    const totalSeconds = Math.ceil(ms / 1000);
     const minutes = Math.floor(totalSeconds / 60);
     const seconds = totalSeconds % 60;
     return `${minutes}:${seconds.toString().padStart(2, '0')}`;

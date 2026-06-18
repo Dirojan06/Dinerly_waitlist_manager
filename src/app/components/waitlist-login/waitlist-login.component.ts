@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { WaitlistAuthService } from 'src/app/services/waitlist-auth.service';
 
 export type UserRole = 'guest' | 'restaurant' | 'admin';
@@ -57,14 +57,26 @@ export class WaitlistLoginComponent implements OnInit {
 
   };
 
-  constructor(private fb: FormBuilder, private router: Router, private auth: WaitlistAuthService) { }
+  constructor(private fb: FormBuilder, private router: Router, private route: ActivatedRoute, private auth: WaitlistAuthService) { }
 
   ngOnInit(): void {
     this.loginForm = this.fb.group({
       email: ['', []],
       password: ['', []]
     });
-    this.updateValidatorsByRole();
+
+    this.route.paramMap.subscribe(params => {
+      const role = params.get('role') as UserRole | null;
+      if (role === 'restaurant' || role === 'admin') {
+        this.selectedRole = role;
+      } else {
+        this.selectedRole = 'guest';
+      }
+      this.loginForm.reset();
+      this.errorMessage = '';
+      this.updateValidatorsByRole();
+
+    });
   }
 
   get currentConfig(): RoleConfig {
@@ -81,31 +93,20 @@ export class WaitlistLoginComponent implements OnInit {
   }
 
   onRestaurantSubmit(): void {
-
     this.selectedRole = 'restaurant';
-
     this.updateValidatorsByRole();
-
     this.onSubmit();
-
   }
 
   onAdminSubmit(): void {
-
     this.selectedRole = 'admin';
-
     this.updateValidatorsByRole();
-
     this.onSubmit();
-
   }
 
   onGuestSubmit(): void {
-
     this.selectedRole = 'guest';
-
     this.onSubmit();
-
   }
 
   private updateValidatorsByRole(): void {
@@ -131,7 +132,6 @@ export class WaitlistLoginComponent implements OnInit {
     this.errorMessage = '';
     if (this.selectedRole === 'guest') {
       this.auth.loginAsGuest();
-      this.showToast('Welcome Guest! Redirecting...');
       this.router.navigate(['/user']);
       return;
     }
@@ -144,16 +144,16 @@ export class WaitlistLoginComponent implements OnInit {
     this.isLoading = true;
     const { email, password } = this.loginForm.value;
     this.auth.login(email, password).subscribe({
-      next: user => {
+      next: (user) => {
         this.isLoading = false;
-        this.showToast(`Welcome ${user.fullName || user.username}`);
-        this.router.navigate(['/restaurant/dashboard']);
-        // else if (user.role === 'admin') {
-        //   this.router.navigate(['/admin']);
-        // }
+        if (this.selectedRole === 'restaurant') {
+          this.router.navigate(['/restaurant/dashboard']);
+        }
+        if (this.selectedRole === 'admin') {
+          this.router.navigate(['/admin']);
+        }
       },
-
-      error: error => {
+      error: (error) => {
         this.isLoading = false;
         if (error.status === 401 || error.status === 403) {
           this.errorMessage = 'Invalid email or password';
@@ -163,6 +163,20 @@ export class WaitlistLoginComponent implements OnInit {
       }
     });
   }
+
+  goToRestaurantLogin(): void {
+    this.router.navigate(['/login/restaurant']);
+  }
+
+  goToAdminLogin(): void {
+    this.router.navigate(['/login/admin']);
+  }
+
+  goToGuestLogin(): void {
+    this.router.navigate(['/login']);
+  }
+
+
 
   showToast(msg: string): void {
     this.toastMessage = msg;

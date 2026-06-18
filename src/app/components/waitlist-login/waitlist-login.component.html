@@ -1,127 +1,272 @@
-<div class="login-page">
+<div class="login-page" [ngClass]="selectedRole">
 
-  <div class="brand-header">
-    <h1>🍽️ Dinerly</h1>
-    <p>Restaurant Waitlist & Guest Portal</p>
-  </div>
+  <div class="login-shell">
 
-  <div class="role-grid">
+    <!-- LEFT SIDE -->
+    <div class="login-left">
+      <div class="overlay"></div>
 
-    <!-- Guest Card -->
-    <div class="role-card">
-      <div class="card-banner guest-banner">
-        <div class="floating-icon">👥</div>
-      </div>
-
-      <div class="card-body">
-        <h2>Dinerly</h2>
-        <p>Restaurant Waitlist & Guest Portal</p>
-
-        <div class="role-tabs">
-          <button class="active">👥 Guest</button>
-          <button>🍽️ Restaurant</button>
-          <button>🛡️ Admin</button>
+      <div class="left-content">
+        <div class="brand">
+          <div class="brand-icon">⌂</div>
+          <div>
+            <h2>Dinerly</h2>
+            <p>Smart Waitlist, Seamless Dining</p>
+          </div>
         </div>
 
-        <span class="role-desc">Check your queue status & browse the menu</span>
+        <ng-container *ngIf="selectedRole === 'guest'">
+          <h1>Skip the wait,<br>enjoy your meal</h1>
+          <p class="hero-desc">
+            Join the waitlist in seconds and get notified when your table is ready.
+          </p>
 
-        <button class="action-btn guest-btn" (click)="onGuestSubmit()">
-          Sign in as Guest <span>→</span>
-        </button>
+          <div class="info-list">
+            <div class="info-item">
+              <span>👥</span>
+              <div>
+                <h4>No signup. No hassle.</h4>
+                <p>Just sign in as a guest and you’re good to go.</p>
+              </div>
+            </div>
 
-        <div class="access-note">
-          <span></span>
-          No account needed — join the queue as a guest
-        </div>
+            <div class="info-item">
+              <span>🔔</span>
+              <div>
+                <h4>Real-time updates</h4>
+                <p>We’ll notify you the moment your table is ready.</p>
+              </div>
+            </div>
+
+            <div class="info-item">
+              <span>🕒</span>
+              <div>
+                <h4>More time for what matters</h4>
+                <p>Spend less time waiting, more time enjoying.</p>
+              </div>
+            </div>
+          </div>
+        </ng-container>
+
+        <ng-container *ngIf="selectedRole === 'restaurant'">
+          <h1>Welcome Back!<br>Let’s manage every guest experience.</h1>
+          <p class="hero-desc">
+            Login to your restaurant dashboard and take control of your waitlist,
+            tables and guest flow.
+          </p>
+
+          <div class="info-list">
+            <div class="info-item">
+              <span>👥</span>
+              <div>
+                <h4>Real-time Waitlist</h4>
+                <p>Track and manage your waitlist in real-time.</p>
+              </div>
+            </div>
+
+            <div class="info-item">
+              <span>🪑</span>
+              <div>
+                <h4>Table Management</h4>
+                <p>Optimize your tables and seating efficiently.</p>
+              </div>
+            </div>
+
+            <div class="info-item">
+              <span>📊</span>
+              <div>
+                <h4>Smart Insights</h4>
+                <p>Get insights and analytics to grow your business.</p>
+              </div>
+            </div>
+
+            <div class="info-item">
+              <span>🔔</span>
+              <div>
+                <h4>Instant Notifications</h4>
+                <p>Notify guests instantly when their table is ready.</p>
+              </div>
+            </div>
+          </div>
+        </ng-container>
+
+        <ng-container *ngIf="selectedRole === 'admin'">
+          <h1>Admin Control.<br>Complete <span>Oversight.</span></h1>
+          <p class="hero-desc">
+            Manage restaurants, monitor performance, and ensure a seamless
+            experience across the platform.
+          </p>
+
+          <div class="info-list">
+            <div class="info-item">
+              <span>🛡️</span>
+              <div>
+                <h4>Secure Access</h4>
+                <p>Role-based access with enterprise-grade security.</p>
+              </div>
+            </div>
+
+            <div class="info-item">
+              <span>📊</span>
+              <div>
+                <h4>Real-time Insights</h4>
+                <p>Monitor waitlists, tables, and restaurant performance.</p>
+              </div>
+            </div>
+
+            <div class="info-item">
+              <span>👥</span>
+              <div>
+                <h4>Centralized Management</h4>
+                <p>Manage restaurants, users, and system operations.</p>
+              </div>
+            </div>
+
+            <div class="info-item">
+              <span>🔔</span>
+              <div>
+                <h4>System Alerts</h4>
+                <p>Get notified about important activities and updates.</p>
+              </div>
+            </div>
+          </div>
+        </ng-container>
       </div>
     </div>
 
-    <!-- Restaurant Card -->
-    <div class="role-card active-card">
-      <div class="card-banner restaurant-banner">
-        <div class="floating-icon">🍽️</div>
-      </div>
+    <!-- RIGHT SIDE -->
+    <div class="login-right">
 
-      <div class="card-body">
-        <h2>Dinerly</h2>
-        <p>Restaurant Waitlist & Guest Portal</p>
+      <!-- GUEST -->
+      <ng-container *ngIf="selectedRole === 'guest'">
+        <div class="top-icon">👤</div>
+
+        <h1>Sign in as Guest</h1>
+        <p class="subtitle">No account needed</p>
+
+        <div class="illustration">📋🔔</div>
+
+        <div class="benefits">
+          <p>⚡ Join the waitlist instantly</p>
+          <p>🔔 Get notified when your table is ready</p>
+          <p>😊 Enjoy a seamless dining experience</p>
+        </div>
+
+        <button class="main-btn" (click)="onGuestSubmit()">
+          👤 Continue as Guest <span>→</span>
+        </button>
+
+        <p class="secure-note">
+          🛡️ We respect your privacy. No personal data is stored beyond what's needed.
+        </p>
+      </ng-container>
+
+      <!-- RESTAURANT -->
+      <ng-container *ngIf="selectedRole === 'restaurant'">
+        <div class="top-icon">🏪</div>
+
+        <h1>Restaurant Login</h1>
+        <p class="subtitle">Login to your account to continue</p>
 
         <form [formGroup]="loginForm" (ngSubmit)="onRestaurantSubmit()">
-          <label>Email address</label>
-          <input type="email" formControlName="email" placeholder="Enter your email address">
+          <label>Email Address</label>
+          <div class="input-box">
+            <span>✉️</span>
+            <input type="email" formControlName="email" placeholder="Enter your email">
+          </div>
+          <small class="error" *ngIf="emailError">{{ emailError }}</small>
 
           <label>Password</label>
-          <input type="password" formControlName="password" placeholder="Enter your password">
+          <div class="input-box">
+            <span>🔒</span>
+            <input [type]="showPassword ? 'text' : 'password'" formControlName="password"
+              placeholder="Enter your password">
+            <button type="button" (click)="togglePassword()">👁️</button>
+          </div>
+          <small class="error" *ngIf="passwordError">{{ passwordError }}</small>
 
-          <button class="action-btn restaurant-btn" type="submit" >
-          Sign in as Restaurant <span>→</span>
-        </button>
+          <div class="form-row">
+            <label class="remember">
+              <input type="checkbox" checked>
+              Remember me
+            </label>
+            <a>Forgot Password?</a>
+          </div>
+
+          <div class="error-box" *ngIf="errorMessage">
+            {{ errorMessage }}
+          </div>
+
+          <button class="main-btn" type="submit" [disabled]="isLoading">
+            {{ isLoading ? 'Logging in...' : '↪ Login' }}
+          </button>
+
+          <div class="divider"><span>or</span></div>
+
+          <button type="button" class="otp-btn">
+            🛡️ Login with OTP
+          </button>
         </form>
 
-        
+        <p class="secure-note">
+          🛡️ Secure. Reliable. Always here for your business.
+        </p>
+      </ng-container>
 
-        <div class="access-note">
-          <span></span>
-          Restaurant staff credentials required
-        </div>
-      </div>
-    </div>
+      <!-- ADMIN -->
+      <ng-container *ngIf="selectedRole === 'admin'">
+        <div class="top-icon">🛡️</div>
 
-    <!-- Admin Card -->
-    <div class="role-card">
-      <div class="card-banner admin-banner">
-        <div class="floating-icon">🛡️</div>
-      </div>
-
-      <div class="card-body">
-        <h2>Dinerly</h2>
-        <p>Restaurant Waitlist & Guest Portal</p>
+        <h1>Admin Login</h1>
+        <p class="subtitle">Sign in to your admin account</p>
 
         <form [formGroup]="loginForm" (ngSubmit)="onAdminSubmit()">
-          <label>Email address</label>
-          <input type="email" formControlName="email" placeholder="Enter your email address">
+          <label>Email Address</label>
+          <div class="input-box">
+            <span>✉️</span>
+            <input type="email" formControlName="email" placeholder="Enter your email address">
+          </div>
+          <small class="error" *ngIf="emailError">{{ emailError }}</small>
 
           <label>Password</label>
-          <input type="password" formControlName="password" placeholder="Enter your password">
+          <div class="input-box">
+            <span>🔒</span>
+            <input [type]="showPassword ? 'text' : 'password'" formControlName="password"
+              placeholder="Enter your password">
+            <button type="button" (click)="togglePassword()">👁️</button>
+          </div>
+          <small class="error" *ngIf="passwordError">{{ passwordError }}</small>
+
+          <div class="form-row">
+            <label class="remember">
+              <input type="checkbox" checked>
+              Remember me
+            </label>
+            <a>Forgot Password?</a>
+          </div>
+
+          <div class="error-box" *ngIf="errorMessage">
+            {{ errorMessage }}
+          </div>
+
+          <button class="main-btn" type="submit" [disabled]="isLoading">
+            {{ isLoading ? 'Logging in...' : '↪ Login to Admin Panel' }}
+          </button>
+
+          <div class="divider"><span>or</span></div>
+
+          <button type="button" class="otp-btn">
+            🛡️ Login with OTP
+          </button>
         </form>
 
-        <button class="action-btn admin-btn" type="submit">
-          Sign in as Admin <span>→</span>
-        </button>
+        <p class="secure-note">
+          🛡️ Secure. Reliable. Always here to protect and serve.
+        </p>
 
-        <div class="access-note">
-          <span></span>
-          Restricted to Dinerly system administrators
-        </div>
-      </div>
-    </div>
+        <p class="copyright">© 2024 Dinerly. All rights reserved.</p>
+      </ng-container>
 
-  </div>
-
-  <div class="bottom-section">
-    <div class="feature-card">
-      <div class="feature-icon">👥</div>
-      <h4>Easy & Fast</h4>
-      <p>Join in seconds</p>
-    </div>
-
-    <div class="feature-card">
-      <div class="feature-icon">🔔</div>
-      <h4>Live Updates</h4>
-      <p>Real-time status</p>
-    </div>
-
-    <div class="feature-card">
-      <div class="feature-icon">💬</div>
-      <h4>Text Alerts</h4>
-      <p>Stay informed</p>
-    </div>
-
-    <div class="feature-card">
-      <div class="feature-icon">🛡️</div>
-      <h4>Secure & Private</h4>
-      <p>Your data is safe</p>
     </div>
   </div>
-
 </div>

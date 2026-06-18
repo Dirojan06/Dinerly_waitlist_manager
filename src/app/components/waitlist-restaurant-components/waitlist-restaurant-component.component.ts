@@ -2,6 +2,7 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import { NavigationEnd, Router } from '@angular/router';
 import { filter, Subscription } from 'rxjs';
 import { DashboardStatus, tableList } from 'src/app/models/waitlist-api-guest-to-restaurant.model';
+import { NotificationService } from 'src/app/services/notification.service';
 import { WaitlistApiRestaurantService } from 'src/app/services/waitlist-api-restaurant.service';
 
 @Component({
@@ -22,7 +23,8 @@ export class WaitlistRestaurantComponentComponent implements OnInit, OnDestroy {
   isLoading: boolean = false;
   dashboardStatus: DashboardStatus[] = [];
 
-  constructor(private router: Router, private waitlistService: WaitlistApiRestaurantService) { }
+  private refreshSub?: Subscription;
+  constructor(private router: Router, private waitlistService: WaitlistApiRestaurantService,private notificationService : NotificationService) { }
 
   ngOnInit(): void {
 
@@ -34,8 +36,14 @@ export class WaitlistRestaurantComponentComponent implements OnInit, OnDestroy {
           this.setActiveRouteFromUrl(event.urlAfterRedirects);
         })
     );
+
     this.getRestaurantTables();
     this.loadDashboardWaitlist();
+    
+    this.refreshSub = this.notificationService.restaurantRefresh$.subscribe(() => {
+    this.getRestaurantTables();
+    this.loadDashboardWaitlist();
+  });
 
   }
 
@@ -90,7 +98,7 @@ export class WaitlistRestaurantComponentComponent implements OnInit, OnDestroy {
     this.activeRoute = segments[segments.length - 1] || 'dashboard';
   }
 
-  ngOnDestroy(): void { this.subs.unsubscribe(); }
+  ngOnDestroy(): void { this.subs.unsubscribe(); this.refreshSub?.unsubscribe(); }
 
   navigate(route: string): void {
     this.activeRoute = route;
