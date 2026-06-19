@@ -2,11 +2,11 @@
 
   <div class="card">
 
-    <h2>Your Queue Progress</h2>
-
+    <h1 *ngIf="guest?.status === 'PENDING' || guest?.status === 'WAITING' || guest?.status === 'NOTIFIED'">Your Queue Progress</h1>
+    <h1 *ngIf="guest?.status === 'CANCELLED'">Greetings from Dinerly</h1>
     <!-- STEPPER -->
     <mat-horizontal-stepper class="queue-stepper" [selectedIndex]="activeStepIndex" linear="false"
-      labelPosition="bottom">
+      labelPosition="bottom" *ngIf="guest?.status === 'PENDING' || guest?.status === 'WAITING' || guest?.status === 'NOTIFIED'">
 
       <mat-step>
         <ng-template matStepLabel>Joined</ng-template>
@@ -25,11 +25,14 @@
     <!-- PENDING -->
 
     <ng-container *ngIf="guest?.status === 'PENDING'">
-      <h1 class="timer">
+      <!-- <h1 class="timer">
         {{ timerText }}
-      </h1>
+      </h1> -->
       <p>
-        Estimated time for restaurant approval
+        You will be notified once restaurant approval
+      </p>
+      <p>
+        Thank you for your patience
       </p>
     </ng-container>
 
@@ -68,11 +71,21 @@
         </div>
       </div> -->
     </ng-container>
+
+    <ng-container *ngIf="guest?.status === 'CANCELLED'">
+      
+      <p>Please Join the Waitlist</p>
+      
+    </ng-container>
   </div>
 </div>
 
-<button class="leave-btn" (click)="openLeaveConfirm()">
+<button class="leave-btn" *ngIf="guest?.status == 'PENDING' || guest?.status === 'WAITING' || guest?.status === 'NOTIFIED'" (click)="openLeaveConfirm()">
   Leave waitlist
+</button>
+
+<button class="leave-btn" *ngIf="guest?.status == 'CANCELLED'" (click)="goBackButtonMethod()">
+  Go Back
 </button>
 
 <div class="modal-backdrop" *ngIf="showLeaveConfirm">

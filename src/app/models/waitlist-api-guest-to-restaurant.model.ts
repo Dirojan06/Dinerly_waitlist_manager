@@ -24,7 +24,19 @@ export interface PendingGuest {
   partySize: number,
   preference: string,
   notes: string,
-  status: string
+  status: string;
+  joinedAt:string;
+}
+
+export interface CancelledGuest {
+  id: number,
+  guestName: string,
+  guestPhone: string,
+  partySize: number,
+  preference: string,
+  notes: string,
+  status: string;
+  joinedAt:string;
 }
 
 export interface PendingGuestResponse {
@@ -32,6 +44,13 @@ export interface PendingGuestResponse {
   message: string;
   data: PendingGuest[];
 }
+
+export interface CancelledGuestResponse {
+  success: boolean;
+  message: string;
+  data: CancelledGuest[];
+}
+
 
 export interface getGuestWaitingStatus{
   restaurantId: string,
@@ -48,7 +67,10 @@ export interface WaitingGuest {
   status: string;
   position: number;
   estimatedWaitTime: number;
+  joinedAt:string;
+  approvedAt:string;
 }
+
 
 export interface WaitingGuestResponse {
   success: boolean;
@@ -66,6 +88,9 @@ export interface NotifiedGuest {
   status: string;
   position: number;
   estimatedWaitTime: number;
+  joinedAt:string;
+  approvedAt:string;
+  notifiedAt:string
 }
 
 export interface NotifiedGuestResponse {

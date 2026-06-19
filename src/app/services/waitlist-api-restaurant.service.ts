@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { JoinWaitlistRequest, PendingGuest, WaitingGuest, ApproveWaitlistRequest, getGuestWaitingStatus, PendingGuestResponse, WaitingGuestResponse, NotifiedGuestResponse, SeatedGuestResponse, DashboardWaitlistResponse, notifiyguestcallRequest, TablelistResponse, addGuestToWaitlistRequest, seatedGuestcallRequest, GuestHistoryResponse, guestReportsResponse } from '../models/waitlist-api-guest-to-restaurant.model';
+import { JoinWaitlistRequest, PendingGuest, WaitingGuest, ApproveWaitlistRequest, getGuestWaitingStatus, PendingGuestResponse, WaitingGuestResponse, NotifiedGuestResponse, SeatedGuestResponse, DashboardWaitlistResponse, notifiyguestcallRequest, TablelistResponse, addGuestToWaitlistRequest, seatedGuestcallRequest, GuestHistoryResponse, guestReportsResponse, CancelledGuestResponse } from '../models/waitlist-api-guest-to-restaurant.model';
 import { environment } from 'src/environments/environment.prod';
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
@@ -135,6 +135,25 @@ export class WaitlistApiRestaurantService {
 
   }
 
+  // Get cancelled guests based on restaurantId and optional filters api
+  getCancelledGuests(restaurantId: number, status?: string, date?: string): Observable<CancelledGuestResponse> {
+    const token = this.auth.getToken();
+
+    const headers = new HttpHeaders({
+      Authorization: `Bearer ${token}`
+    });
+    let params = new HttpParams();
+
+    if (status) {
+      params = params.set('status', status);
+    }
+    if (date) {
+      params = params.set('date', date);
+    }
+    return this.http.get<CancelledGuestResponse>(`${this.baseUrl}/restaurants/${restaurantId}/waitlist`, { headers, params });
+
+  }
+
   // approve guest in pending list api
   approveGuest(restaurantId: number, waitlistId: number, payload: ApproveWaitlistRequest): Observable<any> {
     const token = this.auth.getToken();
@@ -233,6 +252,27 @@ export class WaitlistApiRestaurantService {
       params = params.set('size', size);
     }
     return this.http.get<GuestHistoryResponse>(`${this.baseUrl}/restaurants/${restaurantId}/guest-history`, { headers, params });
+  }
+
+  // download guest history as csv api 
+
+  exportGuestHistoryCsv(restaurantId: number,status: string , date: string): Observable<any>{
+    const token = this.auth.getToken();
+
+    const headers = new HttpHeaders({
+      Authorization: `Bearer ${token}`
+    });
+    let params = new HttpParams();
+
+     if (status) {
+      params = params.set('status', status);
+    }
+    if (date) {
+      params = params.set('date', date);
+    }
+
+    return this.http.get(
+      `${this.baseUrl}/restaurants/${restaurantId}/guest-history/export`,{ headers,params, responseType: 'blob' });
   }
 
   //reports api

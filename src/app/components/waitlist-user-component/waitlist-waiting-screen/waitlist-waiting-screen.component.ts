@@ -282,6 +282,10 @@ export class WaitlistWaitingScreenComponent implements OnInit {
       });
   }
 
+  goBackButtonMethod(){
+    this.router.navigate(['/user']);
+  }
+
 
   get partiesAhead(): number {
     return this.guest?.position ? this.guest.position - 1 : 0;

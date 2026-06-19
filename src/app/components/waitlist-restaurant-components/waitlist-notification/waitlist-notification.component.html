@@ -1,59 +1,234 @@
-<div class="page">
-  <div class="topbar">
-    <h1 class="page-title">Notify Queue</h1>
-    <button class="btn-notify-all">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
-        <path d="M13.73 21a2 2 0 0 1-3.46 0" />
-      </svg>
-      Notify all
-    </button>
+<div class="notification-page">
+  <div class="page-header">
+    <div>
+      <h1>Notifications</h1>
+      <p>Manage today's waitlist guests and communicate with them.</p>
+    </div>
   </div>
 
-  <div class="content" style="padding-top: 14px;">
-    <p class="queue-subtitle">Guests ready to be notified — table available</p>
-
-    <div *ngIf="queue.length === 0" class="empty-state">No guests pending notification</div>
-
-    <div class="notify-card" *ngFor="let guest of queue; trackBy: trackByGuest">
-      <div class="avatar" [style.background]="getAvatarColor(guest.id).bg"
-        [style.color]="getAvatarColor(guest.id).color">
-        {{ getInitials(guest.name) }}
-      </div>
-      <div class="notify-info">
-        <div class="notify-name-row">
-          <span class="notify-name">{{ guest.name }}</span>
-          <span class="status-badge ready" *ngIf="guest.status === 'table-ready'">Table T6 ready</span>
-          <span class="status-badge overdue" *ngIf="guest.status !== 'table-ready'">Overdue {{ guest.waitMinutes }}
-            min</span>
-        </div>
-        <div class="notify-meta">
-          {{ guest.partySize }} guests · waiting {{ guest.waitMinutes }} min · {{ guest.phone }}
-        </div>
-      </div>
-      <div class="notify-actions">
-        <button class="btn-sms">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
-          </svg>
-          SMS
-        </button>
-        <button class="btn-call">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path
-              d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 13.5a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.6 2.7h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 10.4a16 16 0 0 0 6 6l1.27-.89a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 17.92z" />
-          </svg>
-          Call
-        </button>
+  <!-- Stats -->
+  <div class="stats-grid">
+    <div class="stat-card purple">
+      <div class="stat-icon">👤</div>
+      <div>
+        <h3>{{ stats.total }}</h3>
+        <p>Total Guests</p>
       </div>
     </div>
 
-    <!-- SMS Template -->
-    <div class="sms-template-card">
-      <h3 class="template-title">SMS message template</h3>
-      <label class="template-label">Message</label>
-      <!-- <textarea class="template-textarea" [(ngModel)]="smsTemplate" rows="3"></textarea> -->
-      <button class="btn-save" (click)="saveTemplate()">Save template</button>
+    <div class="stat-card orange">
+      <div class="stat-icon">⏱</div>
+      <div>
+        <h3>{{ stats.waiting }}</h3>
+        <p>Waiting</p>
+      </div>
+    </div>
+
+    <div class="stat-card blue">
+      <div class="stat-icon">💬</div>
+      <div>
+        <h3>{{ stats.notified }}</h3>
+        <p>Notified</p>
+      </div>
+    </div>
+
+    <div class="stat-card green">
+      <div class="stat-icon">🪑</div>
+      <div>
+        <h3>{{ stats.seated }}</h3>
+        <p>Seated</p>
+      </div>
+    </div>
+
+    <div class="stat-card red">
+      <div class="stat-icon">✕</div>
+      <div>
+        <h3>{{ stats.cancelled }}</h3>
+        <p>Cancelled</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="main-layout">
+    <!-- Left table -->
+    <div class="guest-section">
+      <div class="guest-header">
+        <h2>Today's Guests</h2>
+
+        <div class="filters">
+          <input
+            type="text"
+            placeholder="Search by name or phone"
+            [(ngModel)]="searchText"
+          />
+
+          <select [(ngModel)]="selectedStatus">
+            <option value="ALL">All Status</option>
+            <option value="WAITING">Waiting</option>
+            <option value="NOTIFIED">Notified</option>
+            <option value="SEATED">Seated</option>
+            <option value="CANCELLED">Cancelled</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="table-card">
+        <table>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Guest Name</th>
+              <th>Phone</th>
+              <th>Party Size</th>
+              <th>Status</th>
+              <th>Wait Time</th>
+              <th>Added At</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            <tr
+              *ngFor="let guest of filteredGuests; let i = index; trackBy: trackByGuest"
+              [class.active]="selectedGuest?.id === guest.id"
+              (click)="selectGuest(guest)"
+            >
+              <td>{{ i + 1 }}</td>
+              <td>{{ guest.name }}</td>
+              <td>{{ guest.phone }}</td>
+              <td>👥 {{ guest.partySize }}</td>
+              <td>
+                <span class="status-pill" [ngClass]="guest.status.toLowerCase()">
+                  {{ guest.status | titlecase }}
+                </span>
+              </td>
+              <td>{{ guest.waitMinutes ? guest.waitMinutes + ' mins' : '-' }}</td>
+              <td>{{ guest.addedAt }}</td>
+              <td>
+                <div class="action-buttons">
+                  <button
+                    class="icon-btn sms"
+                    *ngIf="guest.status !== 'SEATED'"
+                    (click)="selectGuest(guest); $event.stopPropagation()"
+                  >
+                    💬
+                  </button>
+
+                  <a
+                    class="icon-btn call"
+                    [href]="'tel:' + guest.phone"
+                    (click)="$event.stopPropagation()"
+                  >
+                    📞
+                  </a>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="table-footer">
+
+  <span>
+
+    Showing {{ startItem }} to {{ endItem }} of {{ filteredGuests.length }} guests
+
+  </span>
+
+  <div class="pagination">
+
+    <button class="page-btn arrow" [disabled]="currentPage === 1" (click)="prevPage()">
+
+      ‹
+
+    </button>
+
+    <button
+
+      class="page-btn"
+
+      *ngFor="let page of pages"
+
+      [class.active]="currentPage === page"
+
+      (click)="goToPage(page)"
+
+    >
+
+      {{ page }}
+
+    </button>
+
+    <button class="page-btn arrow" [disabled]="currentPage === totalPages" (click)="nextPage()">
+
+      ›
+
+    </button>
+
+  </div>
+
+</div>
+      </div>
+    </div>
+
+    <!-- Right panel -->
+    <div class="side-panel" *ngIf="selectedGuest">
+      <button class="close-btn" (click)="selectedGuest = null">×</button>
+
+      <h2>{{ selectedGuest.name }}</h2>
+
+      <div class="guest-mini-info">
+        <p>📞 {{ selectedGuest.phone }}</p>
+        <p>👥 Party of {{ selectedGuest.partySize }} · 
+          <span>Waiting for {{ selectedGuest.waitMinutes }} mins</span>
+        </p>
+      </div>
+
+      <div class="quick-actions">
+        <button class="send-btn">💬 Send SMS</button>
+        <a class="call-btn" [href]="'tel:' + selectedGuest.phone">📞 Call</a>
+      </div>
+
+      <div class="sms-box">
+        <h3>Send SMS</h3>
+
+        <div class="radio-row">
+          <label>
+            <input type="radio" name="smsType" checked />
+            Type Custom Message
+          </label>
+
+          <label>
+            <input type="radio" name="smsType" />
+            Use Template
+          </label>
+        </div>
+
+        <textarea
+          [(ngModel)]="smsMessage"
+          maxlength="160"
+          placeholder="Type your message here..."
+        ></textarea>
+
+        <div class="char-count">{{ smsMessage.length }} / 160</div>
+
+        <button class="primary-send" (click)="sendSms()">Send SMS</button>
+      </div>
+
+      <div class="template-section">
+        <div class="template-title-row">
+          <h3>SMS Templates</h3>
+          <button>+ New Template</button>
+        </div>
+
+        <div class="template-card" *ngFor="let template of templates">
+          <strong>{{ template.title }}</strong>
+          <p>{{ template.message }}</p>
+          <span>⋮</span>
+        </div>
+
+        <button class="view-all">View All Templates</button>
+      </div>
     </div>
   </div>
 </div>

@@ -584,6 +584,11 @@ td b {
     background: #FCEBEB;
     color: #0046e8;
   }
+
+   &.cancelled {
+    background: #FCEBEB;
+    color: #ff2727;
+  }
 }
 
 .notify-meta {
@@ -597,41 +602,27 @@ td b {
 }
 
 pending-scroll-container {
-
   display: flex;
-
   flex-direction: column;
-
   gap: 16px;
-
   max-height: calc((150px * 5) + (16px * 4));
-
   overflow-y: auto;
-
   padding-right: 8px;
-
 }
 
 /* optional smooth scrollbar */
 
 .scroll-container::-webkit-scrollbar {
-
   width: 6px;
-
 }
 
 .scroll-container::-webkit-scrollbar-thumb {
-
   background: #cfcfcf;
-
   border-radius: 20px;
-
 }
 
 .scroll-container::-webkit-scrollbar-track {
-
   background: transparent;
-
 }
 
 @media (max-width: 768px) {
@@ -688,4 +679,11 @@ pending-scroll-container {
   font-size: 13px;
   color: #6b7280;
   font-weight: 700;
+}
+
+.notify-time {
+  margin-top: 4px;
+  font-size: 12px;
+  color: #64748b;
+  line-height: 1.4;
 }

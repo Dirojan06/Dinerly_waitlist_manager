@@ -86,31 +86,18 @@
             <button class="reject-btn" (click)="openRejectModal(guest)">✕ </button>
           </div>
         </div>
-
         <div class="card-footer">
-
           Pending guests require approval before joining the waitlist.
-
         </div>
-
         <div class="pagination-row" *ngIf="pendingGuests.length > itemsPerPage">
-
           <button (click)="changePage('pending', 'prev')" [disabled]="pendingPage === 1">
-
             Prev
-
           </button>
-
           <span>Page {{ pendingPage }} / {{ pendingTotalPages }}</span>
-
           <button (click)="changePage('pending', 'next')" [disabled]="pendingPage === pendingTotalPages">
-
             Next
-
           </button>
-
         </div>
-
       </div>
     </div>
 
@@ -168,7 +155,10 @@
               <span class="status-badge waiting" *ngIf="guest.status === 'WAITING'">Waiting</span>
             </div>
             <div class="notify-meta">
-              {{ guest.partySize }} guests · waiting {{ guest.estimatedWaitTime }} min · {{ guest.guestPhone }}
+              {{ guest.partySize }} guests · estimated waiting time : {{ guest.estimatedWaitTime }} min
+            </div>
+            <div class="notify-meta">
+              {{ guest.guestPhone }}
             </div>
           </div>
           <div class="notify-actions">
@@ -233,22 +223,37 @@
       </table> -->
 
         <div class="notify-card" *ngFor="let guest of pagedNotifiedGuests; trackBy: trackBynotifyGuest">
+
           <div class="avatar" [style.color]="getAvatarColor(guest.id).color">
-            {{ (guest.id) }}
+            {{ guest.id }}
           </div>
+
           <div class="notify-info">
             <div class="notify-name-row">
               <span class="notify-name">{{ guest.guestName }}</span>
-              <span class="status-badge nofity" *ngIf="guest.status === 'NOTIFIED'">Notify</span>
+              <span class="status-badge nofity" *ngIf="guest.status === 'NOTIFIED'">
+                Notify
+              </span>
             </div>
+
             <div class="notify-meta">
-              {{ guest.partySize }} guests · waiting {{ guest.estimatedWaitTime }} min · {{ guest.guestPhone }}
+              {{ guest.partySize }} guests · {{ guest.guestPhone }}
+            </div>
+
+            <div class="notify-time">
+              Notified at: {{ formatDateTime(guest.notifiedAt) }}
             </div>
           </div>
+
           <div class="notify-actions">
-            <button class="seat-btn" (click)="openAvailableTableModal(guest)">Seat</button>
-            <button class="delay-btn">Delay</button>
+            <button class="seat-btn" (click)="openAvailableTableModal(guest)">
+              Seat
+            </button>
+            <button class="delay-btn">
+              Delay
+            </button>
           </div>
+
         </div>
 
         <div class="card-footer">Guests have been notified. Update wait time if there is a delay.</div>
@@ -278,30 +283,9 @@
           </div>
         </div>
 
-        <!-- <table>
-        <thead>
-          <tr>
-            <th>ID</th>
-            <th>Guest</th>
-            <th>Members</th>
-            <th>Table</th>
-            <th>Notes</th>
-          </tr>
-        </thead>
-
-        <tbody>
-          <tr *ngFor="let guest of seatedGuests">
-            <td>{{guest.id}}</td>
-            <td><b>{{guest.guestName}}</b><br />{{guest.guestPhone}}</td>
-            <td>{{guest.partySize}}</td>
-            <td><b>Table 7</b></td>
-            <td>{{guest.notes}}</td>
-          </tr>
-        </tbody>
-      </table> -->
 
         <div class="notify-card" *ngFor="let guest of pagedSeatedGuests; trackBy: trackByseatedGuest">
-          <div class="avatar"  class="avatar">
+          <div class="avatar" class="avatar">
             {{ (guest.id) }}
           </div>
           <div class="notify-info">
@@ -325,6 +309,50 @@
         <span>Page {{ seatedPage }} / {{ seatedTotalPages }}</span>
 
         <button (click)="changePage('seated', 'next')" [disabled]="seatedPage === seatedTotalPages">
+          Next
+        </button>
+      </div>
+    </div>
+
+    <!-- //////////////////////////////////////////////////////////////////////////// -->
+
+    <div class="scroll-container">
+      <div class="waitlist-card cancelled">
+        <div class="card-header">
+          <div>
+            <h2>🪑 Cancelled Today <span>{{ cancelledGuest.length }}</span></h2>
+            <p>Guests who have been cancelled today</p>
+          </div>
+          <div class="header-actions">
+            <button class="refresh-btn" (click)="loadCancelledGuests()" [disabled]="isLoading">🔄 Refresh</button>
+          </div>
+        </div>
+
+
+        <div class="notify-card" *ngFor="let guest of pagedCancelledGuests ; trackBy: trackBycancelledGuest">
+          <div class="avatar" class="avatar">
+            {{ (guest.id) }}
+          </div>
+          <div class="notify-info">
+            <div class="notify-name-row">
+              <span class="notify-name">{{ guest.guestName }}</span>
+              <span class="status-badge cancelled" *ngIf="guest.status === 'CANCELLED'">CANCELLED</span>
+            </div>
+            <div class="notify-meta">
+              {{ guest.partySize }} guests · {{ guest.guestPhone }}
+            </div>
+          </div>
+        </div>
+
+      </div>
+      <div class="pagination-row" *ngIf="cancelledGuest.length > itemsPerPage">
+        <button (click)="changePage('cancelled', 'prev')" [disabled]="seatedPage === 1">
+          Prev
+        </button>
+
+        <span>Page {{ cancelledPage }} / {{ cancelledTotalPages }}</span>
+
+        <button (click)="changePage('cancelled', 'next')" [disabled]="cancelledPage === cancelledTotalPages">
           Next
         </button>
       </div>
@@ -410,7 +438,8 @@
       <button class="cancel-btn" (click)="closeAvailableTabletModal()">
         Cancel
       </button>
-      <button class="modal-approve-btn" [disabled]="!selectedTable" (click)="seatedGuestToTable(selectedGuest.id,selectedTable)">
+      <button class="modal-approve-btn" [disabled]="!selectedTable"
+        (click)="seatedGuestToTable(selectedGuest.id,selectedTable)">
         {{ isRejecting ? 'Seating...' : 'Seat Guest' }}
       </button>
     </div>

@@ -1,7 +1,6 @@
 .login-page {
   min-height: 100vh;
   background: #f7f2ff;
-  padding: 8px;
   font-family: 'DM Sans', sans-serif;
 }
 
@@ -10,7 +9,6 @@
   display: grid;
   grid-template-columns: 1.1fr 0.9fr;
   background: #fff;
-  border-radius: 28px;
   overflow: hidden;
   box-shadow: 0 20px 60px rgba(91, 33, 182, 0.12);
 }

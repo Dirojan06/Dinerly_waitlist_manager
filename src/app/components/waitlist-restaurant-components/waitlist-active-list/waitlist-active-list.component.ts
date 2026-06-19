@@ -1,6 +1,6 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { forkJoin, Subscription } from 'rxjs';
-import { NotifiedGuest, PendingGuest, SeatedGuest, tableList, WaitingGuest } from 'src/app/models/waitlist-api-guest-to-restaurant.model';
+import { CancelledGuest, NotifiedGuest, PendingGuest, SeatedGuest, tableList, WaitingGuest } from 'src/app/models/waitlist-api-guest-to-restaurant.model';
 import { NotificationService } from 'src/app/services/notification.service';
 import { WaitlistApiRestaurantService } from 'src/app/services/waitlist-api-restaurant.service';
 import { WaitlistRestaurantModalService } from 'src/app/services/waitlist-restaurant-modal.service';
@@ -21,6 +21,7 @@ export class WaitlistActiveListComponent implements OnInit, OnDestroy {
   waitingGuests: WaitingGuest[] = [];
   notifiedGuests: NotifiedGuest[] = [];
   seatedGuests: SeatedGuest[] = [];
+  cancelledGuest :CancelledGuest[] = [];
   selectedGuest: PendingGuest | null = null;
   showApproveModal = false;
   selectedPosition = 1;
@@ -40,6 +41,7 @@ export class WaitlistActiveListComponent implements OnInit, OnDestroy {
   waitingPage = 1;
   notifiedPage = 1;
   seatedPage = 1;
+  cancelledPage = 1
 
   //for get available table
   showTable: boolean = false;
@@ -47,16 +49,16 @@ export class WaitlistActiveListComponent implements OnInit, OnDestroy {
   selectedTable: tableList | null = null;
   openTables: tableList[] = [];
 
-  constructor(public waitlistService: WaitlistApiRestaurantService, private waitlistUIService: WaitlistRestaurantService, public modalService: WaitlistRestaurantModalService , private notificationService : NotificationService) { }
+  constructor(public waitlistService: WaitlistApiRestaurantService, private waitlistUIService: WaitlistRestaurantService, public modalService: WaitlistRestaurantModalService, private notificationService: NotificationService) { }
 
   ngOnInit(): void {
     this.loadWaitlistData();
 
     this.refreshInterval = setInterval(() => {
 
-    this.loadWaitlistData();
+      this.loadWaitlistData();
 
-  }, 2000);
+    }, 2000);
   }
   loadWaitlistData(): void {
     this.loadPendingGuests();
@@ -126,6 +128,21 @@ export class WaitlistActiveListComponent implements OnInit, OnDestroy {
       error: () => {
         this.isLoading = false;
         alert('Unable to load seated guests');
+      }
+    });
+  }
+
+  loadCancelledGuests(): void {
+    this.isLoading = true;
+    this.selectedStatus = "CANCELLED"
+    this.waitlistService.getCancelledGuests(this.restaurantId, this.selectedStatus, this.selectedDate).subscribe({
+      next: (response) => {
+        this.cancelledGuest = response.data || [];
+        this.isLoading = false;
+      },
+      error: () => {
+        this.isLoading = false;
+        alert('Unable to load cancelled guests');
       }
     });
   }
@@ -224,7 +241,7 @@ export class WaitlistActiveListComponent implements OnInit, OnDestroy {
     this.showTable = false;
   }
 
-  
+
 
   seatedGuestToTable(guestid: any, table: tableList | null) {
     if (!table) {
@@ -234,8 +251,9 @@ export class WaitlistActiveListComponent implements OnInit, OnDestroy {
     this.isLoading = true;
 
     forkJoin({
-      tableStatus: this.waitlistService.updateTableStatus(this.restaurantId,table.id,'OCCUPIED'),
-      seatedGuest: this.waitlistService.seatedGuest(this.restaurantId,guestid,{ tableName: table.tableNumber })}).subscribe({
+      tableStatus: this.waitlistService.updateTableStatus(this.restaurantId, table.id, 'OCCUPIED'),
+      seatedGuest: this.waitlistService.seatedGuest(this.restaurantId, guestid, { tableName: table.tableNumber })
+    }).subscribe({
       next: ({ tableStatus, seatedGuest }) => {
         this.isLoading = false;
         const guest = seatedGuest.data;
@@ -300,6 +318,31 @@ export class WaitlistActiveListComponent implements OnInit, OnDestroy {
     })
   }
 
+  getActualWaitingTime(joinedAt?: string, notifiedAt?: string): string {
+    if (!joinedAt || !notifiedAt) return '-';
+    const joinedTime = new Date(joinedAt).getTime();
+    const notifiedTime = new Date(notifiedAt).getTime();
+    const diffMs = notifiedTime - joinedTime;
+    if (diffMs < 0) return '-';
+    const totalMinutes = Math.floor(diffMs / 60000);
+    const hours = Math.floor(totalMinutes / 60);
+    const minutes = totalMinutes % 60;
+    if (hours > 0) {
+      return `${hours}h ${minutes}m`;
+    }
+    return `${minutes}m`;
+  }
+
+  formatDateTime(date?: string): string {
+    if (!date) return '-';
+
+    return new Date(date).toLocaleString('en-IN', {
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: true
+    });
+  }
+
   getInitials(name: string): string { return this.waitlistUIService.getInitials(name); }
   getAvatarColor(id: number) { return this.waitlistUIService.getAvatarColor(id); }
 
@@ -307,7 +350,7 @@ export class WaitlistActiveListComponent implements OnInit, OnDestroy {
   trackBywaitingGuest(_: number, g: WaitingGuest): number { return g.id; }
   trackBynotifyGuest(_: number, g: NotifiedGuest): number { return g.id; }
   trackByseatedGuest(_: number, g: SeatedGuest): number { return g.id; }
-
+  trackBycancelledGuest(_: number, g: CancelledGuest): number { return g.id; }
 
   // pagination part ///////////////////////////////////////////////////////////////////////
 
@@ -327,6 +370,9 @@ export class WaitlistActiveListComponent implements OnInit, OnDestroy {
     return this.getPagedData(this.seatedGuests, this.seatedPage);
   }
 
+  get pagedCancelledGuests(): CancelledGuest[] {
+    return this.getPagedData(this.cancelledGuest, this.seatedPage);
+  }
   get pendingTotalPages(): number {
     return this.getTotalPages(this.pendingGuests);
   }
@@ -343,6 +389,10 @@ export class WaitlistActiveListComponent implements OnInit, OnDestroy {
     return this.getTotalPages(this.seatedGuests);
   }
 
+  get cancelledTotalPages(): number {
+    return this.getTotalPages(this.cancelledGuest);
+  }
+
   private getPagedData<T>(data: T[], page: number): T[] {
     const start = (page - 1) * this.itemsPerPage;
     return data.slice(start, start + this.itemsPerPage);
@@ -353,7 +403,7 @@ export class WaitlistActiveListComponent implements OnInit, OnDestroy {
   }
 
   changePage(
-    type: 'pending' | 'waiting' | 'notified' | 'seated',
+    type: 'pending' | 'waiting' | 'notified' | 'seated' | 'cancelled',
     direction: 'next' | 'prev'
   ): void {
 
@@ -394,6 +444,16 @@ export class WaitlistActiveListComponent implements OnInit, OnDestroy {
 
       if (direction === 'prev' && this.seatedPage > 1) {
         this.seatedPage--;
+      }
+    }
+
+    if (type === 'cancelled') {
+      if (direction === 'next' && this.cancelledPage < this.cancelledTotalPages) {
+        this.cancelledPage++;
+      }
+
+      if (direction === 'prev' && this.cancelledPage > 1) {
+        this.cancelledPage--;
       }
     }
   }
