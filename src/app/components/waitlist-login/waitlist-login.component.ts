@@ -81,11 +81,19 @@ export class WaitlistLoginComponent implements OnInit {
 
     const savedTheme = localStorage.getItem('dinerly-theme');
     this.isDarkMode = savedTheme === 'dark';
+    document.body.classList.toggle(
+      'dark-mode',
+      this.isDarkMode
+    );
   }
 
   toggleTheme(): void {
     this.isDarkMode = !this.isDarkMode;
     localStorage.setItem('dinerly-theme', this.isDarkMode ? 'dark' : 'light');
+    document.body.classList.toggle(
+      'dark-mode',
+      this.isDarkMode
+    );
   }
 
   get currentConfig(): RoleConfig {

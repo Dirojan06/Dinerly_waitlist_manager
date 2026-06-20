@@ -14,7 +14,9 @@ export class WaitlistModalComponent {
   @Output() closeModal = new EventEmitter<void>();
   @Output() joinedWaitlist = new EventEmitter<any>();
   selectedTags: string[] = [];
-  partySize = [1, 2, 3, 4, 5, '6+'];
+  showPartyPicker = false;
+  tempPartySize: number = 1;
+  partySize: number[] = [1, 2, 3, 4, 5, 6, 7, 8];
   restaurantId = 1;
   isSubmitting = false;
   preference = [
@@ -41,7 +43,7 @@ export class WaitlistModalComponent {
     this.waitlistForm = this.fb.group({
       name: ['', Validators.required],
       phone: ['', [Validators.required, Validators.pattern('^\\+?[0-9]{10,15}$')]],
-      partySize: [null, Validators.required],
+      partySize: [1, Validators.required],
       preference: ['INDOOR', Validators.required],
       notes: [[]]
     });
@@ -77,8 +79,24 @@ export class WaitlistModalComponent {
     return this.selectedTags.includes(tag);
   }
 
+  openPartyPicker(): void {
+    this.tempPartySize = Number(this.waitlistForm.get('partySize')?.value || 1);
+    this.showPartyPicker = true;
+  }
 
-// submit join waitlist api
+  closePartyPicker(): void {
+    this.showPartyPicker = false;
+  }
+
+  confirmPartyPicker(): void {
+    this.waitlistForm.patchValue({
+      partySize: this.tempPartySize
+    });
+    this.showPartyPicker = false;
+  }
+
+
+  // submit join waitlist api
   submitJoinWaitlist(): void {
     if (this.waitlistForm.invalid) {
       this.waitlistForm.markAllAsTouched();

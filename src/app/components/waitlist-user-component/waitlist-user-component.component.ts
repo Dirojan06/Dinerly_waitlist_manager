@@ -9,8 +9,9 @@ import { filter } from 'rxjs';
 })
 export class WaitlistUserComponentComponent {
 
-   restaurantId = 1;
+  restaurantId = 1;
   isWaitingRoute = false;
+  isDarkMode = false;
   constructor(private router: Router) {
     this.isWaitingRoute = this.router.url.includes('/user/waiting');
     this.router.events
@@ -18,6 +19,27 @@ export class WaitlistUserComponentComponent {
       .subscribe((event: any) => {
         this.isWaitingRoute = event.urlAfterRedirects.includes('/user/waiting');
       });
+    const savedTheme = localStorage.getItem('dinerly-theme');
+
+    this.isDarkMode = savedTheme === 'dark';
+    document.body.classList.toggle(
+      'dark-mode',
+      this.isDarkMode
+    );
+  }
+
+  toggleTheme(): void {
+
+    this.isDarkMode = !this.isDarkMode;
+    localStorage.setItem(
+      'dinerly-theme',
+      this.isDarkMode ? 'dark' : 'light'
+    );
+
+    document.body.classList.toggle(
+      'dark-mode',
+      this.isDarkMode
+    );
   }
 
   onJoinedWaitlist(guest: any): void {

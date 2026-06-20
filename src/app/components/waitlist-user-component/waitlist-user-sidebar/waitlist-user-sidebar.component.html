@@ -1,34 +1,43 @@
 <aside class="sidebar">
 
   <div class="sidebar-card waiting-card">
-    <div class="decor left">❧</div>
-    <div class="decor right">❧</div>
 
-    <div class="card-icon">🗓️</div>
+    <div class="card-icon">
+      <i class="fa-solid fa-chair"></i>
+    </div>
 
     <h2>Your table is waiting</h2>
-    <p>Join the waitlist or check your status to get notified.</p>
+
+    <p>
+      Join the waitlist or check your status
+      to get notified.
+    </p>
 
     <button class="btn-full-dark" (click)="openModal('join')">
       Join the waitlist
-      <span>→</span>
+      <i class="fa-solid fa-arrow-right"></i>
     </button>
 
     <span class="or-divider">or</span>
 
     <button class="btn-full-outline" (click)="openModal('status')">
       Check my status
-      <span>→</span>
+      <i class="fa-solid fa-arrow-right"></i>
     </button>
+
   </div>
 
-  <div class="info-row clickable" >
-    <div class="info-icon">📱</div>
+  <div class="info-row clickable">
+    <div class="info-icon">
+      <i class="fa-regular fa-message"></i>
+    </div>
+
     <div class="info-text">
-      <strong>We'll text you when your table is ready</strong>
+      <strong>We’ll text you when your table is ready</strong>
       <span>Make sure your phone is up to date!</span>
     </div>
-    <span>›</span>
+
+    <i class="fa-solid fa-chevron-right"></i>
   </div>
 
 </aside>

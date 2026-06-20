@@ -40,16 +40,49 @@
                     </div>
                 </div>
 
-                <div class="form-grid party-section">
+                <div class="party-section">
                     <div class="field">
                         <label>Party size</label>
 
-                        <div class="party-buttons">
+                        <!-- Desktop / Website -->
+                        <div class="party-buttons desktop-party">
                             <button *ngFor="let size of partySize" type="button"
                                 [class.active]="waitlistForm.value.partySize === size" (click)="selectPartySize(size)">
                                 {{ size }}
                             </button>
                         </div>
+
+                        <!-- Mobile / Tablet iOS Picker -->
+                        <button type="button" class="party-select-box mobile-party" (click)="openPartyPicker()">
+                            <i class="fa-solid fa-user-group"></i>
+                            <span>{{ waitlistForm.get('partySize')?.value }} Guests</span>
+                            <i class="fa-solid fa-chevron-down"></i>
+                        </button>
+
+                    </div>
+                </div>
+
+                <!-- Mobile iOS Picker Popup -->
+                <div class="party-picker-backdrop" *ngIf="showPartyPicker">
+                    <div class="party-picker-modal">
+
+                        <div class="picker-header">
+                            <button type="button" (click)="closePartyPicker()">Cancel</button>
+                            <strong>Party Size</strong>
+                            <button type="button" (click)="confirmPartyPicker()">Done</button>
+                        </div>
+
+                        <div class="ios-picker">
+                            <div class="picker-highlight"></div>
+
+                            <div class="picker-column">
+                                <button type="button" *ngFor="let size of partySize"
+                                    [class.active]="tempPartySize === size" (click)="tempPartySize = size">
+                                    {{ size }}
+                                </button>
+                            </div>
+                        </div>
+
                     </div>
                 </div>
 

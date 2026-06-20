@@ -143,3 +143,96 @@
     height: auto;
   }
 }
+
+@media (max-width: 768px) {
+  .sidebar {
+    height: auto !important;
+    display: flex !important;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .waiting-card {
+    padding: 30px 22px !important;
+    border-radius: 18px !important;
+  }
+
+  .decor {
+    display: none !important;
+  }
+
+  .card-icon {
+    width: 58px !important;
+    height: 58px !important;
+    font-size: 22px !important;
+    margin: 0 auto 20px !important;
+  }
+
+  .waiting-card h2 {
+    font-size: 22px !important;
+    margin-bottom: 12px !important;
+  }
+
+  .waiting-card p {
+    font-size: 15px !important;
+    margin-bottom: 24px !important;
+  }
+
+  .btn-full-dark,
+  .btn-full-outline {
+    height: 54px !important;
+    border-radius: 10px !important;
+    font-size: 15px !important;
+  }
+
+  .or-divider {
+    margin: 16px 0 !important;
+  }
+
+  .info-row {
+    padding: 18px !important;
+    border-radius: 18px !important;
+  }
+
+  .info-icon {
+    width: 52px !important;
+    height: 52px !important;
+    font-size: 20px !important;
+  }
+
+  .info-text {
+    text-align: left !important;
+  }
+
+  :host-context(.dark-mode) .sidebar-card,
+  :host-context(.dark-mode) .info-row {
+    background: rgba(12, 6, 35, 0.72);
+    border: 1px solid rgba(255,255,255,0.1);
+    backdrop-filter: blur(16px);
+    box-shadow: 0 18px 50px rgba(0,0,0,0.35);
+  }
+
+  :host-context(.dark-mode) .waiting-card h2,
+  :host-context(.dark-mode) .waiting-card p,
+  :host-context(.dark-mode) .info-text strong,
+  :host-context(.dark-mode) .info-text span,
+  :host-context(.dark-mode) .or-divider {
+    color: #ffffff;
+  }
+
+  :host-context(.dark-mode) .card-icon,
+  :host-context(.dark-mode) .info-icon {
+    background: rgba(124,58,237,0.45);
+    color: #ffffff;
+  }
+
+  :host-context(.dark-mode) .btn-full-dark {
+    background: linear-gradient(135deg, #7c3aed, #a855f7);
+  }
+
+  :host-context(.dark-mode) .btn-full-outline {
+    background: transparent;
+    color: white;
+    border: 1px solid rgba(168,85,247,0.65);
+  }
+}

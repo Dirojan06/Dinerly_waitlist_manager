@@ -1,5 +1,7 @@
-<div class="app-wrapper">
-  <app-waitlist-navbar></app-waitlist-navbar>
+<div class="app-wrapper" [ngClass]="isDarkMode ? 'dark-mode' : 'light-mode'">
+  <app-waitlist-navbar [isDarkMode]="isDarkMode" (themeToggle)="toggleTheme()">
+
+  </app-waitlist-navbar>
 
   <router-outlet *ngIf="isWaitingRoute"></router-outlet>
 
@@ -10,13 +12,11 @@
       <div class="top-grid">
         <app-waitlist-user-hero></app-waitlist-user-hero>
 
-        <app-waitlist-user-sidebar
-          (joinedWaitlist)="onJoinedWaitlist($event)">
+        <app-waitlist-user-sidebar (joinedWaitlist)="onJoinedWaitlist($event)">
         </app-waitlist-user-sidebar>
       </div>
 
-      <app-waitlist-user-banner
-        (joinedWaitlist)="onJoinedWaitlist($event)">
+      <app-waitlist-user-banner (joinedWaitlist)="onJoinedWaitlist($event)">
       </app-waitlist-user-banner>
 
       <app-waitlist-user-menu></app-waitlist-user-menu>

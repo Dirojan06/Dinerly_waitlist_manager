@@ -1,13 +1,6 @@
 <section class="hero">
 
-  <div class="hero-overlay"></div>
-
   <div class="hero-content">
-
-    <div class="logo-row">
-      <div class="logo-icon">🍴</div>
-      <h2>Dinerly</h2>
-    </div>
 
     <h1>
       A better table <br />
@@ -24,7 +17,9 @@
     <div class="stats-card">
 
       <div class="stat">
-        <div class="stat-icon">👥</div>
+        <div class="stat-icon">
+          <i class="fa-solid fa-user-group"></i>
+        </div>
         <strong>{{ partiesWaiting }}</strong>
         <span>parties waiting</span>
       </div>
@@ -32,18 +27,15 @@
       <div class="stat-divider"></div>
 
       <div class="stat">
-        <div class="stat-icon">🕒</div>
+        <div class="stat-icon">
+          <i class="fa-regular fa-clock"></i>
+        </div>
         <strong>{{ waitMinutes }} <small>min</small></strong>
         <span>average wait</span>
       </div>
 
     </div>
 
-  </div>
-
-  <div class="live-pill">
-    <span></span>
-    <b>Live wait times updated in real time</b>
   </div>
 
 </section>

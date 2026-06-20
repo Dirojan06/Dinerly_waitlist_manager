@@ -21,6 +21,7 @@ export class WaitlistWaitingScreenComponent implements OnInit {
   private pollingSub?: Subscription;
   showLeaveConfirm = false;
   isLeaving = false;
+  isDarkMode = false;
 
   constructor(private waitlistApi: WaitlistApiRestaurantService, private router: Router) { }
 
@@ -36,6 +37,14 @@ export class WaitlistWaitingScreenComponent implements OnInit {
     this.handleStatusTimer();
     this.loadStatusOnce();
     this.startStatusPolling();
+
+    const savedTheme = localStorage.getItem('dinerly-theme');
+
+    this.isDarkMode = savedTheme === 'dark';
+    document.body.classList.toggle(
+      'dark-mode',
+      this.isDarkMode
+    );
   }
 
   restoreFromStorage(): void {
@@ -84,17 +93,17 @@ export class WaitlistWaitingScreenComponent implements OnInit {
         if (res?.success && res?.data) {
           const newGuest = res.data;
 
-        const oldStatus = this.guest?.status;
+          const oldStatus = this.guest?.status;
 
-        this.guest = newGuest;
+          this.guest = newGuest;
 
-        localStorage.setItem('waitlistGuest', JSON.stringify(this.guest));
+          localStorage.setItem('waitlistGuest', JSON.stringify(this.guest));
 
-        if (oldStatus !== newGuest.status) {
+          if (oldStatus !== newGuest.status) {
 
-          this.handleStatusTimer();
+            this.handleStatusTimer();
 
-        }
+          }
 
         }
       },
@@ -150,34 +159,34 @@ export class WaitlistWaitingScreenComponent implements OnInit {
 
   startWaitingCountdown(): void {
 
-  if (this.waitingTimerSub) {
-    this.waitingTimerSub.unsubscribe();
-    this.waitingTimerSub = undefined;
-  }
-
-  const estimatedMinutes = Number(this.guest?.estimatedWaitTime || 0);
-  let remainingSeconds = estimatedMinutes * 60;
-
-  const updateTimer = () => {
-    const minutes = Math.floor(remainingSeconds / 60);
-    const seconds = remainingSeconds % 60;
-    this.waitingTimerText = `${minutes}:${seconds.toString().padStart(2, '0')}`;
-
-    if (remainingSeconds <= 0) {
-      this.waitingTimerText = '0:00';
-      this.waitingTimerSub?.unsubscribe();
+    if (this.waitingTimerSub) {
+      this.waitingTimerSub.unsubscribe();
       this.waitingTimerSub = undefined;
-      return;
     }
-    remainingSeconds--;
-  };
 
-  updateTimer();
-  this.waitingTimerSub = interval(1000).subscribe(() => {
+    const estimatedMinutes = Number(this.guest?.estimatedWaitTime || 0);
+    let remainingSeconds = estimatedMinutes * 60;
+
+    const updateTimer = () => {
+      const minutes = Math.floor(remainingSeconds / 60);
+      const seconds = remainingSeconds % 60;
+      this.waitingTimerText = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+
+      if (remainingSeconds <= 0) {
+        this.waitingTimerText = '0:00';
+        this.waitingTimerSub?.unsubscribe();
+        this.waitingTimerSub = undefined;
+        return;
+      }
+      remainingSeconds--;
+    };
+
     updateTimer();
-  });
+    this.waitingTimerSub = interval(1000).subscribe(() => {
+      updateTimer();
+    });
 
-}
+  }
 
   private formatTime(ms: number): string {
     const totalSeconds = Math.ceil(ms / 1000);
@@ -222,7 +231,7 @@ export class WaitlistWaitingScreenComponent implements OnInit {
       });
   }
 
-  goBackButtonMethod(){
+  goBackButtonMethod() {
     this.router.navigate(['/user']);
   }
 

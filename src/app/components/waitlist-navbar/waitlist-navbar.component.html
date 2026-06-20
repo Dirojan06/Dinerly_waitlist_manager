@@ -1,32 +1,43 @@
+<header class="header">
 
-  <!-- Header -->
-  <header class="header">
   <div class="header-left">
     <div class="logo">
-      <span>
-        <img src="assets/dinerly.png" alt="WaitMe Logo" class="logo-icon" />
-      </span>
+      <img src="assets/dinerly.png" alt="Dinerly Logo" class="logo-icon" />
     </div>
-    <!-- <span class="guest-badge" [ngClass]="user?.role">{{ user?.role | titlecase }}</span> -->
   </div>
+
   <div class="header-right">
-    <button class="icon-btn notification-btn" aria-label="Notifications">
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-        <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
-        <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
-      </svg>
+
+    <button
+      class="theme-btn"
+      type="button"
+      (click)="toggleTheme()">
+      <i class="fa-solid" [ngClass]="isDarkMode ? 'fa-sun' : 'fa-moon'"></i>
+    </button>
+
+    <button class="icon-btn notification-btn" type="button">
+      <i class="fa-regular fa-bell"></i>
       <span class="notif-dot"></span>
     </button>
-    <button class="sign-out-btn" (click)="signOut()">Sign out
-      <button class="icon-btn" aria-label="Menu">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
-        <polyline points="16 17 21 12 16 7"/>
-        <line x1="21" y1="12" x2="9" y2="12"/>
-      </svg>
-    </button>
-    </button>
-    
-  </div>
-</header>
 
+    <button
+      class="icon-btn menu-btn"
+      type="button"
+      (click)="toggleMobileMenu()">
+      <i class="fa-solid" [ngClass]="showMobileMenu ? 'fa-xmark' : 'fa-bars'"></i>
+    </button>
+
+    <button class="sign-out-btn desktop-signout" type="button" (click)="signOut()">
+      Sign out
+    </button>
+
+  </div>
+
+  <div class="mobile-menu" *ngIf="showMobileMenu">
+    <button type="button" (click)="signOut()">
+      <i class="fa-solid fa-right-from-bracket"></i>
+      Sign out
+    </button>
+  </div>
+
+</header>

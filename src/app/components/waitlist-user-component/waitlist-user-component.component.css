@@ -112,3 +112,51 @@
     gap: 14px;
   }
 }
+
+@media (max-width: 768px) {
+  .app-wrapper {
+    min-height: 100vh;
+    overflow-x: hidden;
+    padding-bottom: 24px;
+  }
+
+  .guest-page {
+    width: 100%;
+    max-width: 100%;
+    padding: 0 22px 24px;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .top-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  app-waitlist-user-hero,
+  app-waitlist-user-sidebar,
+  app-waitlist-user-menu {
+    display: block;
+    width: 100%;
+  }
+
+  app-waitlist-user-banner {
+    display: none;
+  }
+
+  .app-wrapper.light-mode {
+    background: #fbf8ff;
+  }
+
+  .app-wrapper.dark-mode {
+    background:
+      linear-gradient(rgba(5, 0, 18, 0.78), rgba(8, 1, 31, 0.96)),
+      url('../../../assets/reserved.png');
+    background-size: cover;
+    background-position: center top;
+    background-attachment: fixed;
+  }
+}
