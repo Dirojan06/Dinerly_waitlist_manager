@@ -1,4 +1,78 @@
-<div class="login-page" [ngClass]="selectedRole">
+<div class="login-page" [ngClass]="[selectedRole, isDarkMode ? 'dark-mode' : 'light-mode']">
+  <button class="theme-toggle" type="button" (click)="toggleTheme()">
+
+    <i class="fa-solid" [ngClass]="isDarkMode ? 'fa-sun' : 'fa-moon'"></i>
+
+  </button>
+
+  <!-- Mobile / Tablet Guest Login -->
+  <div class="mobile-login" *ngIf="selectedRole === 'guest'">
+    <section class="mobile-hero">
+
+      <div class="brand">
+        <div class="">
+          <span>
+        <img src="../../../assets/image-logo.png" alt="WaitMe Logo" class="logo-icon" />
+      </span>
+        </div>
+        <h2>Dinerly</h2>
+        <p>Smart Waitlist, Seamless Dining</p>
+      </div>
+
+      <h1>
+        Skip the wait,<br>
+        <span>enjoy your meal</span>
+      </h1>
+
+      <div class="hero-line"></div>
+      <p class="hero-desc">
+        Join the waitlist in seconds and get notified when your table is ready.
+      </p>
+    </section>
+
+    <section class="guest-card">
+      <div class="avatar">
+        <i class="fa-solid fa-user"></i>
+      </div>
+
+      <h2>Login as <span>Guest</span></h2>
+      <div class="card-line"></div>
+      <div class="benefits">
+        <div class="benefit">
+          <span class="benefit-icon">
+            <i class="fa-solid fa-bolt"></i>
+          </span>
+          <p>Join the waitlist instantly</p>
+        </div>
+
+        <div class="benefit">
+          <span class="benefit-icon">
+            <i class="fa-solid fa-bell"></i>
+          </span>
+          <p>Get notified when your table is ready</p>
+        </div>
+
+        <div class="benefit">
+          <span class="benefit-icon">
+            <i class="fa-solid fa-face-smile"></i>
+          </span>
+          <p>Enjoy a seamless dining experience</p>
+        </div>
+      </div>
+
+      <button class="main-btn" type="button" (click)="onGuestSubmit()">
+        <i class="fa-solid fa-user"></i>
+        <span>Continue as Guest</span>
+        <i class="fa-solid fa-arrow-right"></i>
+      </button>
+    </section>
+
+    <p class="secure-note">
+      <i class="fa-solid fa-shield-halved"></i>
+      We respect your privacy<br>
+      No personal data is stored beyond what's needed.
+    </p>
+  </div>
 
   <div class="login-shell">
 
@@ -199,7 +273,7 @@
             {{ isLoading ? 'Logging in...' : '↪ Login' }}
           </button>
 
-          
+
         </form>
 
         <p class="secure-note">

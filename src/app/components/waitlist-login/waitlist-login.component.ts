@@ -27,6 +27,7 @@ export class WaitlistLoginComponent implements OnInit {
   errorMessage = '';
   toastMessage = '';
   toastVisible = false;
+  isDarkMode = false;
 
   roles: UserRole[] = ['guest', 'restaurant', 'admin'];
 
@@ -77,6 +78,14 @@ export class WaitlistLoginComponent implements OnInit {
       this.updateValidatorsByRole();
 
     });
+
+    const savedTheme = localStorage.getItem('dinerly-theme');
+    this.isDarkMode = savedTheme === 'dark';
+  }
+
+  toggleTheme(): void {
+    this.isDarkMode = !this.isDarkMode;
+    localStorage.setItem('dinerly-theme', this.isDarkMode ? 'dark' : 'light');
   }
 
   get currentConfig(): RoleConfig {
