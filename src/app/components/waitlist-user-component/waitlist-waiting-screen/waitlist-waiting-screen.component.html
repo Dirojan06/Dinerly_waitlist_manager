@@ -40,7 +40,7 @@
 
     <ng-container *ngIf="guest?.status === 'WAITING'">
       <h1 class="wait-time">
-        {{ guest.estimatedWaitTime }}
+        {{ waitingTimerText }}
       </h1>
       <p>Estimated Minutes Remaining</p>
       <div class="info-grid">

@@ -6,7 +6,7 @@
     </div>
 
     <div class="header-actions">
-      <button class="date-btn">Today, May 28</button>
+      <button class="date-btn">{{currentDateTime}}</button>
       <div class="notification-wrapper">
 
         <button class="bell-btn" (click)="toggleNotifications()">
@@ -41,7 +41,7 @@
       <div class="stat-icon purple">👥</div>
       <div>
         <p>Waiting now</p>
-        <h2>{{ stats.waitingNow }}</h2>
+        <h2>{{ dashboardData.totalWaiting}}</h2>
         <span>parties in queue</span>
       </div>
       <small></small>
@@ -51,7 +51,7 @@
       <div class="stat-icon violet">🕘</div>
       <div>
         <p>Avg wait time</p>
-        <h2>{{ stats.avgWait }} min</h2>
+        <h2>{{ dashboardData.averageWaitTime }} min</h2>
         <span>estimated</span>
       </div>
       <small class="green"></small>
@@ -61,7 +61,7 @@
       <div class="stat-icon green-bg">🪑</div>
       <div>
         <p>Seated today</p>
-        <h2>{{ stats.seatedToday }}</h2>
+        <h2>{{ dashboardData.seatedToday }}</h2>
         <span>covers</span>
       </div>
       <small></small>
@@ -71,7 +71,7 @@
       <div class="stat-icon orange">👤</div>
       <div>
         <p>No-shows</p>
-        <h2>{{ stats.noShows }}</h2>
+        <h2>{{ dashboardData.noShowsToday }}</h2>
         <span>today</span>
       </div>
       <small class="green"></small>
@@ -87,7 +87,7 @@
             <button class="refresh-btn" (click)="loadDashboardWaitlist()" [disabled]="isLoading">🔄 Refresh</button>
           </div>
         </div>
-        
+
         <button (click)="goToWaitlist()">View all waitlist</button>
       </div>
 
@@ -140,65 +140,38 @@
         </div>
 
         <div class="table-overview">
-          <div
+          <div class="donut" [style.background]="'conic-gradient(' + donutStyle + ')'">
 
-    class="donut"
+            <div>
+              <h2>{{ tableStats.total }}</h2>
+              <p>Total tables</p>
+            </div>
+          </div>
 
-    [style.background]="'conic-gradient(' + donutStyle + ')'">
+          <div class="legend">
+            <p>
+              <span class="dot open"></span>
+              <b>{{ tableStats.open }}</b> Open
+              <small>ready to seat</small>
+            </p>
 
-    <div>
+            <p>
+              <span class="dot occupied"></span>
+              <b>{{ tableStats.occupied }}</b> Occupied
+              <small>being used</small>
+            </p>
 
-      <h2>{{ tableStats.total }}</h2>
-
-      <p>Total tables</p>
-
-    </div>
-
-  </div>
-
-  <div class="legend">
-
-    <p>
-
-      <span class="dot open"></span>
-
-      <b>{{ tableStats.open }}</b> Open
-
-      <small>ready to seat</small>
-
-    </p>
-
-    <p>
-
-      <span class="dot occupied"></span>
-
-      <b>{{ tableStats.occupied }}</b> Occupied
-
-      <small>being used</small>
-
-    </p>
-
-    <p>
-
-      <span class="dot reserved"></span>
-
-      <b>{{ tableStats.reserved }}</b> Reserved
-
-      <small>upcoming</small>
-
-    </p>
-
-    <p>
-
-      <span class="dot cleaning"></span>
-
-      <b>{{ tableStats.cleaning }}</b> Cleaning
-
-      <small>turnover</small>
-
-    </p>
-
-  </div>
+            <p>
+              <span class="dot reserved"></span>
+              <b>{{ tableStats.reserved }}</b> Reserved
+              <small>upcoming</small>
+            </p>
+            <p>
+              <span class="dot cleaning"></span>
+              <b>{{ tableStats.cleaning }}</b> Cleaning
+              <small>turnover</small>
+            </p>
+          </div>
         </div>
       </div>
 

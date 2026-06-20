@@ -21,7 +21,7 @@ export class WaitlistActiveListComponent implements OnInit, OnDestroy {
   waitingGuests: WaitingGuest[] = [];
   notifiedGuests: NotifiedGuest[] = [];
   seatedGuests: SeatedGuest[] = [];
-  cancelledGuest :CancelledGuest[] = [];
+  cancelledGuest: CancelledGuest[] = [];
   selectedGuest: PendingGuest | null = null;
   showApproveModal = false;
   selectedPosition = 1;
@@ -34,6 +34,8 @@ export class WaitlistActiveListComponent implements OnInit, OnDestroy {
   selectedDate = '';
   showRejectModal: boolean = false;
   private refreshInterval: any;
+  currentDateTime = '';
+  private clockInterval: any;
 
   // pagination
   itemsPerPage = 5;
@@ -53,13 +55,31 @@ export class WaitlistActiveListComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.loadWaitlistData();
-
     this.refreshInterval = setInterval(() => {
-
       this.loadWaitlistData();
-
     }, 2000);
+    this.updateDateTime();
+
+    this.clockInterval = setInterval(() => {
+      this.updateDateTime();
+
+    }, 1000);
   }
+
+  updateDateTime(): void {
+    this.currentDateTime = new Date().toLocaleString('en-IN', {
+      timeZone: 'America/Toronto',
+      weekday: 'short',
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+      hour12: true
+    });
+  }
+
   loadWaitlistData(): void {
     this.loadPendingGuests();
     this.loadWaitingGuests();
@@ -240,8 +260,6 @@ export class WaitlistActiveListComponent implements OnInit, OnDestroy {
   closeAvailableTabletModal() {
     this.showTable = false;
   }
-
-
 
   seatedGuestToTable(guestid: any, table: tableList | null) {
     if (!table) {
@@ -459,7 +477,13 @@ export class WaitlistActiveListComponent implements OnInit, OnDestroy {
   }
 
 
-  ngOnDestroy(): void { this.sub.unsubscribe(); }
+  ngOnDestroy(): void {
+    this.sub.unsubscribe(); if (this.clockInterval) {
+
+      clearInterval(this.clockInterval);
+
+    }
+  }
 
 
 

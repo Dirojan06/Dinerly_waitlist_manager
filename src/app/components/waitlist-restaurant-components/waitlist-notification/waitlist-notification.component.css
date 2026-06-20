@@ -58,17 +58,49 @@
   color: #77738a;
 }
 
-.purple .stat-icon { background: #efe9ff; color: #6d28d9; }
-.orange .stat-icon { background: #fff3df; color: #f59e0b; }
-.blue .stat-icon { background: #eaf1ff; color: #2563eb; }
-.green .stat-icon { background: #e7fbf0; color: #16a34a; }
-.red .stat-icon { background: #ffe9ed; color: #e11d48; }
+.purple .stat-icon {
+  background: #efe9ff;
+  color: #6d28d9;
+}
+
+.orange .stat-icon {
+  background: #fff3df;
+  color: #f59e0b;
+}
+
+.blue .stat-icon {
+  background: #eaf1ff;
+  color: #2563eb;
+}
+
+.green .stat-icon {
+  background: #e7fbf0;
+  color: #16a34a;
+}
+
+.red .stat-icon {
+  background: #ffe9ed;
+  color: #e11d48;
+}
 
 .main-layout {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 360px;
-  gap: 24px;
+  grid-template-columns: 1fr;
+  gap: 20px;
   align-items: start;
+}
+
+.main-layout.panel-open {
+  grid-template-columns: minmax(0, 1fr) 380px;
+}
+
+.guest-section {
+  width: 100%;
+  min-width: 0;
+}
+
+.table-card {
+  width: 100%;
 }
 
 .guest-header {
@@ -477,4 +509,18 @@ textarea:focus {
   .quick-actions {
     grid-template-columns: 1fr;
   }
+}
+
+.jump-input {
+  width: 70px;
+  height: 34px;
+  border: 1px solid #d1d5db;
+  border-radius: 10px;
+  padding: 0 10px;
+  font-size: 13px;
+  outline: none;
+}
+
+.jump-input:focus {
+  border-color: #7c3aed;
 }

@@ -7,7 +7,7 @@ export interface JoinWaitlistRequest {
   notes: string;
 }
 
-export interface addGuestToWaitlistRequest{
+export interface addGuestToWaitlistRequest {
   name: string,
   phone: number,
   partySize: number,
@@ -25,7 +25,7 @@ export interface PendingGuest {
   preference: string,
   notes: string,
   status: string;
-  joinedAt:string;
+  joinedAt: string;
 }
 
 export interface CancelledGuest {
@@ -36,7 +36,7 @@ export interface CancelledGuest {
   preference: string,
   notes: string,
   status: string;
-  joinedAt:string;
+  joinedAt: string;
 }
 
 export interface PendingGuestResponse {
@@ -52,7 +52,7 @@ export interface CancelledGuestResponse {
 }
 
 
-export interface getGuestWaitingStatus{
+export interface getGuestWaitingStatus {
   restaurantId: string,
   phone: string
 }
@@ -67,8 +67,8 @@ export interface WaitingGuest {
   status: string;
   position: number;
   estimatedWaitTime: number;
-  joinedAt:string;
-  approvedAt:string;
+  joinedAt: string;
+  approvedAt: string;
 }
 
 
@@ -88,9 +88,9 @@ export interface NotifiedGuest {
   status: string;
   position: number;
   estimatedWaitTime: number;
-  joinedAt:string;
-  approvedAt:string;
-  notifiedAt:string
+  joinedAt: string;
+  approvedAt: string;
+  notifiedAt: string
 }
 
 export interface NotifiedGuestResponse {
@@ -115,6 +115,24 @@ export interface SeatedGuestResponse {
   data: SeatedGuest[];
 }
 
+export interface getDashboardData {
+  averageWaitTime: number,
+  noShowsToday: number,
+  occupiedTables: number,
+  openTables: number,
+  reservedTables: number,
+  seatedToday: number,
+  tablesNeedingCleaning: number,
+  totalNotified: number,
+  totalWaiting: number
+}
+
+export interface DashboardResponse {
+  success: boolean;
+  message: string;
+  data: getDashboardData;
+}
+
 export interface DashboardStatus {
   id: number;
   guestName: string;
@@ -137,12 +155,12 @@ export interface ApproveWaitlistRequest {
   estimatedWaitTime: number;
 }
 
-export interface notifiyguestcallRequest{
+export interface notifiyguestcallRequest {
   estimatedWaitTime: number,
   position: number
 }
 
-export interface seatedGuestcallRequest{
+export interface seatedGuestcallRequest {
   tableName: string
 }
 
@@ -193,15 +211,15 @@ export interface GuestHistoryResponse {
 
 export interface guestReportsPage {
   averageWaitTime: number,
-        todayGuestsCount: number,
-        todaySeatedCount: number,
-        totalCancelled: number,
-        totalGuests: number,
-        totalNotified: number,
-        totalSeated: number,
-        totalWaiting: number
+  todayGuestsCount: number,
+  todaySeatedCount: number,
+  totalCancelled: number,
+  totalGuests: number,
+  totalNotified: number,
+  totalSeated: number,
+  totalWaiting: number
 }
-export interface guestReportsResponse{
+export interface guestReportsResponse {
   success: boolean;
   message: string;
   data: guestReportsPage;

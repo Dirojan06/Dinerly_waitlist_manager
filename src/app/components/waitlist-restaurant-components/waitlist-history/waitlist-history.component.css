@@ -239,3 +239,17 @@
     justify-content: flex-end;
   }
 }
+
+.jump-input {
+  width: 70px;
+  height: 34px;
+  border: 1px solid #d1d5db;
+  border-radius: 10px;
+  padding: 0 10px;
+  font-size: 13px;
+  outline: none;
+}
+
+.jump-input:focus {
+  border-color: #7c3aed;
+}

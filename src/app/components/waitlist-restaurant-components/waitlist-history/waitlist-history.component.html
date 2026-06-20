@@ -16,14 +16,14 @@
     <div class="section-header">
       <span class="section-title">Today's seating log</span>
       <div class="filters">
-    </div>
+      </div>
       <button class="export-btn" [disabled]="isDownloadingCSV" (click)="exportHistoryCsv()">
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
           <polyline points="7 10 12 15 17 10" />
           <line x1="12" y1="15" x2="12" y2="3" />
         </svg>
-        
+
         {{ isDownloadingCSV ? 'Downloading...' : 'Export' }}
       </button>
     </div>
@@ -109,36 +109,36 @@
       </div>
     </div>
     <div class="table-footer">
-  <span>
-    Showing {{ startItem }} to {{ endItem }} of {{ totalElements }} guests
-  </span>
 
-  <div class="pagination">
-    <button
-      class="page-btn arrow"
-      (click)="previousPage()"
-      [disabled]="currentPage === 0"
-    >
-      ‹
-    </button>
+      <span>
+        Showing {{ startItem }} to {{ endItem }}
+        of {{ totalElements }} guests
+      </span>
 
-    <button
-      class="page-btn"
-      *ngFor="let page of pages"
-      [class.active]="currentPage === page"
-      (click)="goToPage(page)"
-    >
-      {{ page + 1 }}
-    </button>
+      <div class="pagination">
 
-    <button
-      class="page-btn arrow"
-      (click)="nextPage()"
-      [disabled]="currentPage >= totalPages - 1"
-    >
-      ›
-    </button>
-  </div>
-</div>
+        <button class="page-btn arrow" [disabled]="currentPage === 0" (click)="prevPage()">
+          ‹
+        </button>
+
+        <button class="page-btn" *ngFor="let page of pages" [class.active]="currentPage === page"
+          (click)="goToPage(page)">
+          {{ page + 1 }}
+        </button>
+
+        <button class="page-btn arrow" [disabled]="currentPage === totalPages - 1" (click)="nextPage()">
+          ›
+        </button>
+
+        <input type="number" class="jump-input" placeholder="Page" [(ngModel)]="jumpPageInput" min="1"
+          [max]="totalPages" (keyup.enter)="jumpToPage()" />
+
+        <button class="page-btn" (click)="jumpToPage()">
+          Go
+        </button>
+
+      </div>
+
+    </div>
   </div>
 </div>

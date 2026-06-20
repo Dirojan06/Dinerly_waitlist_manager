@@ -25,6 +25,7 @@ export class WaitlistHistoryComponent {
   pageSize = 15;
   totalPages = 0;
   totalElements = 0;
+  jumpPageInput: number | null = null;
   isDownloadingCSV: boolean = false;
 
   constructor(private waitlistService: WaitlistApiRestaurantService) { }
@@ -60,6 +61,13 @@ export class WaitlistHistoryComponent {
     this.loadGuestHistory();
   }
 
+  prevPage(): void {
+    if (this.currentPage > 0) {
+      this.currentPage--;
+      this.loadGuestHistory();
+    }
+  }
+
   nextPage(): void {
     if (this.currentPage < this.totalPages - 1) {
       this.currentPage++;
@@ -67,11 +75,20 @@ export class WaitlistHistoryComponent {
     }
   }
 
-  previousPage(): void {
-    if (this.currentPage > 0) {
-      this.currentPage--;
-      this.loadGuestHistory();
+  jumpToPage(): void {
+    if (!this.jumpPageInput) {
+      alert('Please enter page number');
+      return;
     }
+
+    if (this.jumpPageInput < 1 || this.jumpPageInput > this.totalPages) {
+      alert(`Please enter page between 1 and ${this.totalPages}`);
+      return;
+    }
+
+    this.currentPage = this.jumpPageInput - 1;
+    this.loadGuestHistory();
+    this.jumpPageInput = null;
   }
 
   get pages(): number[] {

@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { JoinWaitlistRequest, PendingGuest, WaitingGuest, ApproveWaitlistRequest, getGuestWaitingStatus, PendingGuestResponse, WaitingGuestResponse, NotifiedGuestResponse, SeatedGuestResponse, DashboardWaitlistResponse, notifiyguestcallRequest, TablelistResponse, addGuestToWaitlistRequest, seatedGuestcallRequest, GuestHistoryResponse, guestReportsResponse, CancelledGuestResponse } from '../models/waitlist-api-guest-to-restaurant.model';
+import { JoinWaitlistRequest, PendingGuest, WaitingGuest, ApproveWaitlistRequest, getGuestWaitingStatus, PendingGuestResponse, WaitingGuestResponse, NotifiedGuestResponse, SeatedGuestResponse, DashboardWaitlistResponse, notifiyguestcallRequest, TablelistResponse, addGuestToWaitlistRequest, seatedGuestcallRequest, GuestHistoryResponse, guestReportsResponse, CancelledGuestResponse, DashboardResponse } from '../models/waitlist-api-guest-to-restaurant.model';
 import { environment } from 'src/environments/environment.prod';
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
@@ -38,6 +38,16 @@ export class WaitlistApiRestaurantService {
 
 
   // ************************************************************************************ RESTAURANT  API STARTS ******************************************************************************* //
+
+  getDashboardData(restaurantId: number): Observable<DashboardResponse> {
+    const token = this.auth.getToken();
+
+    const headers = new HttpHeaders({
+      Authorization: `Bearer ${token}`
+    });
+    return this.http.get<DashboardResponse>(`${this.baseUrl}/restaurants/${restaurantId}/dashboard`, { headers });
+
+  }
 
   getDashboardStatus(restaurantId: number): Observable<DashboardWaitlistResponse> {
     const token = this.auth.getToken();
@@ -256,7 +266,7 @@ export class WaitlistApiRestaurantService {
 
   // download guest history as csv api 
 
-  exportGuestHistoryCsv(restaurantId: number,status: string , date: string): Observable<any>{
+  exportGuestHistoryCsv(restaurantId: number, status: string, date: string): Observable<any> {
     const token = this.auth.getToken();
 
     const headers = new HttpHeaders({
@@ -264,7 +274,7 @@ export class WaitlistApiRestaurantService {
     });
     let params = new HttpParams();
 
-     if (status) {
+    if (status) {
       params = params.set('status', status);
     }
     if (date) {
@@ -272,7 +282,7 @@ export class WaitlistApiRestaurantService {
     }
 
     return this.http.get(
-      `${this.baseUrl}/restaurants/${restaurantId}/guest-history/export`,{ headers,params, responseType: 'blob' });
+      `${this.baseUrl}/restaurants/${restaurantId}/guest-history/export`, { headers, params, responseType: 'blob' });
   }
 
   //reports api

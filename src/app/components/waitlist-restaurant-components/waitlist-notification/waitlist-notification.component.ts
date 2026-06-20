@@ -1,15 +1,7 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Subscription } from 'rxjs';
-
-interface NotificationGuest {
-  id: number;
-  name: string;
-  phone: string;
-  partySize: number;
-  status: 'WAITING' | 'NOTIFIED' | 'SEATED' | 'CANCELLED';
-  waitMinutes: number;
-  addedAt: string;
-}
+import { NotificationGuest, notificationSummary } from 'src/app/models/notification.model';
+import { ApiWaitlistNotificationService } from 'src/app/services/api-waitlist-notification.service';
 
 @Component({
   selector: 'app-waitlist-notification',
@@ -19,30 +11,23 @@ interface NotificationGuest {
 export class WaitlistNotificationComponent implements OnInit, OnDestroy {
   private sub = new Subscription();
 
+  restaurantId = 1;
   searchText = '';
   selectedStatus = 'ALL';
   smsMessage = '';
-  currentPage = 1;
-
+  currentPage = 0;
   pageSize = 10;
+  totalElements = 0;
+  totalApiPages = 0;
+  jumpPageInput: number | null = null;
+  guestSummary :notificationSummary[] = [];
+  selectedDate = '';
+
+  isLoading = false;
 
   selectedGuest: NotificationGuest | null = null;
 
-  guests: NotificationGuest[] = [
-    { id: 1, name: 'Rahul Mehta', phone: '9876543210', partySize: 4, status: 'WAITING', waitMinutes: 25, addedAt: '12:30 PM' },
-    { id: 2, name: 'Priya Sharma', phone: '9876543211', partySize: 2, status: 'NOTIFIED', waitMinutes: 18, addedAt: '12:37 PM' },
-    { id: 3, name: 'Amit Verma', phone: '9876543212', partySize: 6, status: 'WAITING', waitMinutes: 32, addedAt: '12:23 PM' },
-    { id: 4, name: 'Sneha Iyer', phone: '9876543213', partySize: 3, status: 'SEATED', waitMinutes: 0, addedAt: '12:10 PM' },
-    { id: 5, name: 'Pankaj Gupta', phone: '9876543214', partySize: 2, status: 'NOTIFIED', waitMinutes: 12, addedAt: '12:42 PM' },
-    { id: 6, name: 'Neha Singh', phone: '9876543215', partySize: 5, status: 'WAITING', waitMinutes: 40, addedAt: '12:15 PM' },
-    { id: 7, name: 'Karan Patel', phone: '9876543216', partySize: 4, status: 'NOTIFIED', waitMinutes: 10, addedAt: '12:45 PM' },
-    { id: 8, name: 'Anjali Desai', phone: '9876543217', partySize: 2, status: 'WAITING', waitMinutes: 15, addedAt: '12:40 PM' },
-    { id: 9, name: 'Vikram Joshi', phone: '9876543218', partySize: 8, status: 'SEATED', waitMinutes: 0, addedAt: '12:05 PM' },
-    { id: 10, name: 'Meera Kapoor', phone: '9876543219', partySize: 3, status: 'NOTIFIED', waitMinutes: 8, addedAt: '12:47 PM' },
-    { id: 11, name: 'Meera Kapoor', phone: '9876543219', partySize: 3, status: 'NOTIFIED', waitMinutes: 8, addedAt: '12:47 PM' },
-    { id: 12, name: 'Meera Kapoor', phone: '9876543219', partySize: 3, status: 'NOTIFIED', waitMinutes: 8, addedAt: '12:47 PM' }
-
-  ];
+  guests: NotificationGuest[] = [];
 
   templates = [
     {
@@ -63,38 +48,89 @@ export class WaitlistNotificationComponent implements OnInit, OnDestroy {
     }
   ];
 
+  constructor(private waitlistApi: ApiWaitlistNotificationService) { }
+
   ngOnInit(): void {
-    this.selectedGuest = this.guests[0];
+    this.loadNotifications();
+  }
+  loadNotificationSummary():void{
+    this.isLoading = true;
+
+    this.waitlistApi.getNotificationsSummary(this.restaurantId)
+      .subscribe({
+          next: (res) => {
+            this.guests = res.data.content || [];
+           
+
+            this.isLoading = false;
+          },
+          error: () => {
+            this.isLoading = false;
+            alert('Unable to load notifications');
+          }
+        })
+    
   }
 
-  ngOnDestroy(): void {
-    this.sub.unsubscribe();
+  loadNotifications(): void {
+    this.isLoading = true;
+
+    const apiPage = this.currentPage;
+    const status = this.selectedStatus === 'ALL' ? '' : this.selectedStatus;
+
+    this.sub.add(
+      this.waitlistApi
+        .getNotifications(
+          this.restaurantId,
+          apiPage,
+          this.pageSize,
+          this.searchText.trim(),
+          status,
+          this.selectedDate
+
+        )
+        .subscribe({
+          next: (res) => {
+            this.guests = res.data.content || [];
+            this.totalElements = res.data.totalElements || 0;
+            this.totalApiPages = res.data.totalPages || 0;
+
+            this.isLoading = false;
+          },
+          error: () => {
+            this.isLoading = false;
+            alert('Unable to load notifications');
+          }
+        })
+    );
+  }
+
+  onFilterChange(): void {
+    this.loadNotifications();
+  }
+
+  onSearchChange(): void {
+    this.currentPage = 1;
+    this.loadNotifications();
+  }
+
+  onStatusChange(): void {
+    this.currentPage = 1;
+    this.loadNotifications();
   }
 
   get stats() {
     return {
-      total: this.guests.length,
-      waiting: this.guests.filter(g => g.status === 'WAITING').length,
-      notified: this.guests.filter(g => g.status === 'NOTIFIED').length,
-      seated: this.guests.filter(g => g.status === 'SEATED').length,
-      cancelled: this.guests.filter(g => g.status === 'CANCELLED').length
+      total: this.guestSummary.filter(g => g.totalGuests).length,
+      waiting: this.guestSummary.filter(g => g.waiting).length,
+      notified: this.guestSummary.filter(g => g.notified).length,
+      seated: this.guestSummary.filter(g => g.seated).length,
+      cancelled: this.guestSummary.filter(g => g.cancelled).length
     };
   }
 
   get filteredGuests(): NotificationGuest[] {
-    const search = this.searchText.toLowerCase().trim();
-
-    return this.guests.filter(guest => {
-      const matchesSearch =
-        guest.name.toLowerCase().includes(search) ||
-        guest.phone.includes(search);
-
-      const matchesStatus =
-        this.selectedStatus === 'ALL' ||
-        guest.status === this.selectedStatus;
-
-      return matchesSearch && matchesStatus;
-    });
+    return this.guests;
   }
 
   selectGuest(guest: NotificationGuest): void {
@@ -102,7 +138,12 @@ export class WaitlistNotificationComponent implements OnInit, OnDestroy {
     this.smsMessage = '';
   }
 
+  closePanel(): void {
+    this.selectedGuest = null;
+  }
+
   sendSms(): void {
+    this.restaurantId = 1;
     if (!this.selectedGuest) return;
 
     if (!this.smsMessage.trim()) {
@@ -110,46 +151,135 @@ export class WaitlistNotificationComponent implements OnInit, OnDestroy {
       return;
     }
 
-    alert(`SMS sent to ${this.selectedGuest.name}`);
+
+    this.waitlistApi.sendNoficationToGuest(this.restaurantId, this.selectedGuest.id, { message: this.smsMessage }).subscribe({
+      next: (res) => {
+        alert(`SMS sent`);
+
+        this.isLoading = false;
+      },
+      error: () => {
+        this.isLoading = false;
+        alert('Unable to load notifications');
+      }
+    })
+
+
   }
 
   trackByGuest(_: number, guest: NotificationGuest): number {
     return guest.id;
   }
+
   get totalPages(): number {
-    return Math.ceil(this.filteredGuests.length / this.pageSize);
+    return this.totalApiPages;
   }
 
   get pages(): number[] {
-    return Array.from({ length: this.totalPages }, (_, i) => i + 1);
+
+    const maxVisiblePages = 5;
+    if (this.totalPages <= maxVisiblePages) {
+      return Array.from({ length: this.totalPages }, (_, i) => i);
+    }
+
+    let startPage = this.currentPage - 2;
+
+    let endPage = this.currentPage + 2;
+
+    if (startPage < 0) {
+      startPage = 0;
+      endPage = maxVisiblePages - 1;
+    }
+
+    if (endPage >= this.totalPages) {
+      endPage = this.totalPages - 1;
+      startPage = this.totalPages - maxVisiblePages;
+    }
+
+    return Array.from(
+      { length: endPage - startPage + 1 },
+      (_, i) => startPage + i
+    );
   }
 
   get startItem(): number {
-    return this.filteredGuests.length === 0  ? 0  : (this.currentPage - 1) * this.pageSize + 1;
+    if (this.totalElements === 0) return 0;
+    return this.currentPage * this.pageSize + 1;
+
   }
 
   get endItem(): number {
-    return Math.min(this.currentPage * this.pageSize, this.filteredGuests.length);
+    return Math.min((this.currentPage + 1) * this.pageSize, this.totalElements);
   }
 
   get paginatedGuests(): NotificationGuest[] {
-    const start = (this.currentPage - 1) * this.pageSize;
-    return this.filteredGuests.slice(start, start + this.pageSize);
+    return this.guests;
   }
 
   goToPage(page: number): void {
     this.currentPage = page;
+    this.loadNotifications();
   }
 
   prevPage(): void {
-    if (this.currentPage > 1) {
+    if (this.currentPage > 0) {
       this.currentPage--;
+      this.loadNotifications();
     }
   }
 
   nextPage(): void {
-    if (this.currentPage < this.totalPages) {
+    if (this.currentPage < this.totalPages - 1) {
       this.currentPage++;
+      this.loadNotifications();
     }
+  }
+
+  jumpToPage(): void {
+    if (!this.jumpPageInput) {
+      alert('Please enter page number');
+      return;
+    }
+
+    if (this.jumpPageInput < 1 || this.jumpPageInput > this.totalPages) {
+      alert(`Please enter page between 1 and ${this.totalPages}`);
+      return;
+    }
+
+    this.currentPage = this.jumpPageInput - 1;
+    this.loadNotifications();
+    this.jumpPageInput = null;
+  }
+
+  formatDateTime(date?: string): string {
+    if (!date) return '-';
+
+    return new Date(date).toLocaleString('en-IN', {
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: true,
+      day: '2-digit',
+      month: 'short'
+    });
+  }
+
+  getActualWaitTime(approvedAt?: string, notifiedAt?: string): string {
+    if (!approvedAt || !notifiedAt) return '-';
+
+    const diffMs =
+      new Date(notifiedAt).getTime() -
+      new Date(approvedAt).getTime();
+
+    if (diffMs < 0) return '-';
+
+    const totalMinutes = Math.floor(diffMs / 60000);
+    const hours = Math.floor(totalMinutes / 60);
+    const minutes = totalMinutes % 60;
+
+    return hours > 0 ? `${hours}h ${minutes}m` : `${minutes} mins`;
+  }
+
+  ngOnDestroy(): void {
+    this.sub.unsubscribe();
   }
 }
