@@ -284,7 +284,7 @@ td span {
 }
 
 .dashboard-header{
-    display: none;
+    display: block;
   }
 
   .header-header-tab{
