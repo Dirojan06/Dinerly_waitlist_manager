@@ -140,6 +140,63 @@
 
         </div>
 
+        <div class="main-card web-feedback-card" *ngIf="guest?.status === 'SEATED'">
+
+          <ng-container *ngIf="!feedbackSubmitted; else webFeedbackSuccess">
+
+            <div class="big-icon">
+              <i class="fa-solid fa-utensils"></i>
+            </div>
+
+            <h3>YOU ARE SEATED</h3>
+            <h2>Rate your experience</h2>
+
+            <div class="web-rating-row">
+              <button type="button" class="web-star-btn" *ngFor="let star of stars" [class.active]="star <= rating"
+                (click)="setRating(star)">
+                <i class="fa-star" [ngClass]="star <= rating ? 'fa-solid' : 'fa-regular'"></i>
+              </button>
+            </div>
+
+            <p class="web-rating-text" *ngIf="rating > 0">
+              You selected {{ rating }} star{{ rating > 1 ? 's' : '' }}
+            </p>
+
+            <textarea class="web-feedback-textarea" [(ngModel)]="comments" placeholder="Share your comments...">
+    </textarea>
+
+            <div class="web-tag-list">
+              <button type="button" class="web-tag-btn" *ngFor="let tag of feedbackTags"
+                [class.active]="selectedTags.includes(tag)" (click)="toggleTag(tag)">
+                {{ tag }}
+              </button>
+            </div>
+
+            <button type="button" class="web-submit-feedback-btn" [disabled]="isSubmittingFeedback"
+              (click)="submitFeedback()">
+              {{ isSubmittingFeedback ? 'Submitting...' : 'Submit Feedback' }}
+            </button>
+
+          </ng-container>
+
+          <ng-template #webFeedbackSuccess>
+            <div class="big-icon success-icon">
+              <i class="fa-solid fa-circle-check"></i>
+            </div>
+
+            <h3>THANK YOU</h3>
+            <h2>Feedback Submitted!</h2>
+
+            <div class="notice-box">
+              <div class="notice-icon">
+                <i class="fa-solid fa-heart"></i>
+              </div>
+              <p>Thanks for helping us improve your dining experience.</p>
+            </div>
+          </ng-template>
+
+        </div>
+
       </div>
 
       <div class="desktop-bottom-note">
@@ -292,6 +349,64 @@
           </div>
           <p>Please visit the restaurant counter.</p>
         </div>
+      </div>
+
+      <!-- Seated card -->
+      <div class="main-card mobile-feedback-card" *ngIf="guest?.status === 'SEATED'">
+
+        <ng-container *ngIf="!feedbackSubmitted; else mobileFeedbackSuccess">
+
+          <div class="big-icon">
+            <i class="fa-solid fa-utensils"></i>
+          </div>
+
+          <h3>YOU ARE SEATED</h3>
+          <h2>How was your experience?</h2>
+
+          <div class="mobile-rating-row">
+            <button type="button" class="mobile-star-btn" *ngFor="let star of stars" [class.active]="star <= rating"
+              (click)="setRating(star)">
+              <i class="fa-star" [ngClass]="star <= rating ? 'fa-solid' : 'fa-regular'"></i>
+            </button>
+          </div>
+
+          <p class="mobile-rating-text" *ngIf="rating > 0">
+            You selected {{ rating }} star{{ rating > 1 ? 's' : '' }}
+          </p>
+
+          <textarea class="mobile-feedback-textarea" [(ngModel)]="comments" placeholder="Share your comments...">
+    </textarea>
+
+          <div class="mobile-tag-list">
+            <button type="button" class="mobile-tag-btn" *ngFor="let tag of feedbackTags"
+              [class.active]="selectedTags.includes(tag)" (click)="toggleTag(tag)">
+              {{ tag }}
+            </button>
+          </div>
+
+          <button type="button" class="mobile-submit-feedback-btn" [disabled]="isSubmittingFeedback"
+            (click)="submitFeedback()">
+            {{ isSubmittingFeedback ? 'Submitting...' : 'Submit Feedback' }}
+          </button>
+
+        </ng-container>
+
+        <ng-template #mobileFeedbackSuccess>
+          <div class="big-icon success-icon">
+            <i class="fa-solid fa-circle-check"></i>
+          </div>
+
+          <h3>THANK YOU</h3>
+          <h2>Feedback Submitted!</h2>
+
+          <div class="notice-box">
+            <div class="notice-icon">
+              <i class="fa-solid fa-heart"></i>
+            </div>
+            <p>Thanks for helping us improve your dining experience.</p>
+          </div>
+        </ng-template>
+
       </div>
 
       <!-- POSITION CARD -->

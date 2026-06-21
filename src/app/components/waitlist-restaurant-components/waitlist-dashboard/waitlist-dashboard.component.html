@@ -1,40 +1,29 @@
 <div class="dashboard-page">
   <div class="dashboard-header">
-    <div>
+    <div class="dashboard-view">
       <h1>Dashboard</h1>
       <p>Real-time overview of your restaurant</p>
     </div>
 
     <div class="header-actions">
       <button class="date-btn">{{currentDateTime}}</button>
-      <div class="notification-wrapper">
-
-        <button class="bell-btn" (click)="toggleNotifications()">
-          🔔
-          <span class="notification-badge" *ngIf="pendingNotificationCount > 0">
-            {{ pendingNotificationCount }}
-          </span>
-        </button>
-
-        <div class="notification-dropdown" *ngIf="showNotificationBox">
-          <h4>Notifications</h4>
-          <p *ngIf="pendingNotificationCount > 0">
-            You have {{ pendingNotificationCount }} new pending request(s)
-          </p>
-
-          <p *ngIf="pendingNotificationCount === 0">
-            No new notifications
-          </p>
-          <button *ngIf="pendingNotificationCount > 0" (click)="clearNotifications()">
-            Mark as read
-          </button>
-        </div>
-
-      </div>
       <button class="add-btn" (click)="modalService.open()">+ Add guest</button>
       <button class="date-btn" (click)="logout()">Logout</button>
     </div>
   </div>
+
+  <div class="header-header-tab">
+    <div class="header-mobile">
+      <div>
+        <button class="date-btn">{{currentDateTime}}</button>
+      </div>
+      <div class="login-tab">
+        <button class="add-btn" (click)="modalService.open()">+ Add guest</button>
+      <button class="date-btn" (click)="logout()">Logout</button>
+      </div>
+    </div>
+    </div>
+      
 
   <div class="stats-grid">
     <div class="stat-card">

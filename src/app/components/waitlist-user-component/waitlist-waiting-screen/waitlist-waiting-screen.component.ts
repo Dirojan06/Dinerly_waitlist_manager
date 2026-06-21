@@ -22,6 +22,22 @@ export class WaitlistWaitingScreenComponent implements OnInit {
   showLeaveConfirm = false;
   isLeaving = false;
   isDarkMode = false;
+  stars = [1, 2, 3, 4, 5];
+
+  rating = 0;
+  comments = '';
+  selectedTags: string[] = [];
+  feedbackTags = [
+    'Friendly staff',
+    'Quick service',
+    'Great ambiance',
+    'Clean table',
+    'Tasty food',
+    'Good hospitality'
+  ];
+
+  isSubmittingFeedback = false;
+  feedbackSubmitted = false;
 
   constructor(private waitlistApi: WaitlistApiRestaurantService, private router: Router) { }
 
@@ -238,6 +254,52 @@ export class WaitlistWaitingScreenComponent implements OnInit {
 
   get partiesAhead(): number {
     return this.guest?.position ? this.guest.position - 1 : 0;
+  }
+  setRating(value: number) {
+    this.rating = value;
+  }
+
+  toggleTag(tag: string) {
+    if (this.selectedTags.includes(tag)) {
+      this.selectedTags = this.selectedTags.filter(item => item !== tag);
+    } else {
+      this.selectedTags.push(tag);
+    }
+  }
+
+  submitFeedback() {
+
+    if (!this.guest?.id) {
+      alert('Waitlist ID missing');
+      return;
+    }
+
+    if (this.rating === 0) {
+      alert('Please select rating');
+      return;
+    }
+
+    const payload = {
+      waitlistId: this.guest.id,
+      rating: this.rating,
+      comments: this.comments,
+      tags: this.selectedTags
+    };
+
+    this.isSubmittingFeedback = true;
+    this.waitlistApi.submitFeedback(payload).subscribe({
+      next: () => {
+        this.isSubmittingFeedback = false;
+        this.feedbackSubmitted = true;
+        setTimeout(() => {
+          this.router.navigate(['/user']);
+        }, 3000);
+      },
+      error: () => {
+        this.isSubmittingFeedback = false;
+        alert('Unable to submit feedback');
+      }
+    });
   }
 
   ngOnDestroy(): void {

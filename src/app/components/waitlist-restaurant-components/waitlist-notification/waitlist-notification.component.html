@@ -89,8 +89,6 @@
               <th>Phone</th>
               <th>Party Size</th>
               <th>Status</th>
-              <th>Wait Time</th>
-              <th>Added At</th>
               <th>Actions</th>
             </tr>
           </thead>
@@ -115,15 +113,6 @@
                   {{ guest.status | titlecase }}
                 </span>
               </td>
-
-              <td>
-                {{ getActualWaitTime(guest.approvedAt, guest.notifiedAt) }}
-              </td>
-
-              <td>
-                {{ formatDateTime(guest.joinedAt) }}
-              </td>
-
               <td>
                 <div class="action-buttons">
 

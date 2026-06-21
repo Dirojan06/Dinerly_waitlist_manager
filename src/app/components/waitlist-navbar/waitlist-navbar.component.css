@@ -119,7 +119,17 @@
   }
 }
 
+.menu-btn {
+  display: none;
+}
+
 @media (max-width: 768px) {
+
+  .menu-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
   .app-wrapper {
     min-height: 100vh;
     padding-bottom: 78px;

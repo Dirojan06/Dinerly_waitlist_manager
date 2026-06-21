@@ -955,3 +955,361 @@
     display: none;
   }
 }
+
+.feedback-card {
+  gap: 14px;
+}
+
+.rating-row {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin: 8px 0 4px;
+}
+
+.star-btn {
+  border: none;
+  background: transparent;
+  font-size: 28px;
+  color: #d1d5db;
+  cursor: pointer;
+  transition: transform 0.2s ease, color 0.2s ease;
+}
+
+.star-btn.active {
+  color: #f59e0b;
+}
+
+.star-btn:hover {
+  transform: scale(1.12);
+}
+
+.feedback-textarea {
+  width: 100%;
+  min-height: 90px;
+  resize: none;
+  border: 1px solid #e5e7eb;
+  border-radius: 16px;
+  padding: 14px;
+  font-size: 14px;
+  outline: none;
+  background: #fff;
+}
+
+.feedback-textarea:focus {
+  border-color: #7c3aed;
+  box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.12);
+}
+
+.tag-list {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+}
+
+.tag-btn {
+  border: 1px solid #e5e7eb;
+  background: #fff;
+  color: #374151;
+  border-radius: 999px;
+  padding: 8px 12px;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.tag-btn.active {
+  background: #ede9fe;
+  border-color: #7c3aed;
+  color: #5b21b6;
+  font-weight: 700;
+}
+
+.submit-feedback-btn {
+  width: 100%;
+  border: none;
+  border-radius: 16px;
+  padding: 14px 18px;
+  background: linear-gradient(135deg, #6d28d9, #9333ea);
+  color: #fff;
+  font-size: 15px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.submit-feedback-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.success-icon {
+  color: #16a34a;
+}
+
+@media (max-width: 768px) {
+  .star-btn {
+    font-size: 25px;
+  }
+
+  .feedback-textarea {
+    min-height: 80px;
+  }
+
+  .tag-btn {
+    font-size: 12px;
+    padding: 7px 10px;
+  }
+}
+
+@media (min-width: 769px) {
+  .web-feedback-card {
+    max-width: 720px;
+    margin: 0 auto;
+  }
+
+  .web-feedback-card h2 {
+    font-size: 34px;
+  }
+
+  .web-rating-row {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin: 18px 0 6px;
+  }
+
+  .web-star-btn {
+    border: none;
+    background: transparent;
+    font-size: 34px;
+    color: #d1d5db;
+    cursor: pointer;
+    transition: transform 0.18s ease, color 0.18s ease;
+  }
+
+  .web-star-btn.active {
+    color: #f59e0b;
+  }
+
+  .web-star-btn:hover {
+    transform: scale(1.15);
+  }
+
+  .web-rating-text {
+    margin: 0 0 16px;
+    color: #6d28d9;
+    font-size: 15px;
+    font-weight: 900;
+  }
+
+  .web-feedback-textarea {
+    width: 100%;
+    max-width: 520px;
+    min-height: 100px;
+    display: block;
+    margin: 0 auto;
+    border: 1px solid #e5e7eb;
+    border-radius: 16px;
+    padding: 14px;
+    font-size: 14px;
+    resize: none;
+    outline: none;
+    font-family: inherit;
+  }
+
+  .web-feedback-textarea:focus {
+    border-color: #7c3aed;
+    box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.12);
+  }
+
+  .web-tag-list {
+    max-width: 560px;
+    margin: 14px auto 0;
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .web-tag-btn {
+    border: 1px solid #e5e7eb;
+    background: #fff;
+    color: #374151;
+    border-radius: 999px;
+    padding: 8px 13px;
+    font-size: 13px;
+    font-weight: 800;
+    cursor: pointer;
+  }
+
+  .web-tag-btn.active {
+    background: #ede9fe;
+    border-color: #7c3aed;
+    color: #5b21b6;
+  }
+
+  .web-submit-feedback-btn {
+    width: 320px;
+    height: 50px;
+    margin: 18px auto 0;
+    display: block;
+    border: none;
+    border-radius: 14px;
+    background: linear-gradient(135deg, #7c3aed, #5b21b6);
+    color: #fff;
+    font-size: 15px;
+    font-weight: 900;
+    cursor: pointer;
+  }
+
+  .web-submit-feedback-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+
+  .success-icon {
+    color: #16a34a;
+  }
+}
+
+@media (max-width: 768px) {
+  .mobile-feedback-card {
+    padding: 30px 18px;
+  }
+
+  .mobile-feedback-card h2 {
+    font-size: 24px;
+    line-height: 1.25;
+  }
+
+  .mobile-rating-row {
+    display: flex;
+    justify-content: center;
+    gap: 7px;
+    margin: 18px 0 6px;
+  }
+
+  .mobile-star-btn {
+    border: none;
+    background: transparent;
+    font-size: 28px;
+    color: #d1d5db;
+    cursor: pointer;
+    transition: transform 0.18s ease, color 0.18s ease;
+  }
+
+  .mobile-star-btn.active {
+    color: #f59e0b;
+  }
+
+  .mobile-star-btn:active {
+    transform: scale(1.15);
+  }
+
+  .mobile-rating-text {
+    margin: 0 0 14px;
+    color: #6d28d9;
+    font-size: 14px;
+    font-weight: 900;
+  }
+
+  .mobile-feedback-textarea {
+    width: 100%;
+    min-height: 90px;
+    border: 1px solid #e5e7eb;
+    border-radius: 16px;
+    padding: 14px;
+    font-size: 13px;
+    resize: none;
+    outline: none;
+    font-family: inherit;
+  }
+
+  .mobile-feedback-textarea:focus {
+    border-color: #7c3aed;
+    box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.12);
+  }
+
+  .mobile-tag-list {
+    margin-top: 14px;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    gap: 8px;
+  }
+
+  .mobile-tag-btn {
+    border: 1px solid #e5e7eb;
+    background: #fff;
+    color: #374151;
+    border-radius: 999px;
+    padding: 8px 10px;
+    font-size: 12px;
+    font-weight: 800;
+    cursor: pointer;
+  }
+
+  .mobile-tag-btn.active {
+    background: #ede9fe;
+    border-color: #7c3aed;
+    color: #5b21b6;
+  }
+
+  .mobile-submit-feedback-btn {
+    width: 100%;
+    height: 54px;
+    margin-top: 18px;
+    border: none;
+    border-radius: 16px;
+    background: linear-gradient(135deg, #7c3aed, #5b21b6);
+    color: #fff;
+    font-size: 15px;
+    font-weight: 900;
+    cursor: pointer;
+  }
+
+  .mobile-submit-feedback-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+
+  .success-icon {
+    color: #16a34a;
+  }
+}
+
+@media (max-width: 768px) {
+  :host-context(.dark-mode) .mobile-feedback-textarea {
+    background: rgba(255, 255, 255, 0.04);
+    border-color: rgba(255, 255, 255, 0.12);
+    color: #ffffff;
+  }
+
+  :host-context(.dark-mode) .mobile-feedback-textarea::placeholder {
+    color: rgba(255, 255, 255, 0.45);
+  }
+
+  :host-context(.dark-mode) .mobile-star-btn {
+    color: rgba(255, 255, 255, 0.25);
+  }
+
+  :host-context(.dark-mode) .mobile-star-btn.active {
+    color: #fbbf24;
+  }
+
+  :host-context(.dark-mode) .mobile-rating-text {
+    color: #c084fc;
+  }
+
+  :host-context(.dark-mode) .mobile-tag-btn {
+    background: rgba(255, 255, 255, 0.04);
+    border-color: rgba(255, 255, 255, 0.12);
+    color: rgba(255, 255, 255, 0.75);
+  }
+
+  :host-context(.dark-mode) .mobile-tag-btn.active {
+    background: rgba(124, 58, 237, 0.28);
+    border-color: #a855f7;
+    color: #ffffff;
+  }
+}

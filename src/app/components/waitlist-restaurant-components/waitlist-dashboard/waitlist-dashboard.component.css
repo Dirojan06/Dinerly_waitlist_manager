@@ -47,7 +47,7 @@
 .stats-grid {
   display: grid;
   grid-template-columns: repeat(4, minmax(180px, 1fr));
-  gap: clamp(16px, 1.5vw, 26px);
+  gap: 10px;
   margin-bottom: 26px;
 }
 
@@ -283,12 +283,38 @@ td span {
   color: #6b7280;
 }
 
-/* Responsive */
-@media (max-width: 1200px) {
-  .stats-grid {
-    grid-template-columns: repeat(2, 1fr);
+.dashboard-header{
+    display: none;
   }
 
+  .header-header-tab{
+    display: none;
+  }
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .dashboard-header{
+    display: none;
+  }
+
+  .header-header-tab{
+    display: block;
+    
+  }
+
+  .header-mobile{
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 20px;
+  }
+
+  .login-tab{
+    margin-right: 20px;
+  }
+
+  .add-btn{
+    margin-right: 20px;
+  }
   .dashboard-grid {
     grid-template-columns: 1fr;
   }

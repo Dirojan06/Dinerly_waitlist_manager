@@ -277,15 +277,8 @@ td b {
 }
 
 /* Tablet */
-@media (max-width: 1200px) {
-  .section-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .page-header {
-    flex-direction: column;
-  }
-
+@media (max-width: 1024px) {
+  
   .header-actions {
     justify-content: flex-start;
   }

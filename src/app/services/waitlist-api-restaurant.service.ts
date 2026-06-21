@@ -34,6 +34,10 @@ export class WaitlistApiRestaurantService {
     return this.http.get(`${this.baseUrl}/waitlist/${restaurantId}/dashboard`);
   }
 
+  submitFeedback(payload: any): Observable<any> {
+    return this.http.post<any>(`${this.baseUrl}/feedback`, payload);
+  }
+
   // ************************************************************************************ GUEST API ENDS ******************************************************************************* //
 
 

@@ -59,7 +59,7 @@ export class WaitlistDashboardComponent implements OnInit, OnDestroy {
     this.getRestaurantTables();
     this.loadDashboardWaitlist();
     this.loadDashboardStatus();
-
+    this.updateDateTime();
     this.clockInterval = setInterval(() => {
       this.updateDateTime();
 
