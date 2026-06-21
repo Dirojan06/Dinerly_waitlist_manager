@@ -1,21 +1,16 @@
 import { Component } from '@angular/core';
-import { Subscription } from 'rxjs';
-import { GetGuestHistory } from 'src/app/models/waitlist-api-guest-to-restaurant.model';
-import { HistoryEntry } from 'src/app/models/waitlist-restaurant.model';
+import { GetGuestHistory } from 'src/app/models/admin.model';
+import { WaitListAdminService } from 'src/app/services/wait-list-admin.service';
 import { WaitlistApiRestaurantService } from 'src/app/services/waitlist-api-restaurant.service';
-import { WaitlistRestaurantModalService } from 'src/app/services/waitlist-restaurant-modal.service';
-import { WaitlistRestaurantService } from 'src/app/services/waitlist-restaurant.service';
 
 @Component({
-  selector: 'app-waitlist-history',
-  templateUrl: './waitlist-history.component.html',
-  styleUrls: ['./waitlist-history.component.css']
+  selector: 'app-admin-history',
+  templateUrl: './admin-history.component.html',
+  styleUrls: ['./admin-history.component.css']
 })
-export class WaitlistHistoryComponent {
+export class AdminHistoryComponent {
   restaurantId = 1;
-
   history: GetGuestHistory[] = [];
-
   isLoading = false;
   selectedStatus = '';
   selectedStatusCSV = ''
@@ -28,7 +23,7 @@ export class WaitlistHistoryComponent {
   jumpPageInput: number | null = null;
   isDownloadingCSV: boolean = false;
 
-  constructor(private waitlistService: WaitlistApiRestaurantService) { }
+  constructor(private waitlistService: WaitListAdminService) { }
 
   ngOnInit(): void {
     this.loadGuestHistory();

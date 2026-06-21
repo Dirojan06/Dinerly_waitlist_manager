@@ -14,9 +14,7 @@ import { WaitlistUserSidebarComponent } from './components/waitlist-user-compone
 import { WaitlistModalComponent } from './components/waitlist-modal/waitlist-modal.component';
 import { WaitlistWaitingScreenComponent } from './components/waitlist-user-component/waitlist-waiting-screen/waitlist-waiting-screen.component';
 import { WaitlistTablesComponent } from './components/waitlist-restaurant-components/waitlist-tables/waitlist-tables.component';
-import { WaitlistHistoryComponent } from './components/waitlist-restaurant-components/waitlist-history/waitlist-history.component';
 import { WaitlistActiveListComponent } from './components/waitlist-restaurant-components/waitlist-active-list/waitlist-active-list.component';
-import { WaitlistSettingsComponent } from './components/waitlist-restaurant-components/waitlist-settings/waitlist-settings.component';
 import { WaitlistNotificationComponent } from './components/waitlist-restaurant-components/waitlist-notification/waitlist-notification.component';
 import { WaitlistRestaurantComponentComponent } from './components/waitlist-restaurant-components/waitlist-restaurant-component.component';
 import { CommonModule } from '@angular/common';
@@ -26,7 +24,10 @@ import { AuthInterceptor } from './interceptor/auth.interceptor';
 import { HTTP_INTERCEPTORS, HttpClientModule } from '@angular/common/http';
 import { MatStepperModule } from "@angular/material/stepper";
 import { NgChartsModule } from 'ng2-charts';
-import { WaitlistReportsComponent } from './components/waitlist-restaurant-components/waitlist-reports/waitlist-reports.component';
+import { WaitlistAdminComponent } from './components/waitlist-admin/waitlist-admin.component';
+import { AdminHistoryComponent } from './components/waitlist-admin/admin-history/admin-history.component';
+import { AdminReportsComponent } from './components/waitlist-admin/admin-reports/admin-reports.component';
+import { AdminSettingsComponent } from './components/waitlist-admin/admin-settings/admin-settings.component';
 
 
 @NgModule({
@@ -42,14 +43,15 @@ import { WaitlistReportsComponent } from './components/waitlist-restaurant-compo
     WaitlistModalComponent,
     WaitlistWaitingScreenComponent,
     WaitlistTablesComponent,
-    WaitlistHistoryComponent,
     WaitlistActiveListComponent,
-    WaitlistSettingsComponent,
     WaitlistNotificationComponent,
     WaitlistRestaurantComponentComponent,
     WaitlistRestaurantModalComponent,
     WaitlistDashboardComponent,
-    WaitlistReportsComponent
+    WaitlistAdminComponent,
+    AdminHistoryComponent,
+    AdminReportsComponent,
+    AdminSettingsComponent
   ],
   imports: [
     BrowserModule,

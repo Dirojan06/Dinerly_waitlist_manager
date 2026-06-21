@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { JoinWaitlistRequest, PendingGuest, WaitingGuest, ApproveWaitlistRequest, getGuestWaitingStatus, PendingGuestResponse, WaitingGuestResponse, NotifiedGuestResponse, SeatedGuestResponse, DashboardWaitlistResponse, notifiyguestcallRequest, TablelistResponse, addGuestToWaitlistRequest, seatedGuestcallRequest, GuestHistoryResponse, guestReportsResponse, CancelledGuestResponse, DashboardResponse } from '../models/waitlist-api-guest-to-restaurant.model';
+import { JoinWaitlistRequest, ApproveWaitlistRequest, getGuestWaitingStatus, PendingGuestResponse, WaitingGuestResponse, NotifiedGuestResponse, SeatedGuestResponse, DashboardWaitlistResponse, notifiyguestcallRequest, TablelistResponse, addGuestToWaitlistRequest, seatedGuestcallRequest, CancelledGuestResponse, DashboardResponse } from '../models/waitlist-api-guest-to-restaurant.model';
 import { environment } from 'src/environments/environment.prod';
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
@@ -240,98 +240,7 @@ export class WaitlistApiRestaurantService {
 
   //History API
 
-  getRestaurantGuestHistory(restaurantId: number, page: number, size: number, status: string, date: string): Observable<any> {
 
-    const token = this.auth.getToken();
-
-    const headers = new HttpHeaders({
-      Authorization: `Bearer ${token}`
-    });
-    let params = new HttpParams();
-
-    if (status) {
-      params = params.set('status', status);
-    }
-    if (date) {
-      params = params.set('date', date);
-    }
-    if (page) {
-      params = params.set('page', page);
-    }
-    if (size) {
-      params = params.set('size', size);
-    }
-    return this.http.get<GuestHistoryResponse>(`${this.baseUrl}/restaurants/${restaurantId}/guest-history`, { headers, params });
-  }
-
-  // download guest history as csv api 
-
-  exportGuestHistoryCsv(restaurantId: number, status: string, date: string): Observable<any> {
-    const token = this.auth.getToken();
-
-    const headers = new HttpHeaders({
-      Authorization: `Bearer ${token}`
-    });
-    let params = new HttpParams();
-
-    if (status) {
-      params = params.set('status', status);
-    }
-    if (date) {
-      params = params.set('date', date);
-    }
-
-    return this.http.get(
-      `${this.baseUrl}/restaurants/${restaurantId}/guest-history/export`, { headers, params, responseType: 'blob' });
-  }
-
-  //reports api
-
-  getRestaurantReports(
-
-    restaurantId: number,
-
-    fromDate?: string,
-
-    toDate?: string
-
-  ): Observable<any> {
-
-    const token = this.auth.getToken();
-
-    const headers = new HttpHeaders({
-
-      Authorization: `Bearer ${token}`
-
-    });
-
-    let params = new HttpParams();
-
-    if (fromDate && fromDate.trim() !== '') {
-
-      params = params.set('fromDate', fromDate);
-
-    }
-
-    if (toDate && toDate.trim() !== '') {
-
-      params = params.set('toDate', toDate);
-
-    }
-
-    console.log('Reports URL:', `${this.baseUrl}/restaurants/${restaurantId}/reports`);
-
-    console.log('Reports Params:', params.toString());
-
-    return this.http.get<any>(
-
-      `${this.baseUrl}/restaurants/${restaurantId}/reports`,
-
-      { headers, params }
-
-    );
-
-  }
 
   // ************************************************************************************ RESTAURANTS API ENDS ******************************************************************************* //
 

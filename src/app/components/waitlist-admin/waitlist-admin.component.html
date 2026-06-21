@@ -32,30 +32,32 @@
       
       
     </div>
+
+
     <nav class="sidebar-nav">
-      <button class="nav-item" [class.active]="activeRoute === 'dashboard'" (click)="navigate('dashboard')">
-        Dashboard
+      <button class="nav-item" [class.active]="activeRoute === 'history'" (click)="navigate('history')">
+        History
       </button>
 
-      <button class="nav-item" [class.active]="activeRoute === 'waitlist'" (click)="navigate('waitlist')">
-        Live Waitlist
-        <span class="nav-badge">{{ guestCount }}</span>
+      <button class="nav-item" [class.active]="activeRoute === 'reports'" (click)="navigate('reports')">
+        Reports
       </button>
 
-      <button class="nav-item" [class.active]="activeRoute === 'tables'" (click)="navigate('tables')">
-        Tables
-        <span class="nav-badge">{{ openTablesCount }}</span>
-      </button>
-
-      <button class="nav-item" [class.active]="activeRoute === 'notify'" (click)="navigate('notify')">
-        Notification
+      <button class="nav-item" [class.active]="activeRoute === 'settings'" (click)="navigate('settings')">
+        Settings
       </button>
     </nav>
+
+    <!-- <div class="sidebar-user">
+      <div class="user-avatar">RM</div>
+      <div>
+        <div class="restaurant-name">Ravi Manager</div>
+        <div class="restaurant-status">Manager</div>
+      </div>
+    </div> -->
   </aside>
 
   <main class="main-content">
     <router-outlet></router-outlet>
   </main>
 </div>
-
-<app-waitlist-restaurant-modal></app-waitlist-restaurant-modal>

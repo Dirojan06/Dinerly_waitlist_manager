@@ -2,11 +2,11 @@ import { Component } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 
 @Component({
-  selector: 'app-waitlist-settings',
-  templateUrl: './waitlist-settings.component.html',
-  styleUrls: ['./waitlist-settings.component.css']
+  selector: 'app-admin-settings',
+  templateUrl: './admin-settings.component.html',
+  styleUrls: ['./admin-settings.component.css']
 })
-export class WaitlistSettingsComponent {
+export class AdminSettingsComponent {
 restaurantForm: FormGroup;
   notificationForm: FormGroup;
   saved = false;

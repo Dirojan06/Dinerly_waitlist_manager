@@ -21,6 +21,19 @@
   display: none;
 }
 
+.logo-icon {
+  width: 42px;
+  height: 40px;
+  object-fit: contain;
+}
+.heading{
+  font-size: 25px !important;
+    font-weight: 500 !important;
+    line-height: 32px !important;
+    font-family: Roboto, sans-serif !important;
+    letter-spacing: .0125em !important;
+    margin: 0px 5px !important;
+}
 .login-left {
   position: relative;
   color: #fff;
@@ -35,7 +48,6 @@
 .overlay {
   position: absolute;
   inset: 0;
-  background: linear-gradient(90deg, rgba(28, 8, 76, 0.96), rgba(28, 8, 76, 0.45));
 }
 
 .left-content {
@@ -358,16 +370,14 @@ label {
 .login-page.restaurant .login-left {
   background:
     linear-gradient(rgba(35, 7, 86, 0.82), rgba(35, 7, 86, 0.76)),
-    url('/assets/images/restaurant-login-bg.jpg');
+    url('../../../assets/login.png');
   background-size: cover;
   background-position: center;
 }
 
 /* admin specific */
 .login-page.admin .login-left {
-  background:
-    linear-gradient(rgba(12, 6, 38, 0.9), rgba(12, 6, 38, 0.86)),
-    url('/assets/images/admin-login-bg.jpg');
+  background:linear-gradient(rgba(35, 7, 86, 0.52), rgba(35, 7, 86, 0.56)),url('../../../assets/admin.png');
   background-size: cover;
   background-position: center;
 }
