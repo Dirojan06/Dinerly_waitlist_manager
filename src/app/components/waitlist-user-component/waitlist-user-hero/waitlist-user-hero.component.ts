@@ -1,4 +1,5 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { Restaurant } from 'src/app/models/waitlist-api-guest-to-restaurant.model';
 import { WaitlistApiRestaurantService } from 'src/app/services/waitlist-api-restaurant.service';
 
 @Component({
@@ -12,12 +13,12 @@ export class WaitlistUserHeroComponent implements OnInit {
   partiesWaiting = 0;
   waitMinutes = 0;
   @Input() guest: any;
+  restaurant?: Restaurant;
+  @Output() logout = new EventEmitter<void>();
 
-@Output() logout = new EventEmitter<void>();
+  showProfileMenu = false;
 
-showProfileMenu = false;
-
-  constructor(private waitlistApi: WaitlistApiRestaurantService) {}
+  constructor(private waitlistApi: WaitlistApiRestaurantService) { }
 
   ngOnInit(): void {
     const guestData = localStorage.getItem('waitlistGuest');
@@ -27,6 +28,21 @@ showProfileMenu = false;
     }
 
     this.getWaitlistDashboardStatus();
+    this.restaurantId = Number(localStorage.getItem('waitlistRestaurantId'));
+    this.loadRestaurantDetails();
+  }
+
+  loadRestaurantDetails(): void {
+    this.waitlistApi.getRestaurantDetails().subscribe({
+      next: (res) => {
+        if (res?.success && res?.data?.length) {
+          this.restaurant = res.data.find(item => item.id === this.restaurantId) || res.data[0];
+        }
+      },
+      error: () => {
+        console.log('Unable to load restaurant details');
+      }
+    });
   }
 
   getWaitlistDashboardStatus(): void {
@@ -42,9 +58,9 @@ showProfileMenu = false;
 
   get guestName(): string {
 
-  return this.guest?.guestName || this.guest?.name || 'Guest';
+    return this.guest?.guestName || this.guest?.name || 'Guest';
 
-}
+  }
 
   get guestInitial(): string {
     return this.guestName.charAt(0).toUpperCase();
@@ -58,15 +74,26 @@ showProfileMenu = false;
 
   toggleProfileMenu(): void {
 
-  this.showProfileMenu = !this.showProfileMenu;
+    this.showProfileMenu = !this.showProfileMenu;
 
-}
+  }
 
-logoutGuest(): void {
+  getGuestInitials(name: string): string {
+    if (!name) return 'G';
 
-  this.showProfileMenu = false;
+    return name
+      .split(' ')
+      .map(part => part[0])
+      .join('')
+      .substring(0, 2)
+      .toUpperCase();
+  }
 
-  this.logout.emit();
+  logoutGuest(): void {
 
-}
+    this.showProfileMenu = false;
+
+    this.logout.emit();
+
+  }
 }

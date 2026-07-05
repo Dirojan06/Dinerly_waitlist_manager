@@ -2,12 +2,18 @@
 
   <div class="customer-shell">
 
-    <app-waitlist-user-sidebar [activeTab]="activeTab" [isLoggedGuest]="isLoggedGuest" (tabChange)="changeTab($event)">
+    <app-waitlist-user-sidebar
+      [activeTab]="activeTab"
+      [isLoggedGuest]="isLoggedGuest"
+      (tabChange)="changeTab($event)">
     </app-waitlist-user-sidebar>
 
     <main class="customer-main">
 
-      <app-waitlist-user-hero *ngIf="isLoggedGuest" [guest]="guest" (logout)="logoutGuest()">
+      <app-waitlist-user-hero
+        *ngIf="isLoggedGuest"
+        [guest]="guest"
+        (logout)="logoutGuest()">
       </app-waitlist-user-hero>
 
       <ng-container *ngIf="isLoggedGuest">
@@ -15,7 +21,8 @@
         <ng-container *ngIf="activeTab === 'WAITLIST'">
           <app-waitlist-user-banner></app-waitlist-user-banner>
 
-          <app-waitlist-waiting-screen (leaveSuccess)="logoutGuest()">
+          <app-waitlist-waiting-screen
+            (leaveSuccess)="logoutGuest()">
           </app-waitlist-waiting-screen>
         </ng-container>
 
@@ -23,9 +30,15 @@
           <app-waitlist-user-menu></app-waitlist-user-menu>
         </ng-container>
 
+        <ng-container *ngIf="activeTab === 'DISCOUNT'">
+          <!-- discount component here -->
+        </ng-container>
+
       </ng-container>
 
-      <app-waitlist-user-action *ngIf="!isLoggedGuest" (guestJoined)="onGuestJoined($event)">
+      <app-waitlist-user-action
+        *ngIf="!isLoggedGuest"
+        (guestJoined)="onGuestJoined($event)">
       </app-waitlist-user-action>
 
     </main>
@@ -47,6 +60,35 @@
 
     <button type="button" class="access-btn" (click)="closeAccessPopup()">
       Okay
+    </button>
+  </div>
+</div>
+
+<div class="access-backdrop" *ngIf="showCancelledPopup">
+  <div class="access-popup cancelled-popup">
+    <button
+      class="access-close"
+      type="button"
+      (click)="closeCancelledPopup()">
+      ✕
+    </button>
+
+    <div class="access-icon cancelled-icon">
+      <i class="fa-solid fa-circle-xmark"></i>
+    </div>
+
+    <h2>Your waitlist was cancelled</h2>
+
+    <p>
+      Your previous waitlist request has been cancelled.
+      Please join the waitlist again to continue.
+    </p>
+
+    <button
+      type="button"
+      class="access-btn"
+      (click)="closeCancelledPopup()">
+      Join Again
     </button>
   </div>
 </div>

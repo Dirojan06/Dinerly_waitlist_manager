@@ -122,6 +122,7 @@
 <app-waitlist-modal
   *ngIf="showModal"
   [type]="modalType"
+  [restaurants]="restaurants"
   (closeModal)="closeModal()"
   (joinedWaitlist)="onJoinedWaitlist($event)">
 </app-waitlist-modal>

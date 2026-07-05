@@ -1,7 +1,9 @@
 <aside class="customer-sidebar">
 
   <div class="brand">
-    <div class="brand-icon">➤</div>
+    <div class="brand-icon">
+      <img src="../../../../assets/logo.png" style="width: 30px;height: 20px;" alt="Dinerly Logo">
+    </div>
 
     <div>
       <h2>Dinerly</h2>
@@ -45,10 +47,21 @@
     </button> -->
   </nav>
 
-  <div class="sidebar-footer">
-    <p><i class="fa-solid fa-location-dot"></i> 123 Market St, Winnipeg</p>
-    <p><i class="fa-regular fa-clock"></i> Open until 10:00pm</p>
-    <p><i class="fa-solid fa-star"></i> 4.8 · 320 reviews</p>
+  <div class="sidebar-footer" *ngIf="restaurant">
+    <p>
+      <i class="fa-solid fa-location-dot"></i>
+      {{ restaurant.address }}
+    </p>
+
+    <p>
+      <i class="fa-solid fa-phone"></i>
+      {{ restaurant.phone }}
+    </p>
+
+    <p>
+      <i class="fa-solid fa-envelope"></i>
+      {{ restaurant.email }}
+    </p>
   </div>
 
 </aside>

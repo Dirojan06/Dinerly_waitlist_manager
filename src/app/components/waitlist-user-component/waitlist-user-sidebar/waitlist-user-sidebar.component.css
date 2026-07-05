@@ -1,6 +1,5 @@
 .customer-sidebar {
-  background:
-    linear-gradient(rgba(36, 12, 66, 0.94), rgba(36, 12, 66, 0.94));
+  background-image: url('../../../../assets/sidebar-new.png');
   color: #ffffff;
   padding: 30px 22px;
   position: sticky;
@@ -13,8 +12,6 @@
   content: '';
   position: absolute;
   inset: 0;
-  background-image:
-    linear-gradient(30deg, transparent 48%, rgba(255,255,255,0.08) 49%, rgba(255,255,255,0.08) 51%, transparent 52%);
   background-size: 80px 80px;
   opacity: .65;
 }

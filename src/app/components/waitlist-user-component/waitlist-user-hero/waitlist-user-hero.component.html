@@ -2,30 +2,30 @@
   <h4>Waitlist</h4>
 
   <div class="top-actions">
-  <div class="profile-wrapper">
+    <div class="profile-wrapper">
 
-    <div class="profile-pill" (click)="toggleProfileMenu()">
-      <span>{{ guestInitial }}</span>
-      <b>{{ guestShortName }}</b>
-      <i class="fa-solid fa-chevron-down"></i>
-    </div>
+      <div class="profile-pill" (click)="toggleProfileMenu()">
+        <span>{{ guestInitial }}</span>
+        <b>{{ guestShortName }}</b>
+        <i class="fa-solid fa-chevron-down"></i>
+      </div>
 
-    <div class="profile-dropdown" *ngIf="showProfileMenu">
-      <button type="button">
+      <div class="profile-dropdown" *ngIf="showProfileMenu">
+        <!-- <button type="button">
         <i class="fa-regular fa-gear"></i>
         Profile settings
-      </button>
+      </button> -->
 
-      <hr>
+        <hr>
 
-      <button type="button" class="logout-btn" (click)="logoutGuest()">
-        <i class="fa-solid fa-arrow-right-from-bracket"></i>
-        Logout
-      </button>
+        <button type="button" class="logout-btn" (click)="logoutGuest()">
+          <i class="fa-solid fa-arrow-right-from-bracket"></i>
+          Logout
+        </button>
+      </div>
+
     </div>
-
   </div>
-</div>
 </header>
 
 <section class="restaurant-hero">
@@ -52,11 +52,11 @@
 
 <section class="restaurant-info">
 
-  <div class="restaurant-title">
-    <div class="avatar">B</div>
+  <div class="restaurant-title" *ngIf="restaurant">
+    <div class="avatar">{{ getGuestInitials(restaurant.name) }}</div>
 
     <div>
-      <h1>Brothers Café</h1>
+      <h1>{{restaurant.name }}</h1>
       <p>Live wait info & menu — updated in real time</p>
     </div>
   </div>

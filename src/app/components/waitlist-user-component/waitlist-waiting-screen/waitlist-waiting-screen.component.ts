@@ -1,6 +1,7 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { Router } from '@angular/router';
 import { interval, Subscription } from 'rxjs';
+import { Restaurant } from 'src/app/models/waitlist-api-guest-to-restaurant.model';
 import { WaitlistApiRestaurantService } from 'src/app/services/waitlist-api-restaurant.service';
 
 @Component({
@@ -11,7 +12,7 @@ import { WaitlistApiRestaurantService } from 'src/app/services/waitlist-api-rest
 export class WaitlistWaitingScreenComponent implements OnInit {
 
   @Input() guest: any;
-  restaurantId = '1';
+  restaurantId = 1;
   @Output() leaveSuccess = new EventEmitter<void>();
   pendingSeconds = 120;
   timerText = '';
@@ -38,6 +39,7 @@ export class WaitlistWaitingScreenComponent implements OnInit {
 
   isSubmittingFeedback = false;
   feedbackSubmitted = false;
+  restaurant?: Restaurant;
 
   constructor(private waitlistApi: WaitlistApiRestaurantService, private router: Router) { }
 
@@ -61,6 +63,22 @@ export class WaitlistWaitingScreenComponent implements OnInit {
       'dark-mode',
       this.isDarkMode
     );
+
+    this.restaurantId = Number(localStorage.getItem('waitlistRestaurantId'));
+    this.loadRestaurantDetails();
+  }
+
+  loadRestaurantDetails(): void {
+    this.waitlistApi.getRestaurantDetails().subscribe({
+      next: (res) => {
+        if (res?.success && res?.data?.length) {
+          this.restaurant = res.data.find(item => item.id === this.restaurantId) || res.data[0];
+        }
+      },
+      error: () => {
+        console.log('Unable to load restaurant details');
+      }
+    });
   }
 
   restoreFromStorage(): void {

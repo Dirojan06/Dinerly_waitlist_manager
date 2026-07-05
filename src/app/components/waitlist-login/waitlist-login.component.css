@@ -22,9 +22,7 @@
   padding: 56px 64px;
   color: #ffffff;
   overflow: hidden;
-  background:
-    linear-gradient(135deg, rgba(93, 14, 178, 0.94), rgba(33, 6, 70, 0.96)),
-    radial-gradient(circle at 20% 20%, rgba(255, 255, 255, 0.15), transparent 30%);
+  background-image: url('/assets/sidebar-new.png');
 }
 
 .login-left::before {
@@ -32,19 +30,12 @@
   position: absolute;
   inset: 0;
   opacity: 0.16;
-  background-image:
-    linear-gradient(45deg, transparent 45%, rgba(255,255,255,.8) 46%, transparent 47%),
-    linear-gradient(-45deg, transparent 45%, rgba(255,255,255,.8) 46%, transparent 47%);
-  background-size: 100px 100px;
 }
 
 .login-left::after {
   content: "";
   position: absolute;
   inset: 0;
-  background:
-    radial-gradient(circle at 25% 20%, rgba(162, 89, 255, 0.35), transparent 32%),
-    radial-gradient(circle at 70% 55%, rgba(124, 58, 237, 0.26), transparent 34%);
 }
 
 .brand-row,

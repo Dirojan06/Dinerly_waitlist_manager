@@ -1,24 +1,39 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, EventEmitter, Input, Output, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { Restaurant } from 'src/app/models/waitlist-api-guest-to-restaurant.model';
 import { NotificationService } from 'src/app/services/notification.service';
 import { WaitlistApiRestaurantService } from 'src/app/services/waitlist-api-restaurant.service';
+
 
 @Component({
   selector: 'app-waitlist-modal',
   templateUrl: './waitlist-modal.component.html',
   styleUrls: ['./waitlist-modal.component.css']
 })
-export class WaitlistModalComponent {
+export class WaitlistModalComponent implements OnInit {
 
   @Input() type: 'join' | 'status' = 'join';
   @Output() closeModal = new EventEmitter<void>();
   @Output() joinedWaitlist = new EventEmitter<any>();
+
+  @Input() restaurants: Restaurant[] = [];
+  selectedRestaurantId = 1;
+  restaurantId = 1;
+
   selectedTags: string[] = [];
   showPartyPicker = false;
-  tempPartySize: number = 1;
+  tempPartySize = 1;
   partySize: number[] = [1, 2, 3, 4, 5, 6, 7, 8];
-  restaurantId = 1;
+
   isSubmitting = false;
+  isRestaurantLoading = false;
+
+  partiesWaiting = 0;
+  waitMinutes = 0;
+
+  showWaitConfirmPopup = false;
+  pendingSubmit = false;
+
   preference = [
     { label: 'No Preference', value: 'NO_PREFERENCE' },
     { label: 'Indoor', value: 'INDOOR' },
@@ -34,27 +49,13 @@ export class WaitlistModalComponent {
     { label: 'Wheelchair access', value: 'WHEELCHAIR_ACCESS' }
   ];
 
-  restaurants = [
-    {
-      id: 1,
-      name: 'Fern & Ember Bistro',
-      location: 'Winnipeg, MB'
-    },
-
-    {
-      id: 2,
-      name: 'Brothers Café',
-      location: 'Winnipeg, MB'
-    }
-  ];
-
-  selectedRestaurantId = 1;
-
   waitlistForm: FormGroup;
   statusForm: FormGroup;
   guestStatusData: any;
+
   constructor(
-    private fb: FormBuilder, private waitlistApi: WaitlistApiRestaurantService, private notificationService: NotificationService
+    private fb: FormBuilder,
+    private waitlistApi: WaitlistApiRestaurantService
   ) {
     this.waitlistForm = this.fb.group({
       restaurantId: [1, Validators.required],
@@ -62,37 +63,102 @@ export class WaitlistModalComponent {
       phone: ['', [Validators.required, Validators.pattern('^\\+?[0-9]{10,15}$')]],
       partySize: [1, Validators.required],
       preference: ['INDOOR', Validators.required],
-      notes: [[]]
+      notes: ['']
     });
 
     this.statusForm = this.fb.group({
-      phoneNumber: ['', [Validators.required, Validators.pattern('^\\+?[0-9]{10,15}$')]
-      ]
+      phoneNumber: ['', [Validators.required, Validators.pattern('^\\+?[0-9]{10,15}$')]]
     });
   }
 
-  onRestaurantChange(): void {
+  ngOnInit(): void {
+    this.waitlistForm.get('restaurantId')?.valueChanges.subscribe((value) => {
+      this.onRestaurantChange(value);
+    });
 
-    this.restaurantId = Number(this.selectedRestaurantId);
+    if (this.restaurants.length) {
+      const firstRestaurant = this.restaurants[0];
 
+      this.selectedRestaurantId = firstRestaurant.id;
+      this.restaurantId = firstRestaurant.id;
+
+      this.waitlistForm.patchValue(
+        {
+          restaurantId: firstRestaurant.id
+        },
+        {
+          emitEvent: true
+        }
+      );
+    }
+
+    this.getWaitlistDashboardStatus();
   }
 
-  selectPartySize(size: number | string): void {
+  onRestaurantChange(event: Event): void {
+    const selectedId = Number((event.target as HTMLSelectElement).value);
+
+    this.selectedRestaurantId = selectedId;
+    this.restaurantId = selectedId;
+
+    console.log('Selected restaurant:', this.restaurantId);
+
+    this.getWaitlistDashboardStatus();
+  }
+
+  getWaitlistDashboardStatus(): void {
+    this.waitlistApi.getwaitlistdashBoardStatus(this.restaurantId).subscribe({
+      next: (res: any) => {
+        if (res?.success && res?.data) {
+          this.partiesWaiting = res.data.totalWaiting || 0;
+          this.waitMinutes = res.data.averageWaitTime || 0;
+          if (this.partiesWaiting > 0 && !this.pendingSubmit) {
+
+            this.showWaitConfirmPopup = true;
+
+            return;
+
+          }
+        } else {
+          this.partiesWaiting = 0;
+          this.waitMinutes = 0;
+        }
+      },
+      error: () => {
+        this.partiesWaiting = 0;
+        this.waitMinutes = 0;
+      }
+    });
+  }
+
+  confirmWaitAndJoin(): void {
+    this.showWaitConfirmPopup = false;
+    this.pendingSubmit = true;
+  }
+
+  cancelWaitConfirm(): void {
+    this.showWaitConfirmPopup = false;
+    this.pendingSubmit = false;
+  }
+
+  selectPartySize(size: number): void {
     this.waitlistForm.patchValue({
       partySize: size
     });
-
   }
 
   toggleTag(tag: string): void {
     const notes = [...this.selectedTags];
     const index = notes.indexOf(tag);
+
     if (index > -1) {
       notes.splice(index, 1);
     } else {
       notes.push(tag);
     }
+
     this.selectedTags = notes;
+
     this.waitlistForm.patchValue({
       notes: notes.join(', ')
     });
@@ -115,15 +181,22 @@ export class WaitlistModalComponent {
     this.waitlistForm.patchValue({
       partySize: this.tempPartySize
     });
+
     this.showPartyPicker = false;
   }
 
-
-  // submit join waitlist api
   submitJoinWaitlist(): void {
     if (this.waitlistForm.invalid) {
       this.waitlistForm.markAllAsTouched();
       return;
+    }
+
+    if (this.partiesWaiting > 0 && !this.pendingSubmit) {
+
+      this.showWaitConfirmPopup = true;
+
+      return;
+
     }
 
     this.isSubmitting = true;
@@ -171,7 +244,7 @@ export class WaitlistModalComponent {
     const phone = this.statusForm.get('phoneNumber')?.value;
 
     const payload = {
-      restaurantId: this.restaurantId.toString(),
+      restaurantId: this.restaurantId,
       phone: phone.trim()
     };
 

@@ -11,53 +11,82 @@ export class WaitlistUserComponentComponent implements OnInit {
   activeTab: 'WAITLIST' | 'MENU' | 'DISCOUNT' = 'WAITLIST';
 
   guest: any = null;
-
   isLoggedGuest = false;
 
   showAccessPopup = false;
-
-
+  showCancelledPopup = false;
 
   ngOnInit(): void {
     const savedTheme = localStorage.getItem('dinerly-theme');
     this.isDarkMode = savedTheme === 'dark';
 
     document.body.classList.toggle('dark-mode', this.isDarkMode);
+
     this.loadGuest();
   }
 
   loadGuest(): void {
-
     const guestData = localStorage.getItem('waitlistGuest');
 
     if (guestData) {
+      const parsedGuest = JSON.parse(guestData);
 
-      this.guest = JSON.parse(guestData);
+      if (parsedGuest?.status === 'CANCELLED') {
+        this.showCancelledPopup = true;
 
+        this.guest = null;
+        this.isLoggedGuest = false;
+        this.activeTab = 'WAITLIST';
+
+        localStorage.removeItem('waitlistGuest');
+        localStorage.removeItem('waitlistRestaurantId');
+        return;
+      }
+
+      this.guest = parsedGuest;
       this.isLoggedGuest = true;
-
     } else {
-
       this.guest = null;
-
       this.isLoggedGuest = false;
-
     }
-
   }
 
   changeTab(tab: 'WAITLIST' | 'MENU' | 'DISCOUNT'): void {
-
     if (!this.isLoggedGuest) {
-
       this.showAccessPopup = true;
-
       return;
-
     }
 
     this.activeTab = tab;
+  }
 
+  onGuestJoined(guest: any): void {
+    if (guest?.status === 'CANCELLED') {
+      this.showCancelledPopup = true;
+      this.logoutGuest();
+      return;
+    }
+
+    this.guest = guest;
+    this.isLoggedGuest = true;
+    this.activeTab = 'WAITLIST';
+  }
+
+  logoutGuest(): void {
+    localStorage.removeItem('waitlistGuest');
+    localStorage.removeItem('waitlistRestaurantId');
+
+    this.guest = null;
+    this.isLoggedGuest = false;
+    this.activeTab = 'WAITLIST';
+  }
+
+  closeCancelledPopup(): void {
+    this.showCancelledPopup = false;
+  }
+
+  closeAccessPopup(): void {
+    this.showAccessPopup = false;
   }
 
   toggleTheme(): void {
@@ -71,38 +100,7 @@ export class WaitlistUserComponentComponent implements OnInit {
     document.body.classList.toggle('dark-mode', this.isDarkMode);
   }
 
-  onGuestJoined(guest: any): void {
-
-    this.guest = guest;
-
-    this.isLoggedGuest = true;
-
-    this.activeTab = 'WAITLIST';
-
-  }
-
-  logoutGuest(): void {
-
-    localStorage.removeItem('waitlistGuest');
-
-    localStorage.removeItem('waitlistRestaurantId');
-
-    this.guest = null;
-
-    this.isLoggedGuest = false;
-
-    this.activeTab = 'WAITLIST';
-
-  }
-
-  closeAccessPopup(): void {
-
-    this.showAccessPopup = false;
-
-  }
-
   onLeaveSuccess(): void {
-    localStorage.removeItem('waitlistGuest');
-    localStorage.removeItem('waitlistRestaurantId');
+    this.logoutGuest();
   }
 }

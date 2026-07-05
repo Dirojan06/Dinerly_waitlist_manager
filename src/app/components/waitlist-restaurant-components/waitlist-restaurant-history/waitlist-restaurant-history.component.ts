@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
-import { GetGuestHistory } from 'src/app/models/admin.model';
-import { WaitListAdminService } from 'src/app/services/wait-list-admin.service';
+import { GetGuestHistory } from 'src/app/models/waitlist-api-guest-to-restaurant.model';
+import { WaitlistApiRestaurantService } from 'src/app/services/waitlist-api-restaurant.service';
 
 @Component({
   selector: 'app-waitlist-restaurant-history',
@@ -27,7 +27,7 @@ import { WaitListAdminService } from 'src/app/services/wait-list-admin.service';
 
   searchText = '';
 
-  constructor(private waitlistService: WaitListAdminService) { }
+  constructor(private waitlistService: WaitlistApiRestaurantService) { }
 
   ngOnInit(): void {
     this.loadGuestHistory();

@@ -1,6 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
+import { Restaurant } from 'src/app/models/waitlist-api-guest-to-restaurant.model';
+import { WaitlistApiRestaurantService } from 'src/app/services/waitlist-api-restaurant.service';
 import { WaitlistAuthService } from 'src/app/services/waitlist-auth.service';
 
 export type UserRole = 'restaurant' | 'admin';
@@ -23,13 +25,16 @@ export class WaitlistLoginComponent implements OnInit {
   isAdminLogin = true;
   showModal = false;
   modalType: 'join' | 'status' = 'join';
+  restaurants: Restaurant[] = [];
+  isRestaurantLoaded = false;
 
   constructor(
     private fb: FormBuilder,
     private router: Router,
     private route: ActivatedRoute,
-    private auth: WaitlistAuthService
-  ) {}
+    private auth: WaitlistAuthService,
+    private waitlistApi: WaitlistApiRestaurantService
+  ) { }
 
   ngOnInit(): void {
     this.router.navigate(['/login/restaurant']);
@@ -51,6 +56,7 @@ export class WaitlistLoginComponent implements OnInit {
     this.isDarkMode = savedTheme === 'dark';
 
     document.body.classList.toggle('dark-mode', this.isDarkMode);
+    this.loadRestaurants();
   }
 
   toggleTheme(): void {
@@ -68,7 +74,29 @@ export class WaitlistLoginComponent implements OnInit {
     this.showPassword = !this.showPassword;
   }
 
+  loadRestaurants(): void {
+    this.waitlistApi.getRestaurantDetails().subscribe({
+      next: (res) => {
+        if (res?.success && res?.data) {
+          this.restaurants = res.data;
+          this.isRestaurantLoaded = true;
+        }
+      },
+
+      error: () => {
+        this.isRestaurantLoaded = false;
+      }
+    });
+  }
+
   openModal(type: 'join' | 'status'): void {
+    if (!this.isRestaurantLoaded) {
+
+      alert('Restaurants are still loading. Please try again.');
+
+      return;
+
+    }
     this.modalType = type;
     this.showModal = true;
   }
@@ -79,14 +107,11 @@ export class WaitlistLoginComponent implements OnInit {
 
   onJoinedWaitlist(guest: any): void {
     localStorage.setItem('waitlistGuest', JSON.stringify(guest));
-    localStorage.setItem('waitlistRestaurantId', '1');
-
     this.showModal = false;
-
     this.router.navigate(['/user']);
   }
   goToLogin(): void {
-    if(this.isAdminLogin){
+    if (this.isAdminLogin) {
       this.router.navigate(['/login/admin']);
       this.isAdminLogin = false;
     } else {

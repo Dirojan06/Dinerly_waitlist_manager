@@ -75,9 +75,7 @@
     <div class="bottom-actions">
       <!-- <button class="edit-btn" type="button">Edit details</button> -->
 
-      <button
-        class="cancel-btn"
-        type="button"
+      <button class="cancel-btn" type="button"
         *ngIf="guest?.status === 'PENDING' || guest?.status === 'WAITING' || guest?.status === 'NOTIFIED'"
         (click)="openLeaveConfirm()">
         Cancel my spot
@@ -99,11 +97,22 @@
       </div>
     </div>
 
-    <div class="info-card">
-      <h3>Brothers Café</h3>
-      <p><i class="fa-solid fa-location-dot"></i> 123 Market St, Winnipeg</p>
-      <p><i class="fa-regular fa-clock"></i> Open until 10:00pm</p>
-      <p><i class="fa-solid fa-phone"></i> (204) 555-0142</p>
+    <div class="info-card" *ngIf="restaurant">
+      <h3>{{restaurant.name }}</h3>
+      <p>
+        <i class="fa-solid fa-location-dot"></i>
+        {{ restaurant.address }}
+      </p>
+
+      <p>
+        <i class="fa-solid fa-phone"></i>
+        {{ restaurant.phone }}
+      </p>
+
+      <p>
+        <i class="fa-solid fa-envelope"></i>
+        {{ restaurant.email }}
+      </p>
     </div>
 
     <div class="details-card">
@@ -154,11 +163,7 @@
     <div class="actions">
       <button class="btn-cancel" type="button" (click)="closeLeaveConfirm()">No</button>
 
-      <button
-        class="btn-danger"
-        type="button"
-        [disabled]="isLeaving"
-        (click)="confirmLeaveWaitlist()">
+      <button class="btn-danger" type="button" [disabled]="isLeaving" (click)="confirmLeaveWaitlist()">
         {{ isLeaving ? 'Cancelling...' : 'Yes, cancel' }}
       </button>
     </div>

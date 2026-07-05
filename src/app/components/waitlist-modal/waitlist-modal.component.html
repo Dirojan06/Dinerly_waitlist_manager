@@ -20,11 +20,13 @@
                     <div class="restaurant-select-box">
                         <i class="fa-solid fa-house"></i>
 
-                        <select formControlName="restaurantId" [(ngModel)]="selectedRestaurantId"
-                            (change)="onRestaurantChange()">
-
+                        <select formControlName="restaurantId" (change)="onRestaurantChange($event)"
+                            [disabled]="isRestaurantLoading">
+                            <option *ngIf="isRestaurantLoading" disabled>
+                                Loading restaurants...
+                            </option>
                             <option *ngFor="let restaurant of restaurants" [value]="restaurant.id">
-                                {{ restaurant.name }} — {{ restaurant.location }}
+                                {{ restaurant.name }} — {{ restaurant.address }}
                             </option>
 
                         </select>
@@ -197,3 +199,47 @@
 </div>
 
 
+<div class="wait-confirm-backdrop" *ngIf="showWaitConfirmPopup">
+    <div class="wait-confirm-popup">
+
+        <button type="button" class="wait-confirm-close" (click)="cancelWaitConfirm()">
+            ✕
+        </button>
+
+        <div class="wait-confirm-icon">
+            <i class="fa-solid fa-clock"></i>
+        </div>
+
+        <h2>{{restaurants[0].name}}</h2>
+        <h4>Estimated Wait Time</h4>
+
+        
+
+        <div class="wait-info-box">
+            <div>
+                <span>Parties Waiting</span>
+                <h3>{{ partiesWaiting }}</h3>
+            </div>
+
+            <div>
+                <span>Estimated Wait</span>
+                <h3>{{ waitMinutes }} min</h3>
+            </div>
+        </div>
+
+        <p class="wait-question">
+            Is this okay for you?
+        </p>
+
+        <div class="wait-confirm-actions">
+            <button type="button" class="wait-cancel-btn" (click)="cancelWaitConfirm()">
+                No, Cancel
+            </button>
+
+            <button type="button" class="wait-join-btn" (click)="confirmWaitAndJoin()">
+                Yes, Join
+            </button>
+        </div>
+
+    </div>
+</div>

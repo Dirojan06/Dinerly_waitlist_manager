@@ -53,7 +53,7 @@ export interface CancelledGuestResponse {
 
 
 export interface getGuestWaitingStatus {
-  restaurantId: string,
+  restaurantId: number,
   phone: string
 }
 
@@ -197,4 +197,53 @@ export interface guestReportsResponse {
 export interface addTabletoRestaurantRequest {
   tableNumber: string,
   capacity: number
+}
+
+export interface GetGuestHistory {
+  id: number;
+  guestName: string;
+  guestPhone: string;
+  partySize: number;
+  preference: string;
+  notes: string;
+  status: string;
+  joinedAt: string | null;
+  approvedAt: string | null;
+  notifiedAt: string | null;
+  seatedAt: string | null;
+  tableName?: string | null;
+}
+
+export interface GuestHistoryPage {
+  content: GetGuestHistory[];
+  totalElements: number;
+  totalPages: number;
+  number: number;
+  size: number;
+  first: boolean;
+  last: boolean;
+  empty: boolean;
+}
+
+export interface GuestHistoryResponse {
+  success: boolean;
+  message: string;
+  data: GuestHistoryPage;
+}
+
+export interface Restaurant {
+  id: number;
+  name: string;
+  email: string;
+  phone: string;
+  address: string;
+  totalTables: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface RestaurantResponse {
+  success: boolean;
+  message: string;
+  data: Restaurant[];
 }
