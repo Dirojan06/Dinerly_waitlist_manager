@@ -1,27 +1,52 @@
 <div class="app-wrapper" [ngClass]="isDarkMode ? 'dark-mode' : 'light-mode'">
-  <app-waitlist-navbar [isDarkMode]="isDarkMode" (themeToggle)="toggleTheme()">
 
-  </app-waitlist-navbar>
+  <div class="customer-shell">
 
-  <router-outlet *ngIf="isWaitingRoute"></router-outlet>
+    <app-waitlist-user-sidebar [activeTab]="activeTab" [isLoggedGuest]="isLoggedGuest" (tabChange)="changeTab($event)">
+    </app-waitlist-user-sidebar>
 
-  <ng-container *ngIf="!isWaitingRoute">
+    <main class="customer-main">
 
-    <div class="guest-page">
+      <app-waitlist-user-hero *ngIf="isLoggedGuest" [guest]="guest" (logout)="logoutGuest()">
+      </app-waitlist-user-hero>
 
-      <div class="top-grid">
-        <app-waitlist-user-hero></app-waitlist-user-hero>
+      <ng-container *ngIf="isLoggedGuest">
 
-        <app-waitlist-user-sidebar (joinedWaitlist)="onJoinedWaitlist($event)">
-        </app-waitlist-user-sidebar>
-      </div>
+        <ng-container *ngIf="activeTab === 'WAITLIST'">
+          <app-waitlist-user-banner></app-waitlist-user-banner>
 
-      <app-waitlist-user-banner (joinedWaitlist)="onJoinedWaitlist($event)">
-      </app-waitlist-user-banner>
+          <app-waitlist-waiting-screen (leaveSuccess)="logoutGuest()">
+          </app-waitlist-waiting-screen>
+        </ng-container>
 
-      <app-waitlist-user-menu></app-waitlist-user-menu>
+        <ng-container *ngIf="activeTab === 'MENU'">
+          <app-waitlist-user-menu></app-waitlist-user-menu>
+        </ng-container>
 
+      </ng-container>
+
+      <app-waitlist-user-action *ngIf="!isLoggedGuest" (guestJoined)="onGuestJoined($event)">
+      </app-waitlist-user-action>
+
+    </main>
+
+  </div>
+
+</div>
+
+<div class="access-backdrop" *ngIf="showAccessPopup">
+  <div class="access-popup">
+    <button class="access-close" type="button" (click)="closeAccessPopup()">✕</button>
+
+    <div class="access-icon">
+      <i class="fa-solid fa-lock"></i>
     </div>
 
-  </ng-container>
+    <h2>Join the waitlist first</h2>
+    <p>Please join the waitlist to access Waitlist, Menu and Discounts.</p>
+
+    <button type="button" class="access-btn" (click)="closeAccessPopup()">
+      Okay
+    </button>
+  </div>
 </div>

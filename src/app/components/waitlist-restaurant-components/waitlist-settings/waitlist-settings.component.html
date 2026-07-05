@@ -1,0 +1,211 @@
+<div class="settings-page">
+
+  <div class="settings-header">
+    <div>
+      <h1>Settings</h1>
+      <div class="time-pill">
+        <span></span>
+        {{ currentTimeOnly }}
+      </div>
+    </div>
+
+    <!-- <div class="header-actions">
+      <button class="ghost-btn">+ Simulate online join</button>
+      <button class="primary-btn">+ Add Walk-in</button>
+
+      <button class="restaurant-btn">
+        <span>B</span>
+        Brothers Café
+        <i class="fa-solid fa-chevron-down"></i>
+      </button>
+    </div> -->
+  </div>
+
+  <!-- <div class="stats-grid">
+    <div class="stat-card active">
+      <h2>6</h2>
+      <p>parties waiting</p>
+    </div>
+
+    <div class="stat-card">
+      <h2>~16 min</h2>
+      <p>average wait tonight</p>
+    </div>
+
+    <div class="stat-card">
+      <h2>7/12</h2>
+      <p>tables open</p>
+      <div class="progress">
+        <span></span>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <h2>28</h2>
+      <p>seated today</p>
+    </div>
+  </div> -->
+
+  <div class="settings-grid">
+
+    <!-- Restaurant Profile -->
+    <section class="settings-card">
+      <h3>Restaurant profile</h3>
+
+      <div class="info-row">
+        <span>Name</span>
+        <strong>{{ restaurant.name }}</strong>
+      </div>
+
+      <div class="info-row">
+        <span>Address</span>
+        <strong>{{ restaurant.address }}</strong>
+      </div>
+
+      <div class="info-row">
+        <span>Hours</span>
+        <strong>{{ restaurant.hours }}</strong>
+      </div>
+
+      <div class="info-row">
+        <span>Phone</span>
+        <strong>{{ restaurant.phone }}</strong>
+      </div>
+
+      <button class="soft-btn" (click)="editProfile()">Edit profile</button>
+    </section>
+
+    <!-- Staff List -->
+    <section class="settings-card">
+      <h3>Staff list</h3>
+      <p class="card-subtitle">
+        Everyone who works here. Add them once, then pick from this list on the Tables page
+        instead of retyping names each shift.
+      </p>
+
+      <div class="staff-form">
+        <input
+          type="text"
+          placeholder="Staff member name"
+          [(ngModel)]="staffName"
+        />
+
+        <select [(ngModel)]="staffRole">
+          <option *ngFor="let role of staffRoles" [value]="role">
+            {{ role }}
+          </option>
+        </select>
+
+        <button class="primary-btn" (click)="addStaff()">+ Add</button>
+      </div>
+
+      <div class="staff-list" *ngIf="staffList.length; else noStaff">
+        <div class="staff-chip" *ngFor="let staff of staffList">
+          <div class="avatar">{{ getInitial(staff.name) }}</div>
+
+          <div class="staff-info">
+            <strong>{{ staff.name }}</strong>
+            <span>{{ staff.role }}</span>
+          </div>
+
+          <button
+            class="floor-btn"
+            [class.on]="staff.onFloor"
+            (click)="toggleFloor(staff)">
+            + Floor
+          </button>
+
+          <button class="remove-btn" (click)="removeStaff(staff.id)">×</button>
+        </div>
+      </div>
+
+      <ng-template #noStaff>
+        <p class="empty-text">
+          No staff added yet — add your team here so they show up as suggestions on the Tables page.
+        </p>
+      </ng-template>
+    </section>
+
+    <!-- Notifications -->
+    <section class="settings-card">
+      <h3>Notifications</h3>
+
+      <div class="toggle-row">
+        <span>Text guests when their table is ready</span>
+        <label class="switch">
+          <input type="checkbox" [(ngModel)]="notifications.textReady" />
+          <span></span>
+        </label>
+      </div>
+
+      <div class="toggle-row">
+        <span>Email me a nightly summary</span>
+        <label class="switch">
+          <input type="checkbox" [(ngModel)]="notifications.nightlySummary" />
+          <span></span>
+        </label>
+      </div>
+
+      <div class="toggle-row">
+        <span>Auto-remove no-shows after 15 min</span>
+        <label class="switch">
+          <input type="checkbox" [(ngModel)]="notifications.autoRemoveNoShows" />
+          <span></span>
+        </label>
+      </div>
+    </section>
+
+    <!-- Floor Plan Overview -->
+    <section class="settings-card">
+      <h3>Floor plan overview</h3>
+
+      <div class="info-row">
+        <span>Sections</span>
+        <strong>{{ floorOverview.sections }}</strong>
+      </div>
+
+      <div class="info-row">
+        <span>Total tables</span>
+        <strong>{{ floorOverview.totalTables }}</strong>
+      </div>
+
+      <div class="info-row">
+        <span>Total seats</span>
+        <strong>{{ floorOverview.totalSeats }}</strong>
+      </div>
+
+      <div class="info-row">
+        <span>Staff on file</span>
+        <strong>{{ staffOnFile }}</strong>
+      </div>
+    </section>
+
+    <!-- Guest Join Link -->
+    <section class="settings-card guest-link-card">
+      <h3>Guest join link</h3>
+      <p class="card-subtitle">
+        Guests scan this to join the waitlist from their phone — same flow as "Simulate online join."
+      </p>
+
+      <div class="qr-area">
+        <div class="qr-box">
+          <img
+            src="https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=dinerly.app/join/brothers-cafe"
+            alt="QR Code"
+          />
+        </div>
+
+        <div class="link-box">
+          <span>Link</span>
+          <strong>{{ guestJoinLink }}</strong>
+
+          <div class="link-actions">
+            <button class="soft-btn" (click)="copyLink()">Copy link</button>
+            <button class="soft-btn" (click)="downloadQrCode()">Download QR code</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </div>
+</div>

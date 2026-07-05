@@ -107,6 +107,7 @@ export interface SeatedGuest {
   preference: string;
   notes: string;
   status: string;
+  seatedAt: string;
 }
 
 export interface SeatedGuestResponse {
@@ -191,4 +192,9 @@ export interface guestReportsResponse {
   success: boolean;
   message: string;
   data: guestReportsPage;
+}
+
+export interface addTabletoRestaurantRequest {
+  tableNumber: string,
+  capacity: number
 }

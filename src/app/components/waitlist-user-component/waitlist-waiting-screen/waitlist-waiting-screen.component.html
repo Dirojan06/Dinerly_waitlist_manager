@@ -1,486 +1,167 @@
-<!-- desktop view  -->
-<div class="desktop-view">
-  <div class="waiting-page">
+<section class="content-grid">
 
-    <div class="waiting-header">
-      <div class="waiting-logo">
-        <img src="assets/dinerly.png" alt="Dinerly">
-        <span>Smart Waitlist, Seamless Dining</span>
+  <div class="left-area">
+
+    <div class="queue-card">
+
+      <p class="small-title">BROTHERS CAFÉ</p>
+
+      <h2>Your party of {{ guest?.partySize || 1 }}</h2>
+
+      <div class="custom-stepper">
+
+        <div class="step done">
+          <span><i class="fa-solid fa-check"></i></span>
+          <p>Joined</p>
+        </div>
+
+        <div class="line active"></div>
+
+        <div class="step" [class.active]="stepWaitingActive">
+          <span>2</span>
+          <p>Waiting</p>
+        </div>
+
+        <div class="line" [class.active]="stepNotifiedActive || stepSeatedActive"></div>
+
+        <div class="step" [class.active]="stepNotifiedActive">
+          <span>3</span>
+          <p>Notified</p>
+        </div>
+
+        <div class="line" [class.active]="stepSeatedActive"></div>
+
+        <div class="step" [class.active]="stepSeatedActive">
+          <span>4</span>
+          <p>Seated</p>
+        </div>
+
       </div>
 
-      <button class="help-btn" type="button">
-        <i class="fa-solid fa-headphones"></i>
-        Need help?
-      </button>
+      <ng-container *ngIf="guest?.status === 'PENDING'">
+        <h1 class="ready-title">Pending</h1>
+        <p class="time-label">Waiting for restaurant approval</p>
+      </ng-container>
+
+      <ng-container *ngIf="guest?.status === 'WAITING'">
+        <h1 class="big-time">{{ waitingMinutesOnly }}</h1>
+        <p class="time-label">estimated minutes remaining</p>
+
+        <div class="mini-stats">
+          <div>
+            <h3>#{{ guest?.position || 1 }}</h3>
+            <p>Your position</p>
+          </div>
+
+          <div>
+            <h3>{{ partiesAhead }}</h3>
+            <p>Parties ahead</p>
+          </div>
+        </div>
+      </ng-container>
+
+      <ng-container *ngIf="guest?.status === 'NOTIFIED'">
+        <h1 class="ready-title">Your table is ready!</h1>
+        <p class="time-label">Please visit the restaurant counter.</p>
+      </ng-container>
+
+      <ng-container *ngIf="guest?.status === 'SEATED'">
+        <h1 class="ready-title">You are seated</h1>
+        <p class="time-label">Enjoy your meal!</p>
+      </ng-container>
+
     </div>
 
-    <div class="waiting-panel">
+    <div class="bottom-actions">
+      <!-- <button class="edit-btn" type="button">Edit details</button> -->
 
-      <div class="queue-title"
-        *ngIf="guest?.status === 'PENDING' || guest?.status === 'WAITING' || guest?.status === 'NOTIFIED'">
-        <h1>Your Queue Progress</h1>
-        <p>We're saving you a great table!</p>
-      </div>
-
-      <h1 class="cancel-title" *ngIf="guest?.status === 'CANCELLED'">
-        Greetings from Dinerly
-      </h1>
-
-      <mat-horizontal-stepper class="queue-stepper" [selectedIndex]="activeStepIndex" linear="false"
-        labelPosition="bottom"
-        *ngIf="guest?.status === 'PENDING' || guest?.status === 'WAITING' || guest?.status === 'NOTIFIED'">
-
-        <mat-step>
-          <ng-template matStepLabel>Joined</ng-template>
-        </mat-step>
-
-        <mat-step>
-          <ng-template matStepLabel>Waiting</ng-template>
-        </mat-step>
-
-        <mat-step>
-          <ng-template matStepLabel>Notified</ng-template>
-        </mat-step>
-
-        <mat-step>
-          <ng-template matStepLabel>Seated</ng-template>
-        </mat-step>
-
-      </mat-horizontal-stepper>
-
-      <div class="desktop-grid">
-
-        <div class="main-card" *ngIf="guest?.status === 'PENDING'">
-          <div class="big-icon">
-            <i class="fa-regular fa-clock"></i>
-          </div>
-
-          <h3>WAITING FOR APPROVAL</h3>
-          <h2>Pending</h2>
-
-          <div class="notice-box">
-            <div class="notice-icon">
-              <i class="fa-solid fa-bell"></i>
-            </div>
-            <p>You will be notified once restaurant approval and your table is ready.</p>
-          </div>
-        </div>
-
-        <div class="main-card" *ngIf="guest?.status === 'WAITING'">
-          <div class="big-icon">
-            <i class="fa-regular fa-clock"></i>
-          </div>
-
-          <h3>ESTIMATED TIME REMAINING</h3>
-          <h2 class="time-text">{{ waitingTimerText }}</h2>
-          <span class="minutes-label">Minutes</span>
-
-          <div class="notice-box">
-            <div class="notice-icon">
-              <i class="fa-solid fa-bell"></i>
-            </div>
-            <p>You will be notified once restaurant approval and your table is ready.</p>
-          </div>
-        </div>
-
-        <div class="main-card" *ngIf="guest?.status === 'NOTIFIED'">
-          <div class="big-icon">
-            <i class="fa-solid fa-bell"></i>
-          </div>
-
-          <h3>TABLE READY</h3>
-          <h2>Your Table is Ready!</h2>
-
-          <div class="notice-box">
-            <div class="notice-icon">
-              <i class="fa-solid fa-chair"></i>
-            </div>
-            <p>Please visit the restaurant counter.</p>
-          </div>
-        </div>
-
-        <div class="desktop-side" *ngIf="guest?.status === 'WAITING'">
-
-          <div class="position-card">
-            <div class="position-item">
-              <div class="small-icon">
-                <i class="fa-solid fa-users"></i>
-              </div>
-              <div>
-                <span>YOUR POSITION</span>
-                <h3>#{{ guest.position }}</h3>
-              </div>
-            </div>
-
-            <div class="side-line"></div>
-
-            <div class="position-item">
-              <div class="small-icon">
-                <i class="fa-solid fa-users"></i>
-              </div>
-              <div>
-                <span>PARTIES AHEAD</span>
-                <h3>{{ partiesAhead }}</h3>
-              </div>
-            </div>
-          </div>
-
-          <div class="patience-card">
-            <div class="patience-icon">
-              <i class="fa-solid fa-wand-magic-sparkles"></i>
-            </div>
-
-            <div>
-              <h4>Thanks for your patience!</h4>
-              <p>Good things and great tables take time.</p>
-            </div>
-
-            <i class="fa-solid fa-chair table-art"></i>
-          </div>
-
-        </div>
-
-        <div class="main-card web-feedback-card" *ngIf="guest?.status === 'SEATED'">
-
-          <ng-container *ngIf="!feedbackSubmitted; else webFeedbackSuccess">
-
-            <div class="big-icon">
-              <i class="fa-solid fa-utensils"></i>
-            </div>
-
-            <h3>YOU ARE SEATED</h3>
-            <h2>Rate your experience</h2>
-
-            <div class="web-rating-row">
-              <button type="button" class="web-star-btn" *ngFor="let star of stars" [class.active]="star <= rating"
-                (click)="setRating(star)">
-                <i class="fa-star" [ngClass]="star <= rating ? 'fa-solid' : 'fa-regular'"></i>
-              </button>
-            </div>
-
-            <p class="web-rating-text" *ngIf="rating > 0">
-              You selected {{ rating }} star{{ rating > 1 ? 's' : '' }}
-            </p>
-
-            <textarea class="web-feedback-textarea" [(ngModel)]="comments" placeholder="Share your comments...">
-    </textarea>
-
-            <div class="web-tag-list">
-              <button type="button" class="web-tag-btn" *ngFor="let tag of feedbackTags"
-                [class.active]="selectedTags.includes(tag)" (click)="toggleTag(tag)">
-                {{ tag }}
-              </button>
-            </div>
-
-            <button type="button" class="web-submit-feedback-btn" [disabled]="isSubmittingFeedback"
-              (click)="submitFeedback()">
-              {{ isSubmittingFeedback ? 'Submitting...' : 'Submit Feedback' }}
-            </button>
-
-          </ng-container>
-
-          <ng-template #webFeedbackSuccess>
-            <div class="big-icon success-icon">
-              <i class="fa-solid fa-circle-check"></i>
-            </div>
-
-            <h3>THANK YOU</h3>
-            <h2>Feedback Submitted!</h2>
-
-            <div class="notice-box">
-              <div class="notice-icon">
-                <i class="fa-solid fa-heart"></i>
-              </div>
-              <p>Thanks for helping us improve your dining experience.</p>
-            </div>
-          </ng-template>
-
-        </div>
-
-      </div>
-
-      <div class="desktop-bottom-note">
-        <div class="notice-icon">
-          <i class="fa-solid fa-circle-info"></i>
-        </div>
-
-        <div>
-          <h4>Thank you for your patience</h4>
-          <p>We appreciate your time and can’t wait to serve you!</p>
-        </div>
-      </div>
-
-      <button class="leave-btn"
-        *ngIf="guest?.status == 'PENDING' || guest?.status === 'WAITING' || guest?.status === 'NOTIFIED'"
+      <button
+        class="cancel-btn"
+        type="button"
+        *ngIf="guest?.status === 'PENDING' || guest?.status === 'WAITING' || guest?.status === 'NOTIFIED'"
         (click)="openLeaveConfirm()">
-        <i class="fa-solid fa-right-from-bracket"></i>
-        Leave waitlist
+        Cancel my spot
       </button>
-
-      <button class="leave-btn" *ngIf="guest?.status == 'CANCELLED'" (click)="goBackButtonMethod()">
-        Go Back
-      </button>
-
     </div>
-
-    <p class="privacy-note">
-      <i class="fa-solid fa-shield-halved"></i>
-      We respect your privacy. No personal data is stored beyond what's needed.
-    </p>
 
   </div>
 
-  <div class="modal-backdrop" *ngIf="showLeaveConfirm">
-    <div class="leave-modal">
-      <h2>Leave waitlist?</h2>
-      <p>Do you want to leave the waitlist?</p>
+  <div class="right-column">
 
-      <div class="actions">
-        <button class="btn-cancel" (click)="closeLeaveConfirm()">Cancel</button>
+    <div class="text-alert">
+      <div class="alert-icon">
+        <i class="fa-regular fa-comment"></i>
+      </div>
 
-        <button class="btn-danger" [disabled]="isLeaving" (click)="confirmLeaveWaitlist()">
-          {{ isLeaving ? 'Leaving...' : 'Leave' }}
-        </button>
+      <div>
+        <h3>We'll text you when your table is ready</h3>
+        <p>Make sure your phone is nearby and notifications are turned on.</p>
       </div>
     </div>
-  </div>
-</div>
-<!-- mobile view -->
 
-<div class="mobile-screen-view">
-  <div class="waiting-page">
-
-    <div class="waiting-header">
-      <div class="waiting-logo">
-        <img src="assets/dinerly.png" alt="Dinerly">
-      </div>
-
-      <button class="help-btn" type="button">
-        <i class="fa-solid fa-headphones"></i>
-        Need help?
-      </button>
+    <div class="info-card">
+      <h3>Brothers Café</h3>
+      <p><i class="fa-solid fa-location-dot"></i> 123 Market St, Winnipeg</p>
+      <p><i class="fa-regular fa-clock"></i> Open until 10:00pm</p>
+      <p><i class="fa-solid fa-phone"></i> (204) 555-0142</p>
     </div>
 
-    <div class="waiting-screen">
+    <div class="details-card">
+      <h3>Your details</h3>
 
-      <div class="queue-title"
-        *ngIf="guest?.status === 'PENDING' || guest?.status === 'WAITING' || guest?.status === 'NOTIFIED'">
-        <h1>Your Queue Progress</h1>
-        <p>We're saving you a great table!</p>
+      <div>
+        <span>Name</span>
+        <b>{{ guestName }}</b>
       </div>
 
-      <h1 class="cancel-title" *ngIf="guest?.status === 'CANCELLED'">
-        Greetings from Dinerly
-      </h1>
-
-      <mat-horizontal-stepper class="queue-stepper" [selectedIndex]="activeStepIndex" linear="false"
-        labelPosition="bottom"
-        *ngIf="guest?.status === 'PENDING' || guest?.status === 'WAITING' || guest?.status === 'NOTIFIED'">
-
-        <mat-step>
-          <ng-template matStepLabel>Joined</ng-template>
-        </mat-step>
-
-        <mat-step>
-          <ng-template matStepLabel>Waiting</ng-template>
-        </mat-step>
-
-        <mat-step>
-          <ng-template matStepLabel>Notified</ng-template>
-        </mat-step>
-
-        <mat-step>
-          <ng-template matStepLabel>Seated</ng-template>
-        </mat-step>
-
-      </mat-horizontal-stepper>
-
-      <!-- PENDING CARD -->
-      <div class="main-card" *ngIf="guest?.status === 'PENDING'">
-        <div class="big-icon">
-          <i class="fa-regular fa-clock"></i>
-        </div>
-
-        <h3>WAITING FOR APPROVAL</h3>
-
-        <h2>Pending</h2>
-
-        <div class="notice-box">
-          <div class="notice-icon">
-            <i class="fa-solid fa-bell"></i>
-          </div>
-          <p>You will be notified once restaurant approval and your table is ready.</p>
-        </div>
+      <div>
+        <span>Phone</span>
+        <b>{{ guestPhone }}</b>
       </div>
 
-      <!-- WAITING CARD -->
-      <div class="main-card" *ngIf="guest?.status === 'WAITING'">
-        <div class="big-icon">
-          <i class="fa-regular fa-clock"></i>
-        </div>
-
-        <h3>ESTIMATED TIME REMAINING</h3>
-
-        <h2 class="time-text">{{ waitingTimerText }}</h2>
-
-        <span class="minutes-label">Minutes</span>
-
-        <div class="notice-box">
-          <div class="notice-icon">
-            <i class="fa-solid fa-bell"></i>
-          </div>
-          <p>You will be notified once restaurant approval and your table is ready.</p>
-        </div>
+      <div>
+        <span>Seating preference</span>
+        <b>{{ guestPreference }}</b>
       </div>
-
-      <!-- NOTIFIED CARD -->
-      <div class="main-card" *ngIf="guest?.status === 'NOTIFIED'">
-        <div class="big-icon">
-          <i class="fa-solid fa-bell"></i>
-        </div>
-
-        <h3>TABLE READY</h3>
-
-        <h2>Your Table is Ready!</h2>
-
-        <div class="notice-box">
-          <div class="notice-icon">
-            <i class="fa-solid fa-chair"></i>
-          </div>
-          <p>Please visit the restaurant counter.</p>
-        </div>
-      </div>
-
-      <!-- Seated card -->
-      <div class="main-card mobile-feedback-card" *ngIf="guest?.status === 'SEATED'">
-
-        <ng-container *ngIf="!feedbackSubmitted; else mobileFeedbackSuccess">
-
-          <div class="big-icon">
-            <i class="fa-solid fa-utensils"></i>
-          </div>
-
-          <h3>YOU ARE SEATED</h3>
-          <h2>How was your experience?</h2>
-
-          <div class="mobile-rating-row">
-            <button type="button" class="mobile-star-btn" *ngFor="let star of stars" [class.active]="star <= rating"
-              (click)="setRating(star)">
-              <i class="fa-star" [ngClass]="star <= rating ? 'fa-solid' : 'fa-regular'"></i>
-            </button>
-          </div>
-
-          <p class="mobile-rating-text" *ngIf="rating > 0">
-            You selected {{ rating }} star{{ rating > 1 ? 's' : '' }}
-          </p>
-
-          <textarea class="mobile-feedback-textarea" [(ngModel)]="comments" placeholder="Share your comments...">
-    </textarea>
-
-          <div class="mobile-tag-list">
-            <button type="button" class="mobile-tag-btn" *ngFor="let tag of feedbackTags"
-              [class.active]="selectedTags.includes(tag)" (click)="toggleTag(tag)">
-              {{ tag }}
-            </button>
-          </div>
-
-          <button type="button" class="mobile-submit-feedback-btn" [disabled]="isSubmittingFeedback"
-            (click)="submitFeedback()">
-            {{ isSubmittingFeedback ? 'Submitting...' : 'Submit Feedback' }}
-          </button>
-
-        </ng-container>
-
-        <ng-template #mobileFeedbackSuccess>
-          <div class="big-icon success-icon">
-            <i class="fa-solid fa-circle-check"></i>
-          </div>
-
-          <h3>THANK YOU</h3>
-          <h2>Feedback Submitted!</h2>
-
-          <div class="notice-box">
-            <div class="notice-icon">
-              <i class="fa-solid fa-heart"></i>
-            </div>
-            <p>Thanks for helping us improve your dining experience.</p>
-          </div>
-        </ng-template>
-
-      </div>
-
-      <!-- POSITION CARD -->
-      <div class="position-card" *ngIf="guest?.status === 'WAITING'">
-        <div class="position-item">
-          <div class="small-icon">
-            <i class="fa-regular fa-star"></i>
-          </div>
-          <span>YOUR POSITION</span>
-          <h3>#{{ guest.position }}</h3>
-        </div>
-
-        <div class="position-divider"></div>
-
-        <div class="position-item">
-          <div class="small-icon">
-            <i class="fa-solid fa-users"></i>
-          </div>
-          <span>PARTIES AHEAD</span>
-          <h3>{{ partiesAhead }}</h3>
-        </div>
-      </div>
-
-      <!-- PATIENCE CARD -->
-      <div class="patience-card"
-        *ngIf="guest?.status === 'PENDING' || guest?.status === 'WAITING' || guest?.status === 'NOTIFIED'">
-        <div class="patience-icon">
-          <i class="fa-solid fa-wand-magic-sparkles"></i>
-        </div>
-
-        <div>
-          <h4>Thanks for your patience!</h4>
-          <p>Good things and great tables take time.</p>
-        </div>
-
-        <i class="fa-solid fa-chair table-art"></i>
-      </div>
-
-      <!-- CANCELLED -->
-      <div class="main-card" *ngIf="guest?.status === 'CANCELLED'">
-        <div class="big-icon">
-          <i class="fa-solid fa-circle-info"></i>
-        </div>
-
-        <h2>Please Join the Waitlist</h2>
-      </div>
-
     </div>
 
-    <button class="leave-btn"
-      *ngIf="guest?.status == 'PENDING' || guest?.status === 'WAITING' || guest?.status === 'NOTIFIED'"
-      (click)="openLeaveConfirm()">
-      <i class="fa-solid fa-right-from-bracket"></i>
-      Leave waitlist
+    <button class="menu-btn" type="button">
+      <i class="fa-solid fa-utensils"></i>
+      See full menu
+      <i class="fa-solid fa-chevron-right"></i>
     </button>
 
-    <button class="leave-btn" *ngIf="guest?.status == 'CANCELLED'" (click)="goBackButtonMethod()">
-      Go Back
-    </button>
+    <div class="reward-card">
+      <div class="gift">🎁</div>
 
-  </div>
-
-  <div class="modal-backdrop" *ngIf="showLeaveConfirm">
-    <div class="leave-modal">
-      <h2>Leave waitlist?</h2>
-      <p>Do you want to leave the waitlist?</p>
-
-      <div class="actions">
-        <button class="btn-cancel" (click)="closeLeaveConfirm()">Cancel</button>
-
-        <button class="btn-danger" [disabled]="isLeaving" (click)="confirmLeaveWaitlist()">
-          {{ isLeaving ? 'Leaving...' : 'Leave' }}
-        </button>
+      <div>
+        <h3>Earn 15 points when you're seated</h3>
+        <p>Sign in to start collecting Dinerly Rewards points tonight.</p>
       </div>
     </div>
+
   </div>
+
+</section>
+
+<div class="modal-backdrop" *ngIf="showLeaveConfirm">
+
+  <div class="leave-modal">
+    <h2>Cancel your spot?</h2>
+
+    <p>Do you want to cancel your waitlist spot?</p>
+
+    <div class="actions">
+      <button class="btn-cancel" type="button" (click)="closeLeaveConfirm()">No</button>
+
+      <button
+        class="btn-danger"
+        type="button"
+        [disabled]="isLeaving"
+        (click)="confirmLeaveWaitlist()">
+        {{ isLeaving ? 'Cancelling...' : 'Yes, cancel' }}
+      </button>
+    </div>
+  </div>
+
 </div>

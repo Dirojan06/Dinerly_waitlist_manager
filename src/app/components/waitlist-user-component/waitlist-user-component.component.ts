@@ -1,52 +1,108 @@
-import { Component } from '@angular/core';
-import { NavigationEnd, Router } from '@angular/router';
-import { filter } from 'rxjs';
+import { Component, OnInit } from '@angular/core';
 
 @Component({
   selector: 'app-waitlist-user-component',
   templateUrl: './waitlist-user-component.component.html',
   styleUrls: ['./waitlist-user-component.component.css']
 })
-export class WaitlistUserComponentComponent {
+export class WaitlistUserComponentComponent implements OnInit {
 
-  restaurantId = 1;
-  isWaitingRoute = false;
   isDarkMode = false;
-  constructor(private router: Router) {
-    this.isWaitingRoute = this.router.url.includes('/user/waiting');
-    this.router.events
-      .pipe(filter(event => event instanceof NavigationEnd))
-      .subscribe((event: any) => {
-        this.isWaitingRoute = event.urlAfterRedirects.includes('/user/waiting');
-      });
-    const savedTheme = localStorage.getItem('dinerly-theme');
+  activeTab: 'WAITLIST' | 'MENU' | 'DISCOUNT' = 'WAITLIST';
 
+  guest: any = null;
+
+  isLoggedGuest = false;
+
+  showAccessPopup = false;
+
+
+
+  ngOnInit(): void {
+    const savedTheme = localStorage.getItem('dinerly-theme');
     this.isDarkMode = savedTheme === 'dark';
-    document.body.classList.toggle(
-      'dark-mode',
-      this.isDarkMode
-    );
+
+    document.body.classList.toggle('dark-mode', this.isDarkMode);
+    this.loadGuest();
+  }
+
+  loadGuest(): void {
+
+    const guestData = localStorage.getItem('waitlistGuest');
+
+    if (guestData) {
+
+      this.guest = JSON.parse(guestData);
+
+      this.isLoggedGuest = true;
+
+    } else {
+
+      this.guest = null;
+
+      this.isLoggedGuest = false;
+
+    }
+
+  }
+
+  changeTab(tab: 'WAITLIST' | 'MENU' | 'DISCOUNT'): void {
+
+    if (!this.isLoggedGuest) {
+
+      this.showAccessPopup = true;
+
+      return;
+
+    }
+
+    this.activeTab = tab;
+
   }
 
   toggleTheme(): void {
-
     this.isDarkMode = !this.isDarkMode;
+
     localStorage.setItem(
       'dinerly-theme',
       this.isDarkMode ? 'dark' : 'light'
     );
 
-    document.body.classList.toggle(
-      'dark-mode',
-      this.isDarkMode
-    );
+    document.body.classList.toggle('dark-mode', this.isDarkMode);
   }
 
-  onJoinedWaitlist(guest: any): void {
+  onGuestJoined(guest: any): void {
 
-    localStorage.setItem('waitlistGuest', JSON.stringify(guest));
-    localStorage.setItem('waitlistRestaurantId', this.restaurantId.toString());
-    this.router.navigate(['/user/waiting']);
+    this.guest = guest;
 
+    this.isLoggedGuest = true;
+
+    this.activeTab = 'WAITLIST';
+
+  }
+
+  logoutGuest(): void {
+
+    localStorage.removeItem('waitlistGuest');
+
+    localStorage.removeItem('waitlistRestaurantId');
+
+    this.guest = null;
+
+    this.isLoggedGuest = false;
+
+    this.activeTab = 'WAITLIST';
+
+  }
+
+  closeAccessPopup(): void {
+
+    this.showAccessPopup = false;
+
+  }
+
+  onLeaveSuccess(): void {
+    localStorage.removeItem('waitlistGuest');
+    localStorage.removeItem('waitlistRestaurantId');
   }
 }

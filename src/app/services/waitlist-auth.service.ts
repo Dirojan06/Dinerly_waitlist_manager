@@ -37,20 +37,6 @@ export class WaitlistAuthService {
     );
   }
 
-  loginAsGuest(): void {
-    const guestUser: AuthUser = {
-      id: 'guest',
-      email: 'guest@example.com',
-      username: 'Guest',
-      fullName: 'Guest User',
-      phone: '123-456-7890',
-      role: 'guest'
-    };
-
-    localStorage.setItem(this.USER_KEY, JSON.stringify(guestUser));
-    this.currentUserSubject.next(guestUser);
-  }
-
   getToken(): string | null {
     return localStorage.getItem(this.TOKEN_KEY);
   }

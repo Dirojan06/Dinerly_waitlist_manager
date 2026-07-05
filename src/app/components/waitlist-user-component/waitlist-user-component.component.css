@@ -1,162 +1,105 @@
-/* :host {
-  display: block;
-  font-family: 'DM Sans', sans-serif;
-
-  --primary: #4b12c4;
-  --primary-dark: #2b0b78;
-  --primary-soft: #efe7ff;
-  --text-dark: #09051f;
-  --text-muted: #6f6a7c;
-  --card-bg: #ffffff;
-  --page-bg: #fbf9ff;
-  --border: #eee8f7;
-  --shadow: 0 16px 40px rgba(75, 18, 196, 0.08);
-}
-
-.app-wrapper {
-  min-height: 100vh;
-  background:
-    radial-gradient(circle at top left, #f1e7ff 0, transparent 32%),
-    #fbf9ff;
-}
-
-.main-layout {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) 340px;
-  gap: 24px;
-  max-width: 1440px;
-  margin: 0 auto;
-  padding: 20px;
-
-  @media (max-width: 1024px) {
-    grid-template-columns: 1fr;
-  }
-}
-
-.content-area {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-}
-
-.sidebar-area {
-  @media (max-width: 1024px) {
-    display: none;
-  }
-} */
-
 :host {
   display: block;
   font-family: 'DM Sans', sans-serif;
-
-  --primary: #4b12c4;
-  --primary-light: #efe7ff;
-  --text: #09051f;
-  --muted: #5f5870;
-  --border: #eee8f7;
-  --card: #ffffff;
-  --bg: #fbf9ff;
 }
 
 .app-wrapper {
   min-height: 100vh;
-  background: #fbf9ff;
-}
-.guest-page {
-  max-width: 1480px;
-  margin: 0 auto;
-  padding: 18px;
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
+  background: #ffffff;
 }
 
-.top-grid {
+.customer-shell {
+  min-height: 100vh;
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 420px;
-  gap: 20px;
-  align-items: stretch;
-}
-.main-layout {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) 400px;
-  gap: 20px;
-  max-width: 1480px;
-  margin: 0 auto;
-  padding: 18px;
+  grid-template-columns: 255px 1fr;
+  background: #ffffff;
 }
 
-.content-area {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-}
-
-.sidebar-area {
+.customer-main {
+  padding: 36px 44px;
   min-width: 0;
 }
 
-@media (max-width: 1024px) {
-  .main-layout {
+@media (max-width: 900px) {
+  .customer-shell {
     grid-template-columns: 1fr;
   }
 
-  .sidebar-area {
-    display: none;
-  }
-}
-
-@media (max-width: 600px) {
-  .main-layout {
-    padding: 12px;
-    gap: 14px;
-  }
-}
-
-@media (max-width: 768px) {
-  .app-wrapper {
-    min-height: 100vh;
-    overflow-x: hidden;
-    padding-bottom: 24px;
-  }
-
-  .guest-page {
-    width: 100%;
-    max-width: 100%;
-    padding: 0 22px 24px;
-    margin: 0;
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-  }
-
-  .top-grid {
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-  }
-
-  app-waitlist-user-hero,
-  app-waitlist-user-sidebar,
-  app-waitlist-user-menu {
-    display: block;
-    width: 100%;
-  }
-
-  app-waitlist-user-banner {
+  app-waitlist-user-sidebar {
     display: none;
   }
 
-  .app-wrapper.light-mode {
-    background: #fbf8ff;
+  .customer-main {
+    padding: 18px;
   }
+}
 
-  .app-wrapper.dark-mode {
-    background:
-      linear-gradient(rgba(5, 0, 18, 0.78), rgba(8, 1, 31, 0.96)),
-      url('../../../assets/reserved.png');
-    background-size: cover;
-    background-position: center top;
-    background-attachment: fixed;
-  }
+.access-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 15, 20, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+.access-popup {
+  width: 360px;
+  max-width: calc(100% - 32px);
+  background: #ffffff;
+  border-radius: 22px;
+  padding: 30px 26px;
+  text-align: center;
+  position: relative;
+  box-shadow: 0 25px 70px rgba(20, 20, 40, 0.18);
+}
+
+.access-close {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  border: 0;
+  background: #f3f0fb;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.access-icon {
+  width: 62px;
+  height: 62px;
+  border-radius: 50%;
+  background: #f1e8ff;
+  color: #5b16c7;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 16px;
+  font-size: 24px;
+}
+
+.access-popup h2 {
+  margin: 0 0 8px;
+  font-size: 22px;
+  font-weight: 800;
+  color: #202027;
+}
+
+.access-popup p {
+  margin: 0 0 24px;
+  color: #71717a;
+  font-size: 15px;
+}
+
+.access-btn {
+  width: 100%;
+  height: 46px;
+  border: 0;
+  border-radius: 12px;
+  background: #5b16c7;
+  color: #fff;
+  font-weight: 800;
+  cursor: pointer;
 }

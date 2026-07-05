@@ -1,4 +1,5 @@
-<div class="restaurant-modal-backdrop" *ngIf="visible">
+<app-dinerly-loader *ngIf="isLoading"></app-dinerly-loader>
+<div  class="restaurant-modal-backdrop" *ngIf="visible && !isLoading">
   <div class="restaurant-modal-container">
 
     <div class="modal-header">

@@ -1,35 +1,76 @@
-<section class="hero">
+<header class="topbar">
+  <h4>Waitlist</h4>
 
-  <div class="hero-content">
+  <div class="top-actions">
+  <div class="profile-wrapper">
 
-    <h1>
-      A better table <br />
-      awaits you
-    </h1>
-
-    <div class="title-line"></div>
-    <div class="stats-card">
-
-      <div class="stat">
-        <div class="stat-icon">
-          <i class="fa-solid fa-user-group"></i>
-        </div>
-        <strong>{{ partiesWaiting }}</strong>
-        <span>parties waiting</span>
-      </div>
-
-      <div class="stat-divider"></div>
-
-      <div class="stat">
-        <div class="stat-icon">
-          <i class="fa-regular fa-clock"></i>
-        </div>
-        <strong>{{ waitMinutes }} <small>min</small></strong>
-        <span>average wait</span>
-      </div>
-
+    <div class="profile-pill" (click)="toggleProfileMenu()">
+      <span>{{ guestInitial }}</span>
+      <b>{{ guestShortName }}</b>
+      <i class="fa-solid fa-chevron-down"></i>
     </div>
 
+    <div class="profile-dropdown" *ngIf="showProfileMenu">
+      <button type="button">
+        <i class="fa-regular fa-gear"></i>
+        Profile settings
+      </button>
+
+      <hr>
+
+      <button type="button" class="logout-btn" (click)="logoutGuest()">
+        <i class="fa-solid fa-arrow-right-from-bracket"></i>
+        Logout
+      </button>
+    </div>
+
+  </div>
+</div>
+</header>
+
+<section class="restaurant-hero">
+
+  <img src="assets/reserved.png" alt="Restaurant">
+
+  <button class="slider-btn left" type="button">
+    <i class="fa-solid fa-chevron-left"></i>
+  </button>
+
+  <button class="slider-btn right" type="button">
+    <i class="fa-solid fa-chevron-right"></i>
+  </button>
+
+  <span class="chef-pill">Dining room</span>
+
+  <div class="dots">
+    <span></span>
+    <span class="active"></span>
+    <span></span>
+  </div>
+
+</section>
+
+<section class="restaurant-info">
+
+  <div class="restaurant-title">
+    <div class="avatar">B</div>
+
+    <div>
+      <h1>Brothers Café</h1>
+      <p>Live wait info & menu — updated in real time</p>
+    </div>
+  </div>
+
+  <div class="stats-boxes">
+    <div class="stat purple">
+      <h2>{{ partiesWaiting }}</h2>
+      <p>parties waiting</p>
+    </div>
+
+    <div class="stat">
+      <h2>~{{ waitMinutes }}</h2>
+      <p>min wait</p>
+    </div>
   </div>
 
 </section>

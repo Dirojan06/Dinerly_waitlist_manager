@@ -1,360 +1,559 @@
-<div class="waitlist-page">
-  <div class="page-header">
-    <div>
-      <div class="title-row">
-        <h1>Live Waitlist</h1>
-        <span class="live-badge">Live</span>
+<app-dinerly-loader *ngIf="isLoading"></app-dinerly-loader>
+<div *ngIf="!isLoading" class="live-waitlist-page">
+
+  <!-- HEADER -->
+  <header class="waitlist-header">
+
+    <div class="header-title">
+      <h1>Waitlist</h1>
+
+      <div class="time-pill">
+        <span></span>
+        {{ currentTimeOnly }}
       </div>
-      <p>Real-time view of all guests in your waitlist</p>
     </div>
 
     <div class="header-actions">
-      <button class="date-btn">{{ currentDateTime }}</button>
+      <!-- <button class="simulate-btn" type="button" (click)="modalService.open()">
+        + Simulate online join
+      </button> -->
+
+      <button class="walkin-btn" type="button" (click)="modalService.open()">
+        <i class="fa-solid fa-plus"></i>
+        Add Walk-in
+      </button>
+
+      <button class="restaurant-btn" type="button">
+        <span>B</span>
+        Brothers Café
+        <i class="fa-solid fa-chevron-down"></i>
+      </button>
+
+      <button class="walkin-btn" (click)="logout()">Logout</button>
     </div>
-  </div>
 
-  <div class="section-grid">
-    <div class="scroll-container">
+  </header>
 
-      <div class="waitlist-card pending">
+  <!-- NEW REQUEST -->
+  <section class="request-banner" *ngIf="latestPendingGuest">
 
-        <div class="card-header">
-          <div class="d-flex">
-            <div>
-              <h2>⏳ Pending <span>{{ pendingGuests.length }}</span></h2>
-              <p>Awaiting approval</p>
-            </div>
+    <div class="request-info">
+      <div class="request-icon">
+        <i class="fa-regular fa-calendar-days"></i>
+      </div>
 
-          </div>
-          <div class="header-actions">
-            <button class="refresh-btn" (click)="loadPendingGuests()" [disabled]="isLoading">Refresh</button>
-          </div>
-
-        </div>
-
-        <div class="notify-card" *ngFor="let guest of pagedPendingGuests; trackBy: trackBypendingGuest">
-          <div class="avatar" [style.color]="getAvatarColor(guest.id).color">
-            {{ (guest.id) }}
-          </div>
-          <div class="notify-info">
-            <div class="notify-name-row">
-              <span class="notify-name">{{ guest.guestName }}</span>
-              <span class="status-badge pending" *ngIf="guest.status === 'PENDING'">Pending</span>
-            </div>
-            <div class="notify-meta">
-              {{ guest.partySize }} guests ·{{ guest.preference.toLocaleLowerCase() }}
-            </div>
-            <div class="notify-meta">
-              {{guest.notes.toLocaleLowerCase() }} · {{ guest.guestPhone }}
-            </div>
-          </div>
-          <div class="notify-actions">
-            <button class="approve-btn" (click)="openApproveModal(guest)">✓ </button>
-            <button class="reject-btn" (click)="openRejectModal(guest)">✕ </button>
-          </div>
-        </div>
-        <div class="card-footer">
-          Pending guests require approval before joining the waitlist.
-        </div>
-        <div class="pagination-row" *ngIf="pendingGuests.length > itemsPerPage">
-          <button (click)="changePage('pending', 'prev')" [disabled]="pendingPage === 1">
-            Prev
-          </button>
-          <span>Page {{ pendingPage }} / {{ pendingTotalPages }}</span>
-          <button (click)="changePage('pending', 'next')" [disabled]="pendingPage === pendingTotalPages">
-            Next
-          </button>
-        </div>
+      <div>
+        <p>NEW WAITLIST REQUEST</p>
+        <h2>
+          {{ latestPendingGuest.guestName }} — party of {{ latestPendingGuest.partySize }}
+        </h2>
+        <span>
+          {{ latestPendingGuest.guestPhone }} · joined via QR code
+        </span>
       </div>
     </div>
 
+    <div class="request-actions">
+      <button class="decline-btn" type="button" (click)=" showRejectBox()">
+        <i class="fa-solid fa-xmark"></i>
+        Decline
+      </button>
 
-    <div class="scroll-container">
+      <button class="approve-btn" type="button" (click)="openPendingGuest(latestPendingGuest)">
+        <i class="fa-solid fa-check"></i>
+        Approve
+      </button>
+    </div>
 
-      <div class="waitlist-card waiting">
-        <div class="card-header">
-          <div class="d-flex">
-            <div>
-              <h2>🕘 Waiting <span>{{ waitingGuests.length }}</span></h2>
-              <p>Approved • Waiting for availability</p>
-            </div>
+  </section>
 
-          </div>
+  <!-- STATS -->
+  <section class="stats-grid">
 
-          <div class="header-actions">
-            <button class="refresh-btn" (click)="loadWaitingGuests()" [disabled]="isLoading">Refresh</button>
-          </div>
-        </div>
-
-        <div class="notify-card" *ngFor="let guest of pagedWaitingGuests; trackBy: trackBywaitingGuest">
-          <div class="avatar" [style.color]="getAvatarColor(guest.id).color">
-            {{ (guest.id) }}
-          </div>
-          <div class="notify-info">
-            <div class="notify-name-row">
-              <span class="notify-name">{{ guest.guestName }}</span>
-              <span class="status-badge waiting" *ngIf="guest.status === 'WAITING'">Waiting</span>
-            </div>
-            <div class="notify-meta">
-              {{ guest.partySize }} guests · estimated waiting time : {{ guest.estimatedWaitTime }} min
-            </div>
-            <div class="notify-meta">
-              {{ guest.guestPhone }}
-            </div>
-          </div>
-          <div class="notify-actions">
-            <button class="notify-btn" (click)="notifyToGuestCall(guest.id,guest.estimatedWaitTime,guest.position)">🔔
-              Notify</button>
-          </div>
-        </div>
-
-        <div class="card-footer">These guests are waiting for a table.</div>
+    <div class="stat-card purple-card">
+      <div class="stat-icon">
+        <i class="fa-solid fa-users"></i>
       </div>
-      <div class="pagination-row" *ngIf="waitingGuests.length > itemsPerPage">
-        <button (click)="changePage('waiting', 'prev')" [disabled]="waitingPage === 1">
-          Prev
-        </button>
 
-        <span>Page {{ waitingPage }} / {{ waitingTotalPages }}</span>
-
-        <button (click)="changePage('waiting', 'next')" [disabled]="waitingPage === waitingTotalPages">
-          Next
-        </button>
+      <div>
+        <h2>{{ dashboardData.totalWaiting }}</h2>
+        <p>parties waiting</p>
       </div>
     </div>
 
-
-    <div class="scroll-container">
-      <div class="waitlist-card notified">
-        <div class="card-header">
-          <div>
-            <h2>🔔 Notified <span>{{ notifiedGuests.length }}</span></h2>
-            <p>Notified • Awaiting arrival</p>
-          </div>
-          <div class="header-actions">
-            <button class="refresh-btn" (click)="loadNotifiedGuests()" [disabled]="isLoading"> Refresh</button>
-          </div>
-        </div>
-
-        <div class="notify-card" *ngFor="let guest of pagedNotifiedGuests; trackBy: trackBynotifyGuest">
-
-          <div class="avatar" [style.color]="getAvatarColor(guest.id).color">
-            {{ guest.id }}
-          </div>
-
-          <div class="notify-info">
-            <div class="notify-name-row">
-              <span class="notify-name">{{ guest.guestName }}</span>
-              <span class="status-badge nofity" *ngIf="guest.status === 'NOTIFIED'">
-                Notify
-              </span>
-            </div>
-
-            <div class="notify-meta">
-              {{ guest.partySize }} guests · {{ guest.guestPhone }}
-            </div>
-
-            <div class="notify-time">
-              Notified at: {{ formatDateTime(guest.notifiedAt) }}
-            </div>
-          </div>
-
-          <div class="notify-actions">
-            <button class="seat-btn" (click)="openAvailableTableModal(guest)">
-              Seat
-            </button>
-            <button class="delay-btn">
-              Delay
-            </button>
-          </div>
-
-        </div>
-
-        <div class="card-footer">Guests have been notified. Update wait time if there is a delay.</div>
+    <div class="stat-card">
+      <div class="stat-icon soft">
+        <i class="fa-regular fa-clock"></i>
       </div>
-      <div class="pagination-row" *ngIf="notifiedGuests.length > itemsPerPage">
-        <button (click)="changePage('notified', 'prev')" [disabled]="notifiedPage === 1">
-          Prev
-        </button>
 
-        <span>Page {{ notifiedPage }} / {{ notifiedTotalPages }}</span>
-
-        <button (click)="changePage('notified', 'next')" [disabled]="notifiedPage === notifiedTotalPages">
-          Next
-        </button>
+      <div>
+        <h2>~{{ dashboardData.averageWaitTime }} min</h2>
+        <p>average wait tonight</p>
       </div>
     </div>
 
-    <div class="scroll-container">
-      <div class="waitlist-card seated">
-        <div class="card-header">
-          <div>
-            <h2>🪑 Seated Today <span>{{ seatedGuests.length }}</span></h2>
-            <p>Guests who have been seated</p>
-          </div>
-          <div class="header-actions">
-            <button class="refresh-btn" (click)="loadSeatedGuests()" [disabled]="isLoading"> Refresh</button>
-          </div>
-        </div>
-
-
-        <div class="notify-card" *ngFor="let guest of pagedSeatedGuests; trackBy: trackByseatedGuest">
-          <div class="avatar" class="avatar">
-            {{ (guest.id) }}
-          </div>
-          <div class="notify-info">
-            <div class="notify-name-row">
-              <span class="notify-name">{{ guest.guestName }}</span>
-              <span class="status-badge seated" *ngIf="guest.status === 'SEATED'">Seated</span>
-            </div>
-            <div class="notify-meta">
-              {{ guest.partySize }} guests · {{ guest.guestPhone }}
-            </div>
-          </div>
-        </div>
-
-        <div class="card-footer">Guests seated today.</div>
+    <div class="stat-card">
+      <div class="stat-icon soft">
+        <i class="fa-solid fa-table-cells"></i>
       </div>
-      <div class="pagination-row" *ngIf="seatedGuests.length > itemsPerPage">
-        <button (click)="changePage('seated', 'prev')" [disabled]="seatedPage === 1">
-          Prev
-        </button>
 
-        <span>Page {{ seatedPage }} / {{ seatedTotalPages }}</span>
+      <div class="table-stat">
+        <h2>{{ tableStats.open }}/{{ tableStats.total }}</h2>
+        <p>tables open</p>
 
-        <button (click)="changePage('seated', 'next')" [disabled]="seatedPage === seatedTotalPages">
-          Next
-        </button>
+        <div class="table-progress">
+          <span [style.width.%]="tableOpenPercentage"></span>
+        </div>
       </div>
     </div>
 
-    <!-- //////////////////////////////////////////////////////////////////////////// -->
-
-    <div class="scroll-container">
-      <div class="waitlist-card cancelled">
-        <div class="card-header">
-          <div>
-            <h2>🪑 Cancelled Today <span>{{ cancelledGuest.length }}</span></h2>
-            <p>Guests who have been cancelled today</p>
-          </div>
-          <div class="header-actions">
-            <button class="refresh-btn" (click)="loadCancelledGuests()" [disabled]="isLoading"> Refresh</button>
-          </div>
-        </div>
-
-
-        <div class="notify-card" *ngFor="let guest of pagedCancelledGuests ; trackBy: trackBycancelledGuest">
-          <div class="avatar" class="avatar">
-            {{ (guest.id) }}
-          </div>
-          <div class="notify-info">
-            <div class="notify-name-row">
-              <span class="notify-name">{{ guest.guestName }}</span>
-              <span class="status-badge cancelled" *ngIf="guest.status === 'CANCELLED'">CANCELLED</span>
-            </div>
-            <div class="notify-meta">
-              {{ guest.partySize }} guests · {{ guest.guestPhone }}
-            </div>
-          </div>
-        </div>
-
+    <div class="stat-card">
+      <div class="stat-icon soft">
+        <i class="fa-solid fa-check"></i>
       </div>
-      <div class="pagination-row" *ngIf="cancelledGuest.length > itemsPerPage">
-        <button (click)="changePage('cancelled', 'prev')" [disabled]="seatedPage === 1">
-          Prev
-        </button>
 
-        <span>Page {{ cancelledPage }} / {{ cancelledTotalPages }}</span>
-
-        <button (click)="changePage('cancelled', 'next')" [disabled]="cancelledPage === cancelledTotalPages">
-          Next
-        </button>
+      <div>
+        <h2>{{ dashboardData.seatedToday }}</h2>
+        <p>seated today</p>
       </div>
     </div>
-  </div>
 
-  <div class="bottom-summary">
-    <div>Total in waitlist <b>{{ pendingGuests.length + waitingGuests.length + notifiedGuests.length +
-        seatedGuests.length }}</b></div>
-    <div>⏳ Pending <b>{{ pendingGuests.length }}</b></div>
-    <div>🕘 Waiting <b>{{ waitingGuests.length }}</b></div>
-    <div>🔔 Notified <b>{{ notifiedGuests.length }}</b></div>
-    <div>🪑 Seated Today <b>{{ seatedGuests.length }}</b></div>
-  </div>
+  </section>
+
+  <!-- TABLE HEADER -->
+  <section class="table-header">
+    <div>PARTY</div>
+    <div>SIZE</div>
+    <div>WAIT</div>
+    <div>STATUS</div>
+    <div></div>
+  </section>
+
+  <!-- LIST -->
+  <section class="guest-list">
+
+    <div class="guest-row" *ngFor="let guest of liveWaitlistGuests; trackBy: trackByGuest"
+      [ngClass]="['status-' + (guest.status || '').toLowerCase(),recentChangedGuestId === guest.id ? 'row-changed' : '']">
+
+      <!-- PARTY -->
+      <div class="party-cell">
+        <div class="guest-avatar">
+          {{ getGuestInitials(guest.guestName) }}
+        </div>
+
+        <div class="guest-info">
+          <div class="guest-name-line">
+            <strong>{{ guest.guestName }}</strong>
+
+            <span class="guest-tag">
+              {{ guest.status === 'WAITING' ? 'Waiting' : guest.status === 'NOTIFIED' ? 'Notified' : guest.status ===
+              'SEATED' ? 'Seated' : '' }}
+            </span>
+          </div>
+
+          <p>{{ guest.notes }} . {{ guest.guestPhone }}</p>
+        </div>
+      </div>
+
+      <!-- SIZE -->
+      <div class="size-cell">
+        {{ guest.partySize }}
+      </div>
+
+
+      <!-- WAIT -->
+      <div class="wait-cell">
+        <strong>{{ guest.estimatedWaitTime || '-' }} min</strong>
+        <p>joined {{ formatTime(guest.joinedAt || guest.approvedAt) }}</p>
+      </div>
+
+      <!-- STATUS / PREFERENCE -->
+      <div class="status-cell">
+        <i [ngClass]="getPreferenceIcon(guest.preference)"></i>
+        {{ getPreferenceLabel(guest.preference) }}
+      </div>
+
+      <!-- ACTIONS -->
+      <div class="action-cell">
+
+        <button class="notify-action" type="button" *ngIf="guest.status === 'WAITING'" (click)="notifyGuest(guest)">
+          <i class="fa-regular fa-paper-plane"></i>
+          Notify
+        </button>
+
+        <button class="seat-action" type="button" *ngIf="guest.status === 'NOTIFIED'"
+          (click)="openAvailableTableModal(guest)">
+          <i class="fa-solid fa-check"></i>
+          Seat
+        </button>
+
+        <!-- <button
+          class="remove-action"
+          type="button"
+          *ngIf="guest.status === 'WAITING' || guest.status === 'NOTIFIED'"
+          (click)="openRemoveGuest(guest)">
+          <i class="fa-solid fa-xmark"></i>
+        </button> -->
+
+        <button class="action-btn sms" *ngIf="guest.status === 'WAITING' || guest.status === 'NOTIFIED'">
+          SMS
+        </button>
+
+        <button class="action-btn call" *ngIf="guest.status === 'WAITING' || guest.status === 'NOTIFIED'">
+          Call
+        </button>
+
+      </div>
+
+    </div>
+
+    <div class="empty-state" *ngIf="liveWaitlistGuests.length === 0">
+      No waiting guests found.
+    </div>
+
+  </section>
+
+  <section class="history-summary-grid">
+
+    <!-- SEATED -->
+    <div class="summary-card seated-card">
+      <h3>Seated ({{ seatedGuests.length }})</h3>
+
+      <div class="summary-header">
+        <span>#</span>
+        <span>Guest</span>
+        <span>Party size</span>
+        <span>Seated at</span>
+        <span>Actions</span>
+      </div>
+
+      <div class="summary-row" *ngFor="let guest of seatedGuests.slice(0, 3); let i = index">
+        <span>{{ i + 1 }}</span>
+
+        <div>
+          <strong>{{ guest.guestName }}</strong>
+          <p>{{ guest.guestPhone }}</p>
+        </div>
+
+        <span>👥 {{ guest.partySize }}</span>
+
+        <strong>{{ formatTime(guest.seatedAt) }}</strong>
+
+        <div class="summary-actions">
+          <span class="completed-pill">Completed</span>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- CANCELLED -->
+    <div class="summary-card cancelled-card">
+      <h3>Cancelled ({{ cancelledGuests.length }})</h3>
+
+      <div class="summary-header cancelled">
+        <span>#</span>
+        <span>Guest</span>
+        <span>Party size</span>
+        <span>Cancelled at</span>
+        <span>Reason</span>
+      </div>
+
+      <div class="summary-row" *ngFor="let guest of cancelledGuests.slice(0, 3); let i = index">
+        <span>{{ i + 1 }}</span>
+
+        <div>
+          <strong>{{ guest.guestName }}</strong>
+          <p>{{ guest.guestPhone }}</p>
+        </div>
+
+        <span>👥 {{ guest.partySize }}</span>
+
+      </div>
+    </div>
+
+  </section>
+
 </div>
 
+<!-- PENDING / DECLINE POPUP -->
+<div class="modal-backdrop" *ngIf="showGuestPopup">
+  <div class="guest-modal" *ngIf="selectedGuest">
 
-<div class="modal-backdrop" *ngIf="showApproveModal">
-  <div class="approve-modal">
-    <h2>Approve Guest</h2>
+    <div class="modal-title-row">
+      <h2>Pending Guest</h2>
+      <button type="button" class="close-modal" (click)="closeGuestPopup()">×</button>
+    </div>
 
-    <div class="guest-preview" *ngIf="selectedGuest">
+    <div class="guest-preview">
+      <div class="guest-avatar large">
+        {{ getGuestInitials(selectedGuest.guestName) }}
+      </div>
 
-      <h3>{{ selectedGuest.guestName }}</h3>
-      <p>{{ selectedGuest.guestPhone }}</p>
-
-      <div class="guest-details">
-        <span>👥 {{ selectedGuest.partySize }} Members</span>
-        <span>{{ selectedGuest.preference || 'No preference' }}</span>
-        <span>{{ selectedGuest.notes || 'No notes' }}</span>
+      <div>
+        <h3>{{ selectedGuest.guestName }}</h3>
+        <p>{{ selectedGuest.guestPhone }}</p>
       </div>
     </div>
 
-    <label class="time-label">Select wait time</label>
-    <div class="time-options">
-      <button *ngFor="let time of waitTimeOptions" type="button" [class.active]="selectedWaitTime === time"
-        (click)="selectedWaitTime = time">
-        {{ time }} min
-      </button>
+    <div class="detail-grid">
+      <div>
+        <span>Party size</span>
+        <b>{{ selectedGuest.partySize }}</b>
+      </div>
+
+      <div>
+        <span>Preference</span>
+        <b>{{ selectedGuest.preference || '-' }}</b>
+      </div>
+
+      <div>
+        <span>Notes</span>
+        <b>{{ selectedGuest.notes || '-' }}</b>
+      </div>
+    </div>
+
+    <ng-container *ngIf="!showRejectReason">
+      <label class="time-label">Select wait time</label>
+
+      <div class="time-options">
+        <button type="button" *ngFor="let time of waitTimeOptions" [class.active]="selectedWaitTime === time"
+          (click)="selectedWaitTime = time">
+          {{ time }} min
+        </button>
+      </div>
+    </ng-container>
+
+    <div class="reject-box" *ngIf="showRejectReason">
+      <label>Decline reason</label>
+      <textarea [(ngModel)]="rejectReason" placeholder="Enter reason..."></textarea>
     </div>
 
     <div class="modal-actions">
-      <button class="cancel-btn" (click)="closeApproveModal()">
+      <button type="button" class="cancel-btn" (click)="closeGuestPopup()">
         Cancel
       </button>
-      <button class="modal-approve-btn" [disabled]="isApproving" (click)="approveSelectedGuest()">
-        {{ isApproving ? 'Approving...' : 'Approve Guest' }}
+
+      <button type="button" class="delete-btn" *ngIf="!showRejectReason" (click)="showRejectBox()">
+        Decline
+      </button>
+
+      <button type="button" class="delete-btn" *ngIf="showRejectReason" [disabled]="isRejecting"
+        (click)="rejectSelectedGuest()">
+        {{ isRejecting ? 'Sending...' : 'Send Reason' }}
+      </button>
+
+      <button type="button" class="modal-approve-btn" *ngIf="!showRejectReason" [disabled]="isApproving"
+        (click)="approveSelectedGuest()">
+        {{ isApproving ? 'Approving...' : 'Approve' }}
       </button>
     </div>
+
   </div>
 </div>
 
-<div class="modal-backdrop" *ngIf="showRejectModal">
-  <div class="approve-modal" *ngIf="selectedGuest">
-    <h2>Reject Guest</h2>
-
-    <div class="modal-actions">
-      <button class="cancel-btn" (click)="closeRejectModel()">
-        Cancel
-      </button>
-      <button class="modal-approve-btn" [disabled]="isRejecting" (click)="rejectGuest(selectedGuest.id)">
-        {{ isRejecting ? 'Rejecting...' : 'Reject Guest' }}
-      </button>
-    </div>
-  </div>
-</div>
-
-
-
+<!-- SEAT TABLE POPUP -->
 <div class="modal-backdrop" *ngIf="showTable">
-  <div class="approve-modal" *ngIf="selectedGuest">
-    <h2>Seat Guest</h2>
+  <div class="guest-modal" *ngIf="selectedGuest">
 
-    <label class="time-label">Available Tables</label>
-    <div class="time-options">
-      <button *ngFor="let table of openTables" type="button" [class.active]="selectedTable?.id === table.id"
+    <div class="modal-title-row">
+      <h2>Seat Guest</h2>
+      <button type="button" class="close-modal" (click)="closeAvailableTableModal()">×</button>
+    </div>
+
+    <p class="muted">Select available table for {{ selectedGuest.guestName }}</p>
+
+    <div class="table-options">
+      <button type="button" *ngFor="let table of openTables" [class.active]="selectedTable?.id === table.id"
         (click)="selectedTable = table">
-        {{ table.tableNumber }} · {{ table.capacity}}
+        {{ table.tableNumber }} · {{ table.capacity }} seats
       </button>
     </div>
+
     <div class="modal-actions">
-      <button class="cancel-btn" (click)="closeAvailableTabletModal()">
+      <button type="button" class="cancel-btn" (click)="closeAvailableTableModal()">
         Cancel
       </button>
-      <button class="modal-approve-btn" [disabled]="!selectedTable"
-        (click)="seatedGuestToTable(selectedGuest.id,selectedTable)">
-        {{ isRejecting ? 'Seating...' : 'Seat Guest' }}
+
+      <button type="button" class="modal-approve-btn" [disabled]="!selectedTable || isSeating" (click)="seatGuest()">
+        {{ isSeating ? 'Seating...' : 'Seat Guest' }}
       </button>
     </div>
+
   </div>
 </div>
+
+
+<!-- 
+/* MODAL */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.55);
+  display: grid;
+  place-items: center;
+  z-index: 9999;
+  padding: 18px;
+}
+
+.guest-modal {
+  width: min(520px, 100%);
+  background: #ffffff;
+  border-radius: 24px;
+  padding: 24px;
+  box-shadow: 0 24px 80px rgba(15, 23, 42, 0.25);
+}
+
+.modal-title-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.modal-title-row h2 {
+  margin: 0;
+}
+
+.close-modal {
+  width: 38px;
+  height: 38px;
+  border-radius: 12px;
+  border: 1px solid #e5e7eb;
+  background: #ffffff;
+  font-size: 22px;
+  cursor: pointer;
+}
+
+.guest-preview {
+  display: flex;
+  gap: 14px;
+  align-items: center;
+  background: #f8fafc;
+  border-radius: 18px;
+  padding: 16px;
+  margin: 18px 0;
+}
+
+.guest-preview h3 {
+  margin: 0;
+}
+
+.guest-preview p {
+  margin: 4px 0 0;
+  color: #64748b;
+}
+
+.detail-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+.detail-grid div {
+  background: #f8fafc;
+  border-radius: 14px;
+  padding: 12px;
+}
+
+.detail-grid span {
+  display: block;
+  font-size: 12px;
+  color: #64748b;
+}
+
+.detail-grid b {
+  display: block;
+  margin-top: 5px;
+  color: #111827;
+}
+
+.time-label {
+  display: block;
+  font-weight: 900;
+  margin-bottom: 10px;
+}
+
+.time-options,
+.table-options {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(95px, 1fr));
+  gap: 10px;
+}
+
+.time-options button,
+.table-options button {
+  min-height: 44px;
+  border-radius: 12px;
+  border: 1px solid #e5e7eb;
+  background: #ffffff;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.time-options button.active,
+.table-options button.active {
+  background: #5b16c9;
+  color: #ffffff;
+  border-color: #5b16c9;
+}
+
+.reject-box {
+  margin-top: 16px;
+}
+
+.reject-box label {
+  display: block;
+  font-weight: 900;
+  margin-bottom: 8px;
+}
+
+.reject-box textarea {
+  width: 100%;
+  min-height: 90px;
+  resize: vertical;
+  border-radius: 14px;
+  border: 1px solid #e5e7eb;
+  padding: 12px;
+  outline: none;
+  font-family: inherit;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 22px;
+}
+
+.cancel-btn,
+.delete-btn,
+.modal-approve-btn {
+  border: none;
+  border-radius: 14px;
+  padding: 12px 18px;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.cancel-btn {
+  background: #f1f5f9;
+  color: #334155;
+}
+
+.delete-btn {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
+.modal-approve-btn {
+  background: #15803d;
+  color: #ffffff;
+}
+
+.modal-approve-btn:disabled,
+.delete-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+-->

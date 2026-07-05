@@ -302,6 +302,44 @@ export class WaitlistWaitingScreenComponent implements OnInit {
     });
   }
 
+  get guestName(): string {
+    return this.guest?.guestName || this.guest?.name || 'Guest';
+  }
+
+  get guestPhone(): string {
+    return this.guest?.guestPhone || this.guest?.phone || '-';
+  }
+
+  get guestPreference(): string {
+    const value = this.guest?.preference;
+
+    if (!value) return 'No preference';
+
+    return value
+      .replace(/_/g, ' ')
+      .toLowerCase()
+      .replace(/\b\w/g, (char: string) => char.toUpperCase());
+  }
+
+  get waitingMinutesOnly(): string {
+    if (this.guest?.status !== 'WAITING') return '0';
+
+    const parts = this.waitingTimerText.split(':');
+    return parts[0] || '0';
+  }
+
+  get stepWaitingActive(): boolean {
+    return this.guest?.status === 'WAITING';
+  }
+
+  get stepNotifiedActive(): boolean {
+    return this.guest?.status === 'NOTIFIED';
+  }
+
+  get stepSeatedActive(): boolean {
+    return this.guest?.status === 'SEATED';
+  }
+
   ngOnDestroy(): void {
     this.pendingTimerSub?.unsubscribe();
     this.waitingTimerSub?.unsubscribe();

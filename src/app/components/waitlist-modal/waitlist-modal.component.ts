@@ -34,6 +34,22 @@ export class WaitlistModalComponent {
     { label: 'Wheelchair access', value: 'WHEELCHAIR_ACCESS' }
   ];
 
+  restaurants = [
+    {
+      id: 1,
+      name: 'Fern & Ember Bistro',
+      location: 'Winnipeg, MB'
+    },
+
+    {
+      id: 2,
+      name: 'Brothers Café',
+      location: 'Winnipeg, MB'
+    }
+  ];
+
+  selectedRestaurantId = 1;
+
   waitlistForm: FormGroup;
   statusForm: FormGroup;
   guestStatusData: any;
@@ -41,6 +57,7 @@ export class WaitlistModalComponent {
     private fb: FormBuilder, private waitlistApi: WaitlistApiRestaurantService, private notificationService: NotificationService
   ) {
     this.waitlistForm = this.fb.group({
+      restaurantId: [1, Validators.required],
       name: ['', Validators.required],
       phone: ['', [Validators.required, Validators.pattern('^\\+?[0-9]{10,15}$')]],
       partySize: [1, Validators.required],
@@ -52,6 +69,12 @@ export class WaitlistModalComponent {
       phoneNumber: ['', [Validators.required, Validators.pattern('^\\+?[0-9]{10,15}$')]
       ]
     });
+  }
+
+  onRestaurantChange(): void {
+
+    this.restaurantId = Number(this.selectedRestaurantId);
+
   }
 
   selectPartySize(size: number | string): void {
@@ -102,73 +125,75 @@ export class WaitlistModalComponent {
       this.waitlistForm.markAllAsTouched();
       return;
     }
+
+    this.isSubmitting = true;
+
     const valueofForm = this.waitlistForm.value;
 
     const payload = {
-      restaurantId: this.restaurantId,
+      restaurantId: +valueofForm.restaurantId,
       name: valueofForm.name.trim(),
       phone: valueofForm.phone.trim(),
       partySize: +valueofForm.partySize,
       preference: valueofForm.preference,
       notes: this.selectedTags.join(', ')
     };
+
     this.waitlistApi.joinWaitlist(payload).subscribe({
       next: (res: any) => {
         this.isSubmitting = false;
+
         if (res?.success && res?.data) {
           localStorage.setItem('waitlistGuest', JSON.stringify(res.data));
-          localStorage.setItem('waitlistRestaurantId', this.restaurantId.toString());
+          localStorage.setItem('waitlistRestaurantId', valueofForm.restaurantId);
+
           this.joinedWaitlist.emit(res.data);
           this.closeModal.emit();
         } else {
           alert(res?.message || 'Unable to join waitlist');
         }
-
       },
       error: () => {
         this.isSubmitting = false;
         alert('Unable to join waitlist. Please try again.');
       }
     });
-
-
   }
 
   checkStatus(): void {
-
     if (this.statusForm.invalid) {
+      this.statusForm.markAllAsTouched();
       return;
     }
+
+    this.isSubmitting = true;
+
     const phone = this.statusForm.get('phoneNumber')?.value;
+
     const payload = {
       restaurantId: this.restaurantId.toString(),
       phone: phone.trim()
-
     };
 
     this.waitlistApi.getWaitlistStatus(payload).subscribe({
       next: (response) => {
         this.isSubmitting = false;
-        if (response?.success) {
-          if (response?.success && response?.data) {
-            localStorage.setItem('waitlistGuest', JSON.stringify(response.data));
-            localStorage.setItem('waitlistRestaurantId', this.restaurantId.toString());
-            this.joinedWaitlist.emit(response.data);
-            this.closeModal.emit();
-          } else {
-            alert(response?.message || 'No waitlist record found');
-          }
+
+        if (response?.success && response?.data) {
+          localStorage.setItem('waitlistGuest', JSON.stringify(response.data));
+          localStorage.setItem('waitlistRestaurantId', this.restaurantId.toString());
+
+          this.joinedWaitlist.emit(response.data);
+          this.closeModal.emit();
         } else {
           alert(response?.message || 'No waitlist record found');
         }
-
       },
       error: () => {
         this.isSubmitting = false;
-        alert('Unable to join waitlist. Please try again.');
+        alert('Unable to check waitlist status. Please try again.');
       }
     });
-
   }
 
   close(): void {

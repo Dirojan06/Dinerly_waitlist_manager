@@ -1,59 +1,190 @@
-<div class="page">
+<app-dinerly-loader *ngIf="isLoading"></app-dinerly-loader>
+<div *ngIf="!isLoading" class="tables-page">
+
+  <!-- TOP BAR -->
   <div class="topbar">
-    <h1 class="page-title">Tables</h1>
-    <div class="topbar-actions">
-      <button class="btn-primary" (click)="reloadTableList()">
-        Reload
+    <div class="title-wrap">
+      <h1>Tables</h1>
+      <span class="time-pill">● 12:13 AM</span>
+    </div>
+
+    <div class="top-actions">
+      <button class="restaurant-pill">B Brothers Café⌄</button>
+    </div>
+  </div>
+
+
+  <!-- SECTIONS + MODE BUTTONS -->
+  <div class="section-row">
+    <div class="section-tabs">
+      <button class="section-tab active">Main</button>
+      <!-- <button class="section-tab add" *ngIf="activeMode === 'EDIT'">
+        + Add Table
+      </button> -->
+    </div>
+
+    <div class="mode-actions">
+      <button class="mode-btn" [disabled]="activeMode === 'EDIT'" [class.active]="activeMode === 'ASSIGN'"
+        (click)="setMode('ASSIGN')">
+        ♙ Assign Server
       </button>
-      <button class="btn-primary">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-        Add Table
+
+      <!-- <button class="mode-btn" [disabled]="activeMode === 'EDIT'" [class.active]="activeMode === 'MERGE'"
+        (click)="setMode('MERGE')">
+        🔗 Merge Tables
+      </button> -->
+
+      <button class="mode-btn edit" [class.active]="activeMode === 'EDIT'" (click)="toggleEditMode()">
+        {{ activeMode === 'EDIT' ? '✓ Done Editing' : '✎ Edit Floor Plan' }}
       </button>
     </div>
   </div>
 
-  <div class="stats-grid">
-    <div class="stat-card">
-      <div class="stat-label">Open tables</div>
-      <div class="stat-value">{{ openCount }}</div>
-      <div class="stat-sub">ready to seat</div>
+  <!-- EDIT TOOLBAR -->
+  <div class="edit-toolbar" *ngIf="activeMode === 'EDIT'">
+    <button (click)="addTable(2)">□ + 2-Seat Table</button>
+    <button (click)="addTable(4)">□ + 4-Seat Table</button>
+    <button (click)="addTable(6)">□ + 6-Seat Table</button>
+    <button (click)="addTable(8)">□ + 8-Seat Table</button>
+    <button (click)="addFixture('WALL')">— + Wall</button>
+    <button (click)="addFixture('BAR')">▯ + Bar</button>
+    <button (click)="addFixture('HOST')">□ + Host Stand</button>
+  </div>
+
+  <p class="edit-help" *ngIf="activeMode === 'EDIT'">
+    Drag any table or fixture to reposition it. Use capacity buttons to change seat count.
+    Occupied tables are locked.
+  </p>
+
+  <!-- MERGE TOOLBAR -->
+  <!-- <div class="action-toolbar merge" *ngIf="activeMode === 'MERGE'">
+    <span>Tap 2+ open nearby tables to merge them</span>
+
+    <div>
+      <button class="btn-light" (click)="cancelMode()">Cancel</button>
+      <button class="btn-primary" [disabled]="selectedTableIds.length < 2" (click)="confirmMerge()">
+        Merge
+      </button>
     </div>
-    <div class="stat-card">
-      <div class="stat-label">Occupied</div>
-      <div class="stat-value">{{ seatedCount }}</div>
-      <div class="stat-sub">of {{ tables.length }} tables</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-label">Reserved</div>
-      <div class="stat-value">{{ reservedCount }}</div>
-      <div class="stat-sub">upcoming tonight</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-label">Needs cleaning</div>
-      <div class="stat-value">{{ dirtyCount }}</div>
-      <div class="stat-sub">bussing required</div>
+  </div> -->
+
+  <!-- ASSIGN SERVER TOOLBAR -->
+  <div class="action-toolbar assign" *ngIf="activeMode === 'ASSIGN'">
+    <span>Tap nearby tables to group them</span>
+
+    <div class="assign-controls">
+      <select [(ngModel)]="selectedServer">
+        <option value="">Unassigned</option>
+        <option *ngFor="let server of servers" [value]="server">
+          {{ server }}
+        </option>
+      </select>
+
+      <button class="btn-light" (click)="cancelMode()">Cancel</button>
+      <button class="btn-primary" [disabled]="!selectedTableIds.length" (click)="assignServer()">
+        Assign
+      </button>
     </div>
   </div>
 
-  <div class="content">
-    <div class="section-header">
-      <span class="section-title">Floor map</span>
-      <div class="legend">
-        <div class="legend-item"><div class="legend-dot open"></div> Open</div>
-        <div class="legend-item"><div class="legend-dot seated"></div> Seated</div>
-        <div class="legend-item"><div class="legend-dot reserved"></div> Reserved</div>
-        <div class="legend-item"><div class="legend-dot dirty"></div> Dirty</div>
+  <!-- FLOOR CANVAS -->
+  <div class="floor-canvas" [class.editing]="activeMode === 'EDIT'">
+
+    <!-- MERGE LINES -->
+    <svg class="merge-lines" *ngIf="mergedGroups.length">
+      <line *ngFor="let line of mergeLines" [attr.x1]="line.x1" [attr.y1]="line.y1" [attr.x2]="line.x2"
+        [attr.y2]="line.y2" />
+    </svg>
+
+    <!-- TABLES -->
+    <div class="table-tile" *ngFor="let table of tables; trackBy: trackById" cdkDrag
+      [cdkDragDisabled]="activeMode !== 'EDIT'" [cdkDragFreeDragPosition]="{ x: table.x || 0, y: table.y || 0 }"
+      (cdkDragEnded)="onDragEnd($event, table)" [ngClass]="[
+        table.status,
+        'seat-' + table.capacity,
+        isSelected(table.id) ? 'selected' : '',
+        isMerged(table.id) ? 'merged' : '',
+        activeMode === 'EDIT' ? 'edit-mode' : ''
+      ]" (click)="onTableClick(table)">
+
+      <button class="rotate-lock" *ngIf="activeMode === 'EDIT'" (click)="rotateTable(table, $event)">
+        ⟳
+      </button>
+
+      <ng-container *ngFor="let chair of getChairs(table.capacity)">
+        <div class="chair" [ngClass]="chair.position" [style.--chair-index]="chair.index"
+          [style.--chair-total]="chair.total">
+        </div>
+      </ng-container>
+
+      <strong>{{ table.customName || table.tableNumber }}</strong>
+
+      <div class="table-status-popup" *ngIf="selectedTable?.id === table.id && activeMode === 'LIVE'"
+        (click)="$event.stopPropagation()">
+
+        <div class="popup-title">
+          {{ table.customName || 'Table ' + table.tableNumber }}
+        </div>
+
+        <div class="popup-status">
+          Current Status: <b>{{ table.status }}</b>
+        </div>
+
+        <button type="button" class="popup-status-btn" *ngFor="let option of getStatusOptions(table)"
+          (click)="changeTableStatus(table, option.value)">
+          {{ option.label }}
+        </button>
       </div>
+
+      <span class="merge-badge" *ngIf="isMerged(table.id)">🔗</span>
+
+      <!-- <div class="capacity-controls" *ngIf="activeMode === 'EDIT' && table.status !== 'OCCUPIED'">
+        <button (click)="changeCapacity(table, 2, $event)">2</button>
+        <button (click)="changeCapacity(table, 4, $event)">4</button>
+        <button (click)="changeCapacity(table, 6, $event)">6</button>
+        <button (click)="changeCapacity(table, 8, $event)">8</button>
+        
+      </div> -->
     </div>
 
-    <div class="floor-grid">
-      <div class="table-card"
-           *ngFor="let table of tables; trackBy: trackById"
-           [ngClass]="table.status">
-        <div class="table-id">{{ table.tableNumber  }}</div>
-        <div class="table-seats">{{  table.status}}</div>
-        <div class="table-info">{{ table.capacity }} members</div>
-      </div>
+    <!-- FIXTURES -->
+    <div class="fixture" *ngFor="let fixture of fixtures" cdkDrag [cdkDragDisabled]="activeMode !== 'EDIT'"
+      [cdkDragFreeDragPosition]="{ x: fixture.x, y: fixture.y }" (cdkDragEnded)="onFixtureDragEnd($event, fixture)"
+      [ngClass]="fixture.type">
+
+      <button class="fixture-rotate" *ngIf="activeMode === 'EDIT'" (click)="rotateFixture(fixture, $event)">
+        ⟳
+      </button>
+
+      {{ fixture.label }}
+    </div>
+
+  </div>
+
+  <!-- DETAIL PANEL -->
+  <div class="detail-panel" *ngIf="selectedTable">
+    <div>
+      <h3>{{ selectedTable.customName || 'Table ' + selectedTable.tableNumber }}</h3>
+      <p>Status: {{ selectedTable.status }} · {{ selectedTable.capacity }} seats</p>
+      <p *ngIf="selectedTable.server">Server: {{ selectedTable.server }}</p>
+    </div>
+
+    <div class="detail-actions">
+      <button class="btn-primary" *ngIf="selectedTable.status === 'OPEN' && activeMode === 'LIVE'">
+        Seat next party
+      </button>
+
+      <button class="btn-light" *ngIf="selectedTable.status === 'OCCUPIED' && activeMode === 'LIVE'">
+        Clear table
+      </button>
+
+      <button class="btn-danger" *ngIf="activeMode === 'EDIT' && selectedTable.status !== 'OCCUPIED'"
+        (click)="removeTable(selectedTable)">
+        Remove table
+      </button>
+
+      <button class="btn-light" (click)="selectedTable = null">Close</button>
     </div>
   </div>
+
 </div>

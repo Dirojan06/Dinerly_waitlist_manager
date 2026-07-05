@@ -1,79 +1,42 @@
-<!-- DESKTOP MENU -->
-<section class="menu-section desktop-menu">
+<div class="menu-page">
 
-  <div class="benefit-card">
-    <div class="benefit-icon">
-      <i class="fa-regular fa-clock"></i>
+ 
+
+ 
+
+  <div class="menu-filter">
+    <div class="search-box">
+      <i class="fa-solid fa-magnifying-glass"></i>
+      <input
+        type="text"
+        placeholder="Search..."
+        [(ngModel)]="searchText">
     </div>
-    <h3>Real-time wait times</h3>
-    <p>Always accurate, always updated</p>
+
+    <button
+      *ngFor="let category of categories"
+      [class.active]="selectedCategory === category"
+      (click)="selectCategory(category)">
+      {{ category }}
+    </button>
   </div>
 
-  <div class="benefit-card">
-    <div class="benefit-icon">
-      <i class="fa-regular fa-message"></i>
-    </div>
-    <h3>Text notifications</h3>
-    <p>We'll alert you when your table is ready</p>
-  </div>
-
-  <div class="benefit-card">
-    <div class="benefit-icon">
-      <i class="fa-solid fa-user-group"></i>
-    </div>
-    <h3>For any party size</h3>
-    <p>From 1 guest to large groups</p>
-  </div>
-
-  <div class="benefit-card">
-    <div class="benefit-icon">
-      <i class="fa-solid fa-leaf"></i>
-    </div>
-    <h3>Relax & enjoy</h3>
-    <p>Explore, unwind, we've got your spot</p>
-  </div>
-
-  <div class="benefit-card">
-    <div class="benefit-icon">
-      <i class="fa-solid fa-shield-halved"></i>
-    </div>
-    <h3>Private & secure</h3>
-    <p>Your info is safe with us</p>
-  </div>
-
-</section>
-
-<!-- MOBILE MENU -->
-<section class="menu-section mobile-menu-section">
-
-  <h2>Why Dinerly?</h2>
-
-  <div class="mobile-benefits">
-
-    <div class="benefit-card">
-      <div class="benefit-icon">
-        <i class="fa-solid fa-mobile-screen-button"></i>
+  <div class="menu-grid">
+    <div class="menu-card" *ngFor="let item of filteredItems">
+      <div class="item-image">
+        {{ item.emoji }}
       </div>
-      <h3>Join in seconds</h3>
-      <p>Add your party and we’ll text you when ready.</p>
-    </div>
 
-    <div class="benefit-card">
-      <div class="benefit-icon">
-        <i class="fa-regular fa-comment-dots"></i>
+      <div class="item-content">
+        <h4>{{ item.name }}</h4>
+        <p>{{ item.description }}</p>
+
+        <div class="item-footer">
+          <strong>${{ item.price }}</strong>
+          <button>+</button>
+        </div>
       </div>
-      <h3>Live updates</h3>
-      <p>Get real-time updates about your wait time.</p>
     </div>
-
-    <div class="benefit-card">
-      <div class="benefit-icon">
-        <i class="fa-solid fa-utensils"></i>
-      </div>
-      <h3>Dine with ease</h3>
-      <p>Relax! We’ll notify you the moment your table is ready.</p>
-    </div>
-
   </div>
 
-</section>
+</div>

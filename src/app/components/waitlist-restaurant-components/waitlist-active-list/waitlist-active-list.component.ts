@@ -1,12 +1,42 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Router } from '@angular/router';
 import { forkJoin, Subscription } from 'rxjs';
-import { CancelledGuest, NotifiedGuest, PendingGuest, SeatedGuest, tableList, WaitingGuest } from 'src/app/models/waitlist-api-guest-to-restaurant.model';
+
+import {
+  CancelledGuest,
+  DashboardStatus,
+  getDashboardData,
+  NotifiedGuest,
+  PendingGuest,
+  SeatedGuest,
+  tableList,
+  WaitingGuest
+} from 'src/app/models/waitlist-api-guest-to-restaurant.model';
+
 import { NotificationService } from 'src/app/services/notification.service';
 import { WaitlistApiRestaurantService } from 'src/app/services/waitlist-api-restaurant.service';
 import { WaitlistRestaurantModalService } from 'src/app/services/waitlist-restaurant-modal.service';
-import { WaitlistRestaurantService } from 'src/app/services/waitlist-restaurant.service';
 
-type FilterType = 'all' | 'waiting' | 'table-ready' | 'notified';
+interface DashboardLiveGuest {
+  id: number;
+  guestName: string;
+  guestPhone: string;
+  partySize: number;
+  preference?: string;
+  notes?: string;
+  status: string;
+  position?: number;
+  estimatedWaitTime?: number;
+  joinedAt?: string;
+  approvedAt?: string;
+  notifiedAt?: string;
+  seatedAt?: string;
+  cancelledAt?: string;
+  tableName?: string;
+}
+
+type WaitlistTab = 'WAITING' | 'NOTIFIED' | 'SEATED' | 'CANCELLED';
+
 
 @Component({
   selector: 'app-waitlist-active-list',
@@ -16,54 +46,150 @@ type FilterType = 'all' | 'waiting' | 'table-ready' | 'notified';
 export class WaitlistActiveListComponent implements OnInit, OnDestroy {
 
   restaurantId = 1;
-  private sub = new Subscription();
+
+  dashboardStatus: DashboardStatus[] = [];
+
+  dashboardData: getDashboardData = {
+    averageWaitTime: 0,
+    noShowsToday: 0,
+    occupiedTables: 0,
+    openTables: 0,
+    reservedTables: 0,
+    seatedToday: 0,
+    tablesNeedingCleaning: 0,
+    totalNotified: 0,
+    totalWaiting: 0
+  };
+
   pendingGuests: PendingGuest[] = [];
   waitingGuests: WaitingGuest[] = [];
   notifiedGuests: NotifiedGuest[] = [];
   seatedGuests: SeatedGuest[] = [];
-  cancelledGuest: CancelledGuest[] = [];
-  selectedGuest: PendingGuest | null = null;
-  showApproveModal = false;
-  selectedPosition = 1;
-  selectedWaitTime = 20;
+  cancelledGuests: CancelledGuest[] = [];
+
+  activeTab: WaitlistTab = 'WAITING';
+
+  showPendingBox = false;
+  showGuestPopup = false;
+  showRejectReason = false;
+
+  selectedGuest: any = null;
+  selectedWaitTime = 5;
   waitTimeOptions = [5, 10, 15, 20, 25, 30];
+
+  rejectReason = '';
+
   isLoading = false;
   isApproving = false;
   isRejecting = false;
-  selectedStatus = '';
-  selectedDate = '';
-  showRejectModal: boolean = false;
-  private refreshInterval: any;
+  isNotifying = false;
+  isSeating = false;
+
+  tables: tableList[] = [];
+  openTables: tableList[] = [];
+  selectedTable: tableList | null = null;
+  showTable = false;
+
+  tableStats = {
+    total: 0,
+    open: 0,
+    occupied: 0,
+    reserved: 0,
+    cleaning: 0
+  };
+
+  donutStyle = '';
+
   currentDateTime = '';
   private clockInterval: any;
+  private refreshInterval: any;
+  private sub = new Subscription();
 
-  // pagination
-  itemsPerPage = 5;
-  pendingPage = 1;
-  waitingPage = 1;
-  notifiedPage = 1;
-  seatedPage = 1;
-  cancelledPage = 1
+  recentChangedGuestId: number | null = null;
 
-  //for get available table
-  showTable: boolean = false;
-  tables: tableList[] = [];
-  selectedTable: tableList | null = null;
-  openTables: tableList[] = [];
-
-  constructor(public waitlistService: WaitlistApiRestaurantService, private waitlistUIService: WaitlistRestaurantService, public modalService: WaitlistRestaurantModalService, private notificationService: NotificationService) { }
+  constructor(
+    private router: Router,
+    public modalService: WaitlistRestaurantModalService,
+    private waitlistApi: WaitlistApiRestaurantService,
+    private notificationService: NotificationService
+  ) { }
 
   ngOnInit(): void {
-    this.loadWaitlistData();
-    this.refreshInterval = setInterval(() => {
-      this.loadWaitlistData();
-    }, 2000);
+    this.loadDashboardAllData();
+
     this.updateDateTime();
 
     this.clockInterval = setInterval(() => {
       this.updateDateTime();
-
     }, 1000);
+
+    this.refreshInterval = setInterval(() => {
+      this.loadDashboardAllData(false);
+    }, 5000);
+  }
+
+  loadDashboardAllData(showLoader: boolean = true): void {
+    if (showLoader) {
+      this.isLoading = true;
+    }
+
+    forkJoin({
+      dashboard: this.waitlistApi.getDashboardData(this.restaurantId),
+      pending: this.waitlistApi.getGuestsStatus(this.restaurantId, 'PENDING', ''),
+      waiting: this.waitlistApi.getWaitingGuests(this.restaurantId, 'WAITING', ''),
+      notified: this.waitlistApi.getNotifiedGuests(this.restaurantId, 'NOTIFIED', ''),
+      seated: this.waitlistApi.getSeatedGuests(this.restaurantId, 'SEATED', ''),
+      cancelled: this.waitlistApi.getCancelledGuests(this.restaurantId, 'CANCELLED', ''),
+      tables: this.waitlistApi.getRestaurantTableslist(this.restaurantId)
+    }).subscribe({
+      next: (res) => {
+        this.isLoading = false;
+
+        if (res.dashboard.success) {
+          this.dashboardData = res.dashboard.data;
+        }
+
+        this.pendingGuests = res.pending.data || [];
+        this.waitingGuests = res.waiting.data || [];
+        this.notifiedGuests = res.notified.data || [];
+        this.seatedGuests = res.seated.data || [];
+        this.cancelledGuests = res.cancelled.data || [];
+
+        this.tables = res.tables.data || [];
+        this.openTables = this.tables.filter(table => table.status === 'OPEN');
+
+        this.calculateTableStats();
+      },
+      error: () => {
+        this.isLoading = false;
+        alert('Unable to load dashboard data');
+      }
+    });
+  }
+
+  get allDashboardGuests(): DashboardLiveGuest[] {
+    return [
+      ...this.waitingGuests,
+      ...this.notifiedGuests,
+      ...this.seatedGuests,
+      ...this.cancelledGuests
+    ].map((guest: any) => ({
+      id: guest.id,
+      guestName: guest.guestName,
+      guestPhone: guest.guestPhone,
+      partySize: guest.partySize,
+      preference: guest.preference,
+      notes: guest.notes,
+      status: guest.status,
+      position: guest.position,
+      estimatedWaitTime: guest.estimatedWaitTime,
+      joinedAt: guest.joinedAt,
+      approvedAt: guest.approvedAt,
+      notifiedAt: guest.notifiedAt,
+      seatedAt: guest.seatedAt,
+      cancelledAt: guest.cancelledAt,
+      tableName: guest.tableName
+    }));
   }
 
   updateDateTime(): void {
@@ -80,409 +206,365 @@ export class WaitlistActiveListComponent implements OnInit, OnDestroy {
     });
   }
 
-  loadWaitlistData(): void {
-    this.loadPendingGuests();
-    this.loadWaitingGuests();
-    this.loadNotifiedGuests();
-    this.getRestaurantTables();
+  togglePendingBox(): void {
+    this.showPendingBox = !this.showPendingBox;
   }
 
-  // Load pending guests based on selected filters
-  loadPendingGuests(): void {
-    this.isLoading = true;
-    this.selectedStatus = "PENDING"
-    this.waitlistService.getGuestsStatus(this.restaurantId, this.selectedStatus, this.selectedDate).subscribe({
-      next: (response) => {
-        this.pendingGuests = response.data || [];
-        this.isLoading = false;
-      },
-      error: () => {
-        this.isLoading = false;
-        alert('Unable to load pending guests');
-      }
-    });
-  }
-
-  // Load waiting guests for the restaurant
-  loadWaitingGuests(): void {
-    this.isLoading = true;
-    this.selectedStatus = "WAITING"
-    this.waitlistService.getWaitingGuests(this.restaurantId, this.selectedStatus, this.selectedDate).subscribe({
-      next: (response) => {
-        this.waitingGuests = response.data || [];
-        this.isLoading = false;
-      },
-      error: () => {
-        this.isLoading = false;
-        alert('Unable to load waiting guests');
-      }
-    });
-
-  }
-
-  // Load notified guests for the restaurant
-  loadNotifiedGuests(): void {
-    this.isLoading = true;
-    this.selectedStatus = "NOTIFIED"
-    this.waitlistService.getNotifiedGuests(this.restaurantId, this.selectedStatus, this.selectedDate).subscribe({
-      next: (response) => {
-        this.notifiedGuests = response.data || [];
-        this.isLoading = false;
-      },
-      error: () => {
-        this.isLoading = false;
-        alert('Unable to load notified guests');
-      }
-    });
-
-  }
-
-  loadSeatedGuests(): void {
-    this.isLoading = true;
-    this.selectedStatus = "SEATED"
-    this.waitlistService.getSeatedGuests(this.restaurantId, this.selectedStatus, this.selectedDate).subscribe({
-      next: (response) => {
-        this.seatedGuests = response.data || [];
-        this.isLoading = false;
-      },
-      error: () => {
-        this.isLoading = false;
-        alert('Unable to load seated guests');
-      }
-    });
-  }
-
-  loadCancelledGuests(): void {
-    this.isLoading = true;
-    this.selectedStatus = "CANCELLED"
-    this.waitlistService.getCancelledGuests(this.restaurantId, this.selectedStatus, this.selectedDate).subscribe({
-      next: (response) => {
-        this.cancelledGuest = response.data || [];
-        this.isLoading = false;
-      },
-      error: () => {
-        this.isLoading = false;
-        alert('Unable to load cancelled guests');
-      }
-    });
-  }
-
-
-
-  openApproveModal(guest: any) {
+  openPendingGuest(guest: PendingGuest): void {
     this.selectedGuest = guest;
     this.selectedWaitTime = 5;
-    this.showApproveModal = true;
+    this.rejectReason = '';
+    this.showRejectReason = false;
+    this.showGuestPopup = true;
+    this.showPendingBox = false;
   }
 
-  approveSelectedGuest() {
+  closeGuestPopup(): void {
+    this.selectedGuest = null;
+    this.showGuestPopup = false;
+    this.showRejectReason = false;
+    this.rejectReason = '';
+  }
 
+  approveSelectedGuest(): void {
     if (!this.selectedGuest) return;
 
-    if (this.selectedWaitTime == null) {
-      alert('Please select wait time');
-      return;
-    }
     this.isApproving = true;
-    this.waitlistService.approveGuest(this.restaurantId, this.selectedGuest!.id, {
+
+    this.waitlistApi.approveGuest(this.restaurantId, this.selectedGuest.id, {
       estimatedWaitTime: this.selectedWaitTime
     }).subscribe({
       next: (res) => {
         const approvedGuest = res.data;
-        this.pendingGuests = this.pendingGuests.filter(g => g.id !== approvedGuest.id);
-        this.waitingGuests = [approvedGuest, ...this.waitingGuests];
-        this.loadWaitlistData();
+
+        this.pendingGuests = this.pendingGuests.filter(
+          guest => guest.id !== approvedGuest.id
+        );
+
+        //this.waitingGuests = [approvedGuest, ...this.waitingGuests];
+
+        this.activeTab = 'WAITING';
+        this.markRowChanged(approvedGuest.id);
+
         this.isApproving = false;
-        this.closeApproveModal();
-      }, error: () => {
-        this.isLoading = false;
-        alert('Unable to approve the guests');
-        this.isApproving = false;
-        this.closeApproveModal();
-      }
-    });
-  }
+        this.closeGuestPopup();
 
-  closeApproveModal(): void {
-    this.selectedGuest = null;
-    this.showApproveModal = false;
-  }
-
-
-  openRejectModal(guest: any) {
-    this.selectedGuest = guest;
-    this.showRejectModal = true
-  }
-
-  rejectGuest(id: any): void {
-    if (!this.selectedGuest) return;
-    this.isRejecting = true;
-    this.waitlistService.rejectGuest(this.restaurantId, id).subscribe({
-      next: () => {
-        this.isRejecting = false;
-        this.closeRejectModel();
+        this.loadDashboardAllData(false);
       },
       error: () => {
-        this.isLoading = false;
-        alert('Unable to remove the guests');
-        this.isRejecting = false;
-        this.closeRejectModel();
+        this.isApproving = false;
+        alert('Unable to approve guest');
       }
     });
   }
-  closeRejectModel() {
-    this.showRejectModal = false;
+
+  showRejectBox(): void {
+    this.showRejectReason = true;
   }
 
-  notifyToGuestCall(guestid: any, time: any, position: any) {
+  rejectSelectedGuest(): void {
+    if (!this.selectedGuest) return;
 
-    this.waitlistService.notifyToGuest(this.restaurantId, guestid, {
-      estimatedWaitTime: time, position: position
+    // if (!this.rejectReason.trim()) {
+    //   alert('Please enter delete reason');
+    //   {
+    //   reason: this.rejectReason
+    // }
+    //   return;
+    // }
+
+    this.isRejecting = true;
+
+    this.waitlistApi.rejectGuest(this.restaurantId, this.selectedGuest.id,).subscribe({
+      next: () => {
+        this.pendingGuests = this.pendingGuests.filter(
+          guest => guest.id !== this.selectedGuest.id
+        );
+
+        this.isRejecting = false;
+        this.closeGuestPopup();
+
+        this.loadDashboardAllData(false);
+      },
+      error: () => {
+        this.isRejecting = false;
+        alert('Unable to delete guest');
+      }
+    });
+  }
+
+  notifyGuest(guest: any): void {
+    if (!guest) return;
+
+    this.isNotifying = true;
+
+    this.waitlistApi.notifyToGuest(this.restaurantId, guest.id, {
+      estimatedWaitTime: guest.estimatedWaitTime,
+      position: guest.position
     }).subscribe({
       next: (res) => {
         const notifiedGuest = res.data;
-        this.waitingGuests = this.waitingGuests.filter(g => g.id !== notifiedGuest.id);
-        this.notifiedGuests = [notifiedGuest, ...this.notifiedGuests];
-        this.loadWaitlistData();
-      }, error: () => {
-        this.isLoading = false;
-        alert('Unable to notify the guests');
+
+        this.waitingGuests = this.waitingGuests.filter(
+          item => item.id !== notifiedGuest.id
+        );
+
+        //this.notifiedGuests = [notifiedGuest, ...this.notifiedGuests];
+
+        this.activeTab = 'NOTIFIED';
+        this.markRowChanged(notifiedGuest.id);
+
+        this.isNotifying = false;
+
+        this.loadDashboardAllData(false);
+      },
+      error: () => {
+        this.isNotifying = false;
+        alert('Unable to notify guest');
       }
     });
   }
 
-  openAvailableTableModal(guest: any) {
-    this.showTable = true;
+  openAvailableTableModal(guest: any): void {
     this.selectedGuest = guest;
-
+    this.selectedTable = null;
+    this.openTables = this.tables.filter(table => table.status === 'OPEN');
+    this.showTable = true;
   }
 
-  closeAvailableTabletModal() {
+  closeAvailableTableModal(): void {
     this.showTable = false;
+    this.selectedGuest = null;
+    this.selectedTable = null;
   }
 
-  seatedGuestToTable(guestid: any, table: tableList | null) {
-    if (!table) {
-      alert('Please select a table');
+  seatGuest(): void {
+    if (!this.selectedGuest || !this.selectedTable) {
+      alert('Please select table');
       return;
     }
-    this.isLoading = true;
+
+    this.isSeating = true;
 
     forkJoin({
-      tableStatus: this.waitlistService.updateTableStatus(this.restaurantId, table.id, 'OCCUPIED'),
-      seatedGuest: this.waitlistService.seatedGuest(this.restaurantId, guestid, { tableName: table.tableNumber })
+      tableStatus: this.waitlistApi.updateTableStatus(
+        this.restaurantId,
+        this.selectedTable.id,
+        'OCCUPIED'
+      ),
+      seatedGuest: this.waitlistApi.seatedGuest(
+        this.restaurantId,
+        this.selectedGuest.id,
+        {
+          tableName: this.selectedTable.tableNumber
+        }
+      )
     }).subscribe({
-      next: ({ tableStatus, seatedGuest }) => {
-        this.isLoading = false;
-        const guest = seatedGuest.data;
+      next: ({ seatedGuest }) => {
+        const seated = seatedGuest.data;
+
         this.notifiedGuests = this.notifiedGuests.filter(
-          g => g.id !== guest.id
+          guest => guest.id !== seated.id
         );
-        this.seatedGuests = [guest, ...this.seatedGuests];
-        this.showTable = false;
-        this.selectedTable = null;
-        this.loadNotifiedGuests()
+
+        //this.seatedGuests = [seated, ...this.seatedGuests];
+
+        this.activeTab = 'SEATED';
+        this.markRowChanged(seated.id);
+
+        this.isSeating = false;
+        this.closeAvailableTableModal();
+
+        this.loadDashboardAllData(false);
         this.notificationService.triggerRestaurantRefresh();
       },
-      error: (err) => {
-        this.isLoading = false;
-        console.error('Seat guest failed:', err);
-        alert('Unable to seat guest. Please try again.');
+      error: () => {
+        this.isSeating = false;
+        alert('Unable to seat guest');
       }
     });
   }
 
-  addGuestbyrestaurant() {
-    let name = '';
-    let phone = 0;
+  calculateTableStats(): void {
+    const total = this.tables.length;
+    const open = this.tables.filter(t => t.status === 'OPEN').length;
+    const occupied = this.tables.filter(t => t.status === 'OCCUPIED').length;
+    const reserved = this.tables.filter(t => t.status === 'RESERVED').length;
+    const cleaning = this.tables.filter(t => t.status === 'CLEANING').length;
 
-    let partySize = 0
-    let preference = ''
-    let notes = ''
-    let position = 0
-    let estimatedWaitTime = 0;
-    this.waitlistService.addGuestInWaitlist(this.restaurantId, {
-      name: name,
-      phone: phone,
-      partySize: partySize,
-      preference: preference,
-      notes: notes,
-      position: position,
-      estimatedWaitTime: estimatedWaitTime
-    }).subscribe({
-      next: (res) => {
+    this.tableStats = {
+      total,
+      open,
+      occupied,
+      reserved,
+      cleaning
+    };
 
-      }, error: () => {
-        this.isLoading = false;
-        alert('Unable to approve the guests');
-
-      }
-    });
-  }
-
-  getRestaurantTables() {
-
-    this.waitlistService.getRestaurantTableslist(this.restaurantId).subscribe({
-      next: (res) => {
-        this.tables = res.data;
-        this.openTables = this.tables.filter(
-
-          (table: any) => table.status === 'OPEN'
-
-        );
-      }, error: () => {
-        alert('Unable to load the table');
-      }
-    })
-  }
-
-  getActualWaitingTime(joinedAt?: string, notifiedAt?: string): string {
-    if (!joinedAt || !notifiedAt) return '-';
-    const joinedTime = new Date(joinedAt).getTime();
-    const notifiedTime = new Date(notifiedAt).getTime();
-    const diffMs = notifiedTime - joinedTime;
-    if (diffMs < 0) return '-';
-    const totalMinutes = Math.floor(diffMs / 60000);
-    const hours = Math.floor(totalMinutes / 60);
-    const minutes = totalMinutes % 60;
-    if (hours > 0) {
-      return `${hours}h ${minutes}m`;
+    if (total === 0) {
+      this.donutStyle = '#e5e7eb 0 100%';
+      return;
     }
-    return `${minutes}m`;
+
+    const openEnd = (open / total) * 100;
+    const occupiedEnd = openEnd + (occupied / total) * 100;
+    const reservedEnd = occupiedEnd + (reserved / total) * 100;
+    const cleaningEnd = reservedEnd + (cleaning / total) * 100;
+
+    this.donutStyle = `
+        #22c55e 0 ${openEnd}%,
+        #6d28d9 ${openEnd}% ${occupiedEnd}%,
+        #f59e0b ${occupiedEnd}% ${reservedEnd}%,
+        #94a3b8 ${reservedEnd}% ${cleaningEnd}%
+      `;
   }
 
-  formatDateTime(date?: string): string {
+  getStatusLabel(status: string): string {
+    switch (status) {
+      case 'PENDING':
+        return 'Pending';
+      case 'WAITING':
+        return 'Waiting';
+      case 'NOTIFIED':
+        return 'Notified';
+      case 'SEATED':
+        return 'Seated';
+      case 'CANCELLED':
+        return 'Cancelled';
+      default:
+        return status;
+    }
+  }
+
+  getGuestInitials(name: string): string {
+    if (!name) return 'G';
+
+    return name
+      .split(' ')
+      .map(part => part[0])
+      .join('')
+      .substring(0, 2)
+      .toUpperCase();
+  }
+
+  formatTime(date?: string): string {
     if (!date) return '-';
 
-    return new Date(date).toLocaleString('en-IN', {
+    return new Date(date).toLocaleTimeString('en-IN', {
       hour: '2-digit',
       minute: '2-digit',
       hour12: true
     });
   }
 
-  getInitials(name: string): string { return this.waitlistUIService.getInitials(name); }
-  getAvatarColor(id: number) { return this.waitlistUIService.getAvatarColor(id); }
+  markRowChanged(id: number): void {
+    this.recentChangedGuestId = id;
 
-  trackBypendingGuest(_: number, g: PendingGuest): number { return g.id; }
-  trackBywaitingGuest(_: number, g: WaitingGuest): number { return g.id; }
-  trackBynotifyGuest(_: number, g: NotifiedGuest): number { return g.id; }
-  trackByseatedGuest(_: number, g: SeatedGuest): number { return g.id; }
-  trackBycancelledGuest(_: number, g: CancelledGuest): number { return g.id; }
-
-  // pagination part ///////////////////////////////////////////////////////////////////////
-
-  get pagedPendingGuests(): PendingGuest[] {
-    return this.getPagedData(this.pendingGuests, this.pendingPage);
+    setTimeout(() => {
+      this.recentChangedGuestId = null;
+    }, 1200);
   }
 
-  get pagedWaitingGuests(): WaitingGuest[] {
-    return this.getPagedData(this.waitingGuests, this.waitingPage);
+  trackByGuest(_: number, guest: any): number {
+    return guest.id;
   }
 
-  get pagedNotifiedGuests(): NotifiedGuest[] {
-    return this.getPagedData(this.notifiedGuests, this.notifiedPage);
+  goToFloorMap(): void {
+    this.router.navigate(['/restaurant/tables']);
   }
 
-  get pagedSeatedGuests(): SeatedGuest[] {
-    return this.getPagedData(this.seatedGuests, this.seatedPage);
+  logout(): void {
+    localStorage.removeItem('authToken');
+    this.router.navigate(['/login']);
   }
-
-  get pagedCancelledGuests(): CancelledGuest[] {
-    return this.getPagedData(this.cancelledGuest, this.seatedPage);
-  }
-  get pendingTotalPages(): number {
-    return this.getTotalPages(this.pendingGuests);
-  }
-
-  get waitingTotalPages(): number {
-    return this.getTotalPages(this.waitingGuests);
-  }
-
-  get notifiedTotalPages(): number {
-    return this.getTotalPages(this.notifiedGuests);
-  }
-
-  get seatedTotalPages(): number {
-    return this.getTotalPages(this.seatedGuests);
-  }
-
-  get cancelledTotalPages(): number {
-    return this.getTotalPages(this.cancelledGuest);
-  }
-
-  private getPagedData<T>(data: T[], page: number): T[] {
-    const start = (page - 1) * this.itemsPerPage;
-    return data.slice(start, start + this.itemsPerPage);
-  }
-
-  private getTotalPages(data: any[]): number {
-    return Math.ceil(data.length / this.itemsPerPage) || 1;
-  }
-
-  changePage(
-    type: 'pending' | 'waiting' | 'notified' | 'seated' | 'cancelled',
-    direction: 'next' | 'prev'
-  ): void {
-
-    if (type === 'pending') {
-      if (direction === 'next' && this.pendingPage < this.pendingTotalPages) {
-        this.pendingPage++;
-      }
-
-      if (direction === 'prev' && this.pendingPage > 1) {
-        this.pendingPage--;
-      }
-    }
-
-    if (type === 'waiting') {
-      if (direction === 'next' && this.waitingPage < this.waitingTotalPages) {
-        this.waitingPage++;
-      }
-
-      if (direction === 'prev' && this.waitingPage > 1) {
-        this.waitingPage--;
-      }
-    }
-
-    if (type === 'notified') {
-      if (direction === 'next' && this.notifiedPage < this.notifiedTotalPages) {
-        this.notifiedPage++;
-      }
-
-      if (direction === 'prev' && this.notifiedPage > 1) {
-        this.notifiedPage--;
-      }
-    }
-
-    if (type === 'seated') {
-      if (direction === 'next' && this.seatedPage < this.seatedTotalPages) {
-        this.seatedPage++;
-      }
-
-      if (direction === 'prev' && this.seatedPage > 1) {
-        this.seatedPage--;
-      }
-    }
-
-    if (type === 'cancelled') {
-      if (direction === 'next' && this.cancelledPage < this.cancelledTotalPages) {
-        this.cancelledPage++;
-      }
-
-      if (direction === 'prev' && this.cancelledPage > 1) {
-        this.cancelledPage--;
-      }
-    }
-  }
-
 
   ngOnDestroy(): void {
-    this.sub.unsubscribe(); if (this.clockInterval) {
+    this.sub.unsubscribe();
 
+    if (this.clockInterval) {
       clearInterval(this.clockInterval);
-
     }
+
+    if (this.refreshInterval) {
+      clearInterval(this.refreshInterval);
+    }
+  }
+
+  get latestPendingGuest(): PendingGuest | null {
+    return this.pendingGuests.length ? this.pendingGuests[0] : null;
+  }
+
+  get liveWaitlistGuests(): DashboardLiveGuest[] {
+    return [
+      ...this.waitingGuests,
+      ...this.notifiedGuests
+    ].map((guest: any) => ({
+      id: guest.id,
+      guestName: guest.guestName,
+      guestPhone: guest.guestPhone,
+      partySize: guest.partySize,
+      preference: guest.preference,
+      notes: guest.notes,
+      status: guest.status,
+      position: guest.position,
+      estimatedWaitTime: guest.estimatedWaitTime,
+      joinedAt: guest.joinedAt,
+      approvedAt: guest.approvedAt,
+      notifiedAt: guest.notifiedAt,
+      seatedAt: guest.seatedAt,
+      cancelledAt: guest.cancelledAt,
+      tableName: guest.tableName
+    }));
+  }
+
+  get currentTimeOnly(): string {
+    return new Date().toLocaleTimeString('en-IN', {
+      timeZone: 'America/Toronto',
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: true
+    });
+  }
+
+  get tableOpenPercentage(): number {
+    if (!this.tableStats.total) return 0;
+    return (this.tableStats.open / this.tableStats.total) * 100;
+  }
+
+  getGuestSubText(guest: DashboardLiveGuest): string {
+    if (guest.notes) return guest.notes;
+
+    if (guest.preference === 'PATIO' || guest.preference === 'OUTDOOR') {
+      return 'prefers outdoor seating';
+    }
+
+    return 'First time at Brothers Café';
+  }
+
+  getPreferenceLabel(preference?: string): string {
+    if (!preference || preference === 'NO_PREFERENCE') return 'No pref';
+
+    return preference
+      .replace(/_/g, ' ')
+      .toLowerCase()
+      .replace(/\b\w/g, char => char.toUpperCase());
+  }
+
+  getPreferenceIcon(preference?: string): string {
+    if (preference === 'INDOOR') return 'fa-regular fa-house';
+
+    if (preference === 'PATIO' || preference === 'OUTDOOR') {
+      return 'fa-regular fa-sun';
+    }
+
+    return 'fa-regular fa-building';
+  }
+
+  
+  openRemoveGuest(guest: DashboardLiveGuest): void {
+    this.selectedGuest = guest;
+    this.showRejectReason = true;
+    this.rejectReason = '';
+    this.showGuestPopup = true;
   }
 
 

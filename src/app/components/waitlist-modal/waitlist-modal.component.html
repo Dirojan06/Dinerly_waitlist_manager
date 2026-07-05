@@ -8,10 +8,28 @@
             <form [formGroup]="waitlistForm" (ngSubmit)="submitJoinWaitlist()">
 
                 <div class="modal-header">
-                    <div class="header-icon">👥</div>
+                    <div class="header-icon"><i class="fa-solid fa-user" style="color: rgb(177, 151, 252);"></i></div>
                     <div>
                         <h2>Join the Waitlist</h2>
                         <p>We'll text you when your table is ready.</p>
+                    </div>
+                </div>
+                <div class="field restaurant-field">
+                    <label>Restaurant</label>
+
+                    <div class="restaurant-select-box">
+                        <i class="fa-solid fa-house"></i>
+
+                        <select formControlName="restaurantId" [(ngModel)]="selectedRestaurantId"
+                            (change)="onRestaurantChange()">
+
+                            <option *ngFor="let restaurant of restaurants" [value]="restaurant.id">
+                                {{ restaurant.name }} — {{ restaurant.location }}
+                            </option>
+
+                        </select>
+
+                        <i class="fa-solid fa-chevron-down chevron"></i>
                     </div>
                 </div>
 
@@ -19,7 +37,6 @@
                     <div class="field">
                         <label>Your name</label>
                         <div class="input-box">
-                            <span class="input-icon">♡</span>
                             <input type="text" formControlName="name" placeholder="Enter your name">
                         </div>
                         <small class="error"
@@ -116,16 +133,9 @@
                 <div class="field">
                     <label>Special requests <span>(Optional)</span></label>
 
-                    <div class="notes">
-                        <button class="tag-btn" *ngFor="let note of notes" type="button"
-                            [class.active]="isSelectedTag(note.value)" (click)="toggleTag(note.value)">
-                            {{ note.label }}
-                        </button>
-                    </div>
-
-                    <div class="request-input">
-                        <input type="text" placeholder="Any other special requests?">
-                        <span>✎</span>
+                    <div class="input-box">
+                        <input type="text" formControlName="notes"
+                            placeholder="Any special requests? (e.g. high chair, wheelchair access)">
                     </div>
                 </div>
 
@@ -185,3 +195,5 @@
 
     </div>
 </div>
+
+

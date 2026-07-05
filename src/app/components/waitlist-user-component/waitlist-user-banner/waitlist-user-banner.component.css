@@ -1,152 +1,32 @@
-.waitlist-banner {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  background: #fff;
-  border: 1px solid #eee8f7;
-  border-radius: 18px;
-  overflow: hidden;
-  box-shadow: 0 14px 40px rgba(75, 18, 196, 0.06);
-}
-
-.feature-card {
+.success-banner {
+  min-height: 80px;
+  border-radius: 16px;
+  background: #f4f1fb;
+  padding: 18px 22px;
   display: flex;
   align-items: center;
-  gap: 28px;
-  padding: 30px;
-  border-right: 1px solid #eee8f7;
+  gap: 16px;
+  margin-bottom: 22px;
+  box-sizing: border-box;
 }
 
-.feature-card:last-child {
-  border-right: none;
-}
-
-.feature-image {
-  width: 120px;
-  height: 120px;
+.success-icon {
+  width: 44px;
+  height: 44px;
   border-radius: 50%;
-  background: #efe7ff;
+  background: #dcfce7;
+  color: #138a4b;
   display: grid;
   place-items: center;
-  color: #4b12c4;
-  font-size: 54px;
-  flex-shrink: 0;
-}
-
-.feature-content h3 {
-  margin: 0 0 14px;
   font-size: 20px;
-  color: #09051f;
-  font-weight: 900;
 }
 
-.feature-content p {
+.success-banner h3 {
   margin: 0;
-  font-size: 16px;
-  line-height: 1.55;
-  color: #09051f;
+  font-size: 20px;
 }
 
-.feature-content span {
-  display: block;
-  width: 42px;
-  height: 3px;
-  background: #4b12c4;
-  margin-top: 20px;
-}
-
-@media (max-width: 1024px) {
-  .waitlist-banner {
-    grid-template-columns: 1fr;
-  }
-
-  .feature-card {
-    border-right: none;
-    border-bottom: 1px solid #eee8f7;
-  }
-
-  .feature-card:last-child {
-    border-bottom: none;
-  }
-}
-
-@media (max-width: 600px) {
-  .feature-card {
-    padding: 22px;
-    gap: 18px;
-  }
-
-  .feature-image {
-    width: 76px;
-    height: 76px;
-    font-size: 36px;
-  }
-
-  .feature-content h3 {
-    font-size: 17px;
-  }
-
-  .feature-content p {
-    font-size: 14px;
-  }
-}
-
-@media (max-width: 768px) {
-  .waitlist-banner {
-    display: block;
-    border-radius: 18px;
-    overflow: hidden;
-  }
-
-  .feature-card {
-    padding: 18px;
-    gap: 14px;
-    border: none;
-  }
-
-  .feature-image {
-    width: 52px;
-    height: 52px;
-    font-size: 20px;
-  }
-
-  .feature-content h3 {
-    font-size: 14px;
-    margin-bottom: 5px;
-  }
-
-  .feature-content p {
-    font-size: 13px;
-  }
-
-  .feature-content span {
-    display: none;
-  }
-
-  .arrow {
-    margin-left: auto;
-    color: #5f5870;
-  }
-
-  :host-context(.dark-mode) .waitlist-banner {
-    background: rgba(11, 5, 31, 0.72);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    backdrop-filter: blur(16px);
-    box-shadow: 0 22px 60px rgba(0, 0, 0, 0.35);
-  }
-
-  :host-context(.dark-mode) .feature-card {
-    background: transparent;
-  }
-
-  :host-context(.dark-mode) .feature-image {
-    background: rgba(124, 58, 237, 0.42);
-    color: #ffffff;
-    box-shadow: 0 0 22px rgba(124, 58, 237, 0.32);
-  }
-
-  :host-context(.dark-mode) .feature-content h3,
-  :host-context(.dark-mode) .feature-content p,
-  :host-context(.dark-mode) .arrow {
-    color: #ffffff;
-  }
+.success-banner p {
+  margin: 4px 0 0;
+  color: #777383;
 }

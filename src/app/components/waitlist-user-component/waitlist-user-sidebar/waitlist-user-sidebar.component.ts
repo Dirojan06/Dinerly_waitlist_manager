@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Output } from '@angular/core';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
 
 @Component({
   selector: 'app-waitlist-user-sidebar',
@@ -7,22 +7,12 @@ import { Component, EventEmitter, Output } from '@angular/core';
 })
 export class WaitlistUserSidebarComponent {
 
-  @Output() joinedWaitlist = new EventEmitter<any>();
-  showModal = false;
+  @Input() activeTab: 'WAITLIST' | 'MENU' | 'DISCOUNT' = 'WAITLIST';
+  @Input() isLoggedGuest = false;
 
-  modalType: 'join' | 'status' = 'join';
+  @Output() tabChange = new EventEmitter<'WAITLIST' | 'MENU' | 'DISCOUNT'>();
 
-  openModal(type: 'join' | 'status'): void {
-    this.modalType = type;
-    this.showModal = true;
-  }
-
-  closeModal(): void {
-    this.showModal = false;
-  }
-
-  onJoinedWaitlist(guest: any): void {
-    this.joinedWaitlist.emit(guest);
-    this.showModal = false;
+  selectTab(tab: 'WAITLIST' | 'MENU' | 'DISCOUNT'): void {
+    this.tabChange.emit(tab);
   }
 }

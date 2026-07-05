@@ -28,7 +28,11 @@ import { WaitlistAdminComponent } from './components/waitlist-admin/waitlist-adm
 import { AdminHistoryComponent } from './components/waitlist-admin/admin-history/admin-history.component';
 import { AdminReportsComponent } from './components/waitlist-admin/admin-reports/admin-reports.component';
 import { AdminSettingsComponent } from './components/waitlist-admin/admin-settings/admin-settings.component';
-
+import { DragDropModule } from '@angular/cdk/drag-drop';
+import { WaitlistSettingsComponent } from './components/waitlist-restaurant-components/waitlist-settings/waitlist-settings.component';
+import { WaitlistRestaurantHistoryComponent } from './components/waitlist-restaurant-components/waitlist-restaurant-history/waitlist-restaurant-history.component';
+import { DinerlyLoaderComponent } from './components/dinerly-loader/dinerly-loader.component';
+import { WaitlistUserActionComponent } from './components/waitlist-user-component/waitlist-user-action/waitlist-user-action.component';
 
 @NgModule({
   declarations: [
@@ -51,7 +55,11 @@ import { AdminSettingsComponent } from './components/waitlist-admin/admin-settin
     WaitlistAdminComponent,
     AdminHistoryComponent,
     AdminReportsComponent,
-    AdminSettingsComponent
+    AdminSettingsComponent,
+    WaitlistSettingsComponent,
+    WaitlistRestaurantHistoryComponent,
+    DinerlyLoaderComponent,
+    WaitlistUserActionComponent
   ],
   imports: [
     BrowserModule,
@@ -62,7 +70,9 @@ import { AdminSettingsComponent } from './components/waitlist-admin/admin-settin
     HttpClientModule,
     FormsModule,
     MatStepperModule,
-    NgChartsModule
+    NgChartsModule,
+    DragDropModule
+
 ],
   providers: [
     {

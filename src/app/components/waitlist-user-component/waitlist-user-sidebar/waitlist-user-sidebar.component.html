@@ -1,50 +1,54 @@
-<aside class="sidebar">
+<aside class="customer-sidebar">
 
-  <div class="sidebar-card waiting-card">
+  <div class="brand">
+    <div class="brand-icon">➤</div>
 
-    <div class="card-icon">
-      <i class="fa-solid fa-chair"></i>
+    <div>
+      <h2>Dinerly</h2>
+      <p>Guest Portal</p>
     </div>
-
-    <h2>Your table is waiting</h2>
-
-    <p>
-      Join the waitlist or check your status
-      to get notified.
-    </p>
-
-    <button class="btn-full-dark" (click)="openModal('join')">
-      Join the waitlist
-      <i class="fa-solid fa-arrow-right"></i>
-    </button>
-
-    <span class="or-divider">or</span>
-
-    <button class="btn-full-outline" (click)="openModal('status')">
-      Check my status
-      <i class="fa-solid fa-arrow-right"></i>
-    </button>
-
   </div>
 
-  <div class="info-row clickable">
-    <div class="info-icon">
-      <i class="fa-regular fa-message"></i>
-    </div>
+  <p class="section-label">YOUR VISIT</p>
 
-    <div class="info-text">
-      <strong>We’ll text you when your table is ready</strong>
-      <span>Make sure your phone is up to date!</span>
-    </div>
+  <nav class="side-nav">
+    <button [class.active]="activeTab === 'WAITLIST'" (click)="selectTab('WAITLIST')">
+      <i class="fa-regular fa-clock"></i>
+      Waitlist
+    </button>
 
-    <i class="fa-solid fa-chevron-right"></i>
+    <button [class.active]="activeTab === 'MENU'" (click)="selectTab('MENU')">
+      <i class="fa-solid fa-utensils"></i>
+      Menu
+    </button>
+
+    <button [class.active]="activeTab === 'DISCOUNT'" (click)="selectTab('DISCOUNT')">
+      <i class="fa-solid fa-tag"></i>
+      Discounts
+    </button>
+
+    <!-- <button>
+      <i class="fa-regular fa-square-check"></i>
+      Orders
+    </button>
+
+    <button>
+      <i class="fa-regular fa-award"></i>
+      Rewards
+      <span>🔒</span>
+    </button>
+
+    <button>
+      <i class="fa-regular fa-star"></i>
+      Reviews
+      <span>🔒</span>
+    </button> -->
+  </nav>
+
+  <div class="sidebar-footer">
+    <p><i class="fa-solid fa-location-dot"></i> 123 Market St, Winnipeg</p>
+    <p><i class="fa-regular fa-clock"></i> Open until 10:00pm</p>
+    <p><i class="fa-solid fa-star"></i> 4.8 · 320 reviews</p>
   </div>
 
 </aside>
-
-<app-waitlist-modal
-  *ngIf="showModal"
-  [type]="modalType"
-  (closeModal)="closeModal()"
-  (joinedWaitlist)="onJoinedWaitlist($event)">
-</app-waitlist-modal>

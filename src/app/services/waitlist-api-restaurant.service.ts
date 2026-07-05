@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { JoinWaitlistRequest, ApproveWaitlistRequest, getGuestWaitingStatus, PendingGuestResponse, WaitingGuestResponse, NotifiedGuestResponse, SeatedGuestResponse, DashboardWaitlistResponse, notifiyguestcallRequest, TablelistResponse, addGuestToWaitlistRequest, seatedGuestcallRequest, CancelledGuestResponse, DashboardResponse } from '../models/waitlist-api-guest-to-restaurant.model';
+import { JoinWaitlistRequest, ApproveWaitlistRequest, getGuestWaitingStatus, PendingGuestResponse, WaitingGuestResponse, NotifiedGuestResponse, SeatedGuestResponse, DashboardWaitlistResponse, notifiyguestcallRequest, TablelistResponse, addGuestToWaitlistRequest, seatedGuestcallRequest, CancelledGuestResponse, DashboardResponse, addTabletoRestaurantRequest } from '../models/waitlist-api-guest-to-restaurant.model';
 import { environment } from 'src/environments/environment.prod';
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
@@ -238,6 +238,15 @@ export class WaitlistApiRestaurantService {
       params = params.set('status', status);
     }
     return this.http.post(`${this.baseUrl}/restaurants/${restaurantId}/tables/${tableId}/status`, null, { headers, params });
+  }
+
+  addTabletoRestaurant(restaurantId: number, payload: addTabletoRestaurantRequest): Observable<any> {
+    const token = this.auth.getToken();
+
+    const headers = new HttpHeaders({
+      Authorization: `Bearer ${token}`
+    });
+    return this.http.post(`${this.baseUrl}/restaurants/${restaurantId}/tables`, payload, { headers });
   }
 
 

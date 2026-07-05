@@ -12,7 +12,7 @@ import { WaitlistApiRestaurantService } from 'src/app/services/waitlist-api-rest
 })
 export class WaitlistRestaurantComponentComponent implements OnInit, OnDestroy {
 
-  activeRoute = 'dashboard';
+  activeRoute = 'waitlist';
   guestCount = 0;
   notifyCount = 0;
   openTablesCount = 0;
@@ -95,7 +95,7 @@ export class WaitlistRestaurantComponentComponent implements OnInit, OnDestroy {
 
   setActiveRouteFromUrl(url: string): void {
     const segments = url.split('/').filter(Boolean);
-    this.activeRoute = segments[segments.length - 1] || 'dashboard';
+    this.activeRoute = segments[segments.length - 1] || 'waitlist';
   }
 
   ngOnDestroy(): void { this.subs.unsubscribe(); this.refreshSub?.unsubscribe(); }

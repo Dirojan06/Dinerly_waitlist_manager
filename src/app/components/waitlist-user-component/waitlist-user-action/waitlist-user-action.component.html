@@ -1,0 +1,44 @@
+<section class="action-grid">
+
+  <div class="action-card">
+    <div class="left">
+      <div class="icon-circle">
+        <i class="fa-regular fa-clock"></i>
+      </div>
+
+      <div>
+        <h3>Want to join the waitlist?</h3>
+        <p>Add your party — we'll text you when ready</p>
+      </div>
+    </div>
+
+    <button class="primary-btn" type="button" (click)="openModal('join')">
+      Join now
+    </button>
+  </div>
+
+  <div class="action-card">
+    <div class="left">
+      <div class="icon-circle">
+        <i class="fa-solid fa-location-dot"></i>
+      </div>
+
+      <div>
+        <h3>Already on the list?</h3>
+        <p>Check your position and wait time</p>
+      </div>
+    </div>
+
+    <button class="secondary-btn" type="button" (click)="openModal('status')">
+      Check status
+    </button>
+  </div>
+
+</section>
+
+<app-waitlist-modal
+  *ngIf="showModal"
+  [type]="modalType"
+  (closeModal)="closeModal()"
+  (joinedWaitlist)="onJoinedWaitlist($event)">
+</app-waitlist-modal>
