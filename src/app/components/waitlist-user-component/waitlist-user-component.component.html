@@ -2,18 +2,12 @@
 
   <div class="customer-shell">
 
-    <app-waitlist-user-sidebar
-      [activeTab]="activeTab"
-      [isLoggedGuest]="isLoggedGuest"
-      (tabChange)="changeTab($event)">
+    <app-waitlist-user-sidebar [activeTab]="activeTab" [isLoggedGuest]="isLoggedGuest" (tabChange)="changeTab($event)">
     </app-waitlist-user-sidebar>
 
     <main class="customer-main">
 
-      <app-waitlist-user-hero
-        *ngIf="isLoggedGuest"
-        [guest]="guest"
-        (logout)="logoutGuest()">
+      <app-waitlist-user-hero *ngIf="isLoggedGuest" [guest]="guest" (logout)="logoutGuest()">
       </app-waitlist-user-hero>
 
       <ng-container *ngIf="isLoggedGuest">
@@ -21,8 +15,7 @@
         <ng-container *ngIf="activeTab === 'WAITLIST'">
           <app-waitlist-user-banner></app-waitlist-user-banner>
 
-          <app-waitlist-waiting-screen
-            (leaveSuccess)="logoutGuest()">
+          <app-waitlist-waiting-screen (leaveSuccess)="onLeaveSuccess($event)">
           </app-waitlist-waiting-screen>
         </ng-container>
 
@@ -36,9 +29,9 @@
 
       </ng-container>
 
-      <app-waitlist-user-action
-        *ngIf="!isLoggedGuest"
-        (guestJoined)="onGuestJoined($event)">
+      <app-waitlist-user-action *ngIf="!isLoggedGuest" [cancelledGuest]="cancelledGuest"
+        [restoreRequestSent]="restoreRequestSent" (guestJoined)="onGuestJoined($event)"
+        (restoreRequested)="onRestoreRequested($event)">
       </app-waitlist-user-action>
 
     </main>
@@ -66,10 +59,7 @@
 
 <div class="access-backdrop" *ngIf="showCancelledPopup">
   <div class="access-popup cancelled-popup">
-    <button
-      class="access-close"
-      type="button"
-      (click)="closeCancelledPopup()">
+    <button class="access-close" type="button" (click)="closeCancelledPopup()">
       ✕
     </button>
 
@@ -84,10 +74,7 @@
       Please join the waitlist again to continue.
     </p>
 
-    <button
-      type="button"
-      class="access-btn"
-      (click)="closeCancelledPopup()">
+    <button type="button" class="access-btn" (click)="closeCancelledPopup()">
       Join Again
     </button>
   </div>

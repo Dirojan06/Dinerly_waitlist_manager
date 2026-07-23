@@ -39,7 +39,7 @@
                     <div class="field">
                         <label>Your name</label>
                         <div class="input-box">
-                            <input type="text" formControlName="name" placeholder="Enter your name">
+                            <input type="text" formControlName="name" placeholder=" Enter your name">
                         </div>
                         <small class="error"
                             *ngIf="waitlistForm.get('name')?.invalid && waitlistForm.get('name')?.touched">
@@ -50,11 +50,11 @@
                     <div class="field">
                         <label>Phone number (for SMS)</label>
                         <div class="input-box phone-box">
-                            <input type="text" formControlName="phone" placeholder="Enter your phone number">
+                            <input type="text" formControlName="phone" placeholder=" Enter your phone number">
                         </div>
                         <small class="error"
                             *ngIf="waitlistForm.get('phone')?.invalid && waitlistForm.get('phone')?.touched">
-                            Enter valid 10 digit phone number
+                            Enter valid phone number
                         </small>
                     </div>
                 </div>
@@ -137,7 +137,7 @@
 
                     <div class="input-box">
                         <input type="text" formControlName="notes"
-                            placeholder="Any special requests? (e.g. high chair, wheelchair access)">
+                            placeholder=" Any special requests? (e.g. high chair, wheelchair access)">
                     </div>
                 </div>
 

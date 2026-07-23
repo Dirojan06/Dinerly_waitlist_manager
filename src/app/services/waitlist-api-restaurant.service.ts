@@ -4,6 +4,7 @@ import { environment } from 'src/environments/environment.prod';
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { WaitlistAuthService } from './waitlist-auth.service';
+import { sendNotificationRequest } from '../models/notification.model';
 
 @Injectable({
   providedIn: 'root'
@@ -36,6 +37,16 @@ export class WaitlistApiRestaurantService {
 
   submitFeedback(payload: any): Observable<any> {
     return this.http.post<any>(`${this.baseUrl}/feedback`, payload);
+  }
+
+
+  //********************* dummy request  ******************************************/
+  requestWaitlistRestore(restaurantId: number, phone: string): Observable<any> {
+    return this.http.post(`${this.baseUrl}/waitlist/${restaurantId}/restore`, { phone });
+  }
+
+  sendArrivalConfirmation(restaurantId: number, waitlistId: number, payload: any): Observable<any> {
+    return this.http.post(`${this.baseUrl}/waitlist/${restaurantId}/${waitlistId}/arrival`, payload);
   }
 
   // ************************************************************************************ GUEST API ENDS ******************************************************************************* //
@@ -258,6 +269,28 @@ export class WaitlistApiRestaurantService {
       Authorization: `Bearer ${token}`
     });
     return this.http.post(`${this.baseUrl}/restaurants/${restaurantId}/tables`, payload, { headers });
+  }
+
+  // send custom notification to guest api
+
+  sendNoficationToGuest(restaurantId: number, waitlistId: number, payload: sendNotificationRequest): Observable<any> {
+      const token = this.auth.getToken();
+  
+      const headers = new HttpHeaders({
+        Authorization: `Bearer ${token}`
+      });
+      return this.http.post(`${this.baseUrl}/restaurants/${restaurantId}/notifications/${waitlistId}/send-sms`, payload, { headers });
+    }
+
+  // delete guest from waitlist api
+  deleteGuestFromWaitlist(restaurantId: number, waitlistId: number): Observable<any> {
+    const token = this.auth.getToken();
+
+    const headers = new HttpHeaders({
+      Authorization: `Bearer ${token}`
+    });
+
+    return this.http.delete(`${this.baseUrl}/restaurants/${restaurantId}/waitlist/${waitlistId}`, { headers });
   }
 
 

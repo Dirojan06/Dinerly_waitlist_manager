@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Output } from '@angular/core';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { Restaurant } from 'src/app/models/waitlist-api-guest-to-restaurant.model';
 import { WaitlistApiRestaurantService } from 'src/app/services/waitlist-api-restaurant.service';
 
@@ -12,16 +12,24 @@ export class WaitlistUserActionComponent {
   showModal = false;
   modalType: 'join' | 'status' = 'join';
   restaurants: Restaurant[] = [];
-    isRestaurantLoaded = false;
+  isRestaurantLoaded = false;
 
-constructor(
+  @Input() cancelledGuest: any = null;
+  @Input() restoreRequestSent = false;
+
+  @Output() restoreRequested = new EventEmitter<any>();
+
+  isRestoring = false;
+  restoreError = '';
+
+  constructor(
     private waitlistApi: WaitlistApiRestaurantService) { }
 
-    ngOnInit(): void {
+  ngOnInit(): void {
     this.loadRestaurants();
-    }
+  }
 
-    loadRestaurants(): void {
+  loadRestaurants(): void {
     this.waitlistApi.getRestaurantDetails().subscribe({
       next: (res) => {
         if (res?.success && res?.data) {
@@ -56,5 +64,57 @@ constructor(
     this.guestJoined.emit(guest);
     this.showModal = false;
 
+  }
+
+  requestRestore(): void {
+    if (!this.cancelledGuest?.id) {
+      this.restoreError =
+        'Previous waitlist details are missing.';
+      return;
+    }
+
+    const restaurantId = Number(
+      localStorage.getItem('waitlistRestaurantId')
+    );
+
+    if (!restaurantId) {
+      this.restoreError =
+        'Restaurant details are missing.';
+      return;
+    }
+
+    this.isRestoring = true;
+    this.restoreError = '';
+
+    this.waitlistApi
+      .requestWaitlistRestore(
+        restaurantId,
+        this.cancelledGuest.id
+      )
+      .subscribe({
+        next: (res: any) => {
+          this.isRestoring = false;
+
+          const restoredGuest = {
+            ...this.cancelledGuest,
+            ...(res?.data || {}),
+            status: 'RESTORE_REQUESTED'
+          };
+
+          localStorage.setItem(
+            'waitlistGuest',
+            JSON.stringify(restoredGuest)
+          );
+
+          this.restoreRequested.emit(restoredGuest);
+        },
+        error: (error: any) => {
+          this.isRestoring = false;
+
+          this.restoreError =
+            error?.error?.message ||
+            'Unable to send restore request.';
+        }
+      });
   }
 }

@@ -36,10 +36,58 @@
 
 </section>
 
-<app-waitlist-modal
-  *ngIf="showModal"
-  [type]="modalType"
-  [restaurants]="restaurants"
-  (closeModal)="closeModal()"
+<section class="restore-card" *ngIf="cancelledGuest">
+
+  <div class="restore-card-content">
+
+    <div class="restore-icon">
+      <i class="fa-solid fa-rotate-left"></i>
+    </div>
+
+    <div>
+      <p class="restore-label">
+        PREVIOUS WAITLIST
+      </p>
+
+      <h3>
+        Your waitlist was cancelled
+      </h3>
+
+      <p *ngIf="!restoreRequestSent">
+        Restore your previous request for a party of
+        {{ cancelledGuest.partySize || 1 }}.
+      </p>
+
+      <p *ngIf="restoreRequestSent">
+        Your restore request has been sent to the restaurant.
+        Please wait for their approval.
+      </p>
+    </div>
+
+  </div>
+
+  <button *ngIf="!restoreRequestSent" class="restore-btn" type="button" [disabled]="isRestoring"
+    (click)="requestRestore()">
+    <i class="fa-solid fa-rotate-left" *ngIf="!isRestoring"></i>
+
+    {{
+    isRestoring
+    ? 'Sending request...'
+    : 'Restore waitlist'
+    }}
+  </button>
+
+  <div class="restore-pending" *ngIf="restoreRequestSent">
+    <i class="fa-regular fa-clock"></i>
+    Awaiting restaurant approval
+  </div>
+
+  <p class="restore-error" *ngIf="restoreError">
+    {{ restoreError }}
+  </p>
+
+</section>
+
+<app-waitlist-modal *ngIf="showModal" [type]="modalType" [restaurants]="restaurants" (closeModal)="closeModal()"
   (joinedWaitlist)="onJoinedWaitlist($event)">
 </app-waitlist-modal>

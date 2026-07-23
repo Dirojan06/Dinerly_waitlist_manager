@@ -1,86 +1,604 @@
 <div class="settings-page">
 
-  <div class="settings-header">
-    <div>
+  <!-- Common header -->
+  <header class="settings-header">
+    <div class="settings-title">
       <h1>Settings</h1>
+
       <div class="time-pill">
         <span></span>
         {{ currentTimeOnly }}
       </div>
     </div>
 
-    <!-- <div class="header-actions">
-      <button class="ghost-btn">+ Simulate online join</button>
-      <button class="primary-btn">+ Add Walk-in</button>
-
-      <button class="restaurant-btn">
-        <span>B</span>
-        Brothers Café
-        <i class="fa-solid fa-chevron-down"></i>
+    <div class="header-actions">
+      <button type="button" class="simulate-btn">
+        + Simulate online join
       </button>
-    </div> -->
-  </div>
 
-  <!-- <div class="stats-grid">
-    <div class="stat-card active">
-      <h2>6</h2>
-      <p>parties waiting</p>
+      <button type="button" class="walkin-btn">
+        <span>+</span>
+        Add Walk-in
+      </button>
+
+      <button type="button" class="restaurant-btn">
+        <span class="restaurant-avatar">B</span>
+        <strong>Brothers Café</strong>
+        <span class="chevron">⌄</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Pending request banner -->
+  <section
+    class="request-banner"
+    *ngIf="showPendingRequest && (
+      activeTab === 'tables' ||
+      activeTab === 'holiday' ||
+      activeTab === 'advanced'
+    )">
+
+    <div class="request-main">
+      <div class="request-icon">▦</div>
+
+      <div>
+        <span class="request-label">
+          NEW WAITLIST REQUEST
+        </span>
+
+        <strong>Maya Thompson — party of 2</strong>
+
+        <small>
+          (204) 555-0184 · joined via QR code
+        </small>
+      </div>
     </div>
 
-    <div class="stat-card">
-      <h2>~16 min</h2>
-      <p>average wait tonight</p>
+    <div class="request-actions">
+      <button
+        type="button"
+        class="decline-btn"
+        (click)="declinePendingRequest()">
+        × Decline
+      </button>
+
+      <button
+        type="button"
+        class="approve-btn"
+        (click)="approvePendingRequest()">
+        ✓ Approve
+      </button>
     </div>
+  </section>
 
-    <div class="stat-card">
-      <h2>7/12</h2>
-      <p>tables open</p>
-      <div class="progress">
-        <span></span>
-      </div>
-    </div>
+  <!-- ==========================
+       PROFILE
+  =========================== -->
 
-    <div class="stat-card">
-      <h2>28</h2>
-      <p>seated today</p>
-    </div>
-  </div> -->
+  <ng-container *ngIf="activeTab === 'profile'">
 
-  <div class="settings-grid">
+    <section class="settings-section">
+      <h2>Restaurant details</h2>
 
-    <!-- Restaurant Profile -->
-    <section class="settings-card">
-      <h3>Restaurant profile</h3>
-
-      <div class="info-row">
-        <span>Name</span>
-        <strong>{{ restaurant.name }}</strong>
+      <div class="setting-value-row">
+        <strong>Name</strong>
+        <span>{{ restaurant.name }}</span>
       </div>
 
-      <div class="info-row">
-        <span>Address</span>
-        <strong>{{ restaurant.address }}</strong>
+      <div class="setting-value-row">
+        <strong>Address</strong>
+        <span>{{ restaurant.address }}</span>
       </div>
 
-      <div class="info-row">
-        <span>Hours</span>
-        <strong>{{ restaurant.hours }}</strong>
+      <div class="setting-value-row">
+        <strong>Hours</strong>
+        <span>{{ restaurant.hours }}</span>
       </div>
 
-      <div class="info-row">
-        <span>Phone</span>
-        <strong>{{ restaurant.phone }}</strong>
+      <div class="setting-value-row">
+        <strong>Phone</strong>
+        <span>{{ restaurant.phone }}</span>
       </div>
-
-      <button class="soft-btn" (click)="editProfile()">Edit profile</button>
     </section>
 
-    <!-- Staff List -->
-    <section class="settings-card">
-      <h3>Staff list</h3>
-      <p class="card-subtitle">
-        Everyone who works here. Add them once, then pick from this list on the Tables page
-        instead of retyping names each shift.
+    <section class="settings-section current-plan-section">
+      <h2>Current plan</h2>
+
+      <div class="setting-value-row plan-row">
+        <strong>Plan</strong>
+
+        <div class="plan-value">
+          <span>{{ currentPlan.name }}</span>
+          <span class="info-icon">i</span>
+
+          <button
+            type="button"
+            class="outline-btn"
+            (click)="updatePackage()">
+            Update package
+          </button>
+        </div>
+      </div>
+
+      <div class="usage-row">
+        <div class="usage-heading">
+          <strong>Notifications sent this month</strong>
+
+          <span>
+            {{ currentPlan.notificationUsed }} /
+            {{ currentPlan.notificationLimit }}
+          </span>
+        </div>
+
+        <div class="progress-track">
+          <span
+            class="progress-value notification-progress"
+            [style.width.%]="notificationPercentage">
+          </span>
+        </div>
+
+        <small class="warning-text">
+          {{ notificationRemaining }} texts left this month.
+        </small>
+      </div>
+
+      <div class="usage-row">
+        <div class="usage-heading">
+          <strong>Marketing messages sent this month</strong>
+
+          <span>
+            {{ currentPlan.marketingUsed }} /
+            {{ currentPlan.marketingLimit }}
+          </span>
+        </div>
+
+        <div class="progress-track">
+          <span
+            class="progress-value marketing-progress"
+            [style.width.%]="marketingPercentage">
+          </span>
+        </div>
+
+        <small>
+          {{ marketingRemaining }}
+          marketing messages left this month.
+        </small>
+      </div>
+
+      <div class="setting-value-row">
+        <strong>Overage charges this month</strong>
+        <span>{{ currentPlan.overageCharges }}</span>
+      </div>
+
+      <div class="setting-value-row">
+        <strong>Next renewal</strong>
+        <span>{{ currentPlan.renewalDate }}</span>
+      </div>
+    </section>
+  </ng-container>
+
+  <!-- ==========================
+       NOTIFICATION
+  =========================== -->
+
+  <ng-container *ngIf="activeTab === 'notification'">
+
+    <section class="settings-section">
+      <h2>Guest notifications</h2>
+
+      <div class="toggle-setting-row">
+        <div>
+          <strong>Text guests when their table is ready</strong>
+
+          <p>
+            Automatically send a text message to the guest as soon
+            as you mark their table ready. Turning this off means
+            you'll need to notify them in person or by calling.
+          </p>
+        </div>
+
+        <label class="switch">
+          <input
+            type="checkbox"
+            [(ngModel)]="guestNotifications.textWhenReady">
+
+          <span></span>
+        </label>
+      </div>
+
+      <div class="toggle-setting-row">
+        <div>
+          <strong>Call guests when their table is ready</strong>
+
+          <p>
+            Along with the text, place an automated phone call using
+            a predefined voice message — helpful for guests who
+            don't check texts right away.
+          </p>
+        </div>
+
+        <label class="switch">
+          <input
+            type="checkbox"
+            [(ngModel)]="guestNotifications.callWhenReady">
+
+          <span></span>
+        </label>
+      </div>
+
+      <div class="toggle-setting-row">
+        <div>
+          <strong>Text a confirmation when a guest joins</strong>
+
+          <p>
+            Send guests a text right when they join the waitlist,
+            confirming their spot and estimated wait time.
+          </p>
+        </div>
+
+        <label class="switch">
+          <input
+            type="checkbox"
+            [(ngModel)]="guestNotifications.joinConfirmation">
+
+          <span></span>
+        </label>
+      </div>
+
+      <div class="toggle-setting-row">
+        <div>
+          <strong>Text reservation confirmations & reminders</strong>
+
+          <p>
+            Send a confirmation text when a reservation is booked,
+            and a reminder about an hour before the reserved time.
+          </p>
+        </div>
+
+        <label class="switch">
+          <input
+            type="checkbox"
+            [(ngModel)]="guestNotifications.reservationConfirmation">
+
+          <span></span>
+        </label>
+      </div>
+
+      <div class="toggle-setting-row">
+        <div>
+          <strong>Auto-remove no-shows after 15 min</strong>
+
+          <p>
+            If a party doesn't respond to their table-ready text
+            within 15 minutes, automatically remove them from the
+            waitlist and free up the table.
+          </p>
+        </div>
+
+        <label class="switch">
+          <input
+            type="checkbox"
+            [(ngModel)]="guestNotifications.autoRemoveNoShows">
+
+          <span></span>
+        </label>
+      </div>
+    </section>
+
+    <section class="settings-section message-section">
+      <h2>Message templates</h2>
+
+      <p class="section-description">
+        What guests actually see and hear for the table-ready text
+        and call. Changing these requires the manager code.
+      </p>
+
+      <div class="template-block">
+        <strong class="template-title">Text message</strong>
+
+        <div class="template-control-row">
+          <label>Template</label>
+
+          <select [(ngModel)]="textTemplate">
+            <option
+              *ngFor="let template of textTemplates"
+              [value]="template">
+              {{ template }}
+            </option>
+          </select>
+
+          <button
+            type="button"
+            class="outline-btn"
+            (click)="editTextTemplate()">
+            ✎ Edit
+          </button>
+        </div>
+
+        <div class="message-preview">
+          <div class="sms-bubble">
+            Hi Jordan! Your table at Brothers Café is ready 🎉
+            <br>
+            Please head to the host stand within the next 10 minutes.
+            See you soon!
+          </div>
+        </div>
+      </div>
+
+      <div class="template-block">
+        <strong class="template-title">Phone call</strong>
+
+        <div class="template-control-row">
+          <label>Script</label>
+
+          <select [(ngModel)]="callScript">
+            <option
+              *ngFor="let script of callScripts"
+              [value]="script">
+              {{ script }}
+            </option>
+          </select>
+
+          <button
+            type="button"
+            class="outline-btn"
+            (click)="editCallScript()">
+            ✎ Edit
+          </button>
+        </div>
+
+        <div class="call-preview">
+          Hi, this is Brothers Café calling to let you know your
+          table is ready. Please head to the host stand within the
+          next ten minutes. We look forward to seeing you!
+        </div>
+
+        <div class="template-control-row voice-row">
+          <label>Voice</label>
+
+          <select [(ngModel)]="selectedVoice">
+            <option value="">Select voice</option>
+
+            <option
+              *ngFor="let voice of voices"
+              [value]="voice">
+              {{ voice }}
+            </option>
+          </select>
+
+          <button
+            type="button"
+            class="outline-btn"
+            (click)="previewCall()">
+            ▶ Preview call
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <section class="settings-section">
+      <h2>Staff notifications</h2>
+
+      <div class="toggle-setting-row">
+        <div>
+          <strong>
+            Alert staff when a party is waiting past the quoted time
+          </strong>
+
+          <p>
+            Show a banner on the Waitlist page when a party has
+            been waiting longer than the wait time they were quoted.
+          </p>
+        </div>
+
+        <label class="switch">
+          <input
+            type="checkbox"
+            [(ngModel)]="staffNotifications.waitingPastQuotedTime">
+
+          <span></span>
+        </label>
+      </div>
+
+      <div class="toggle-setting-row">
+        <div>
+          <strong>
+            Alert staff when a table's been open too long
+          </strong>
+
+          <p>
+            Flag tables that have stayed empty past a set time,
+            as a reminder to check in on turnover.
+          </p>
+        </div>
+
+        <label class="switch">
+          <input
+            type="checkbox"
+            [(ngModel)]="staffNotifications.tableOpenTooLong">
+
+          <span></span>
+        </label>
+      </div>
+    </section>
+  </ng-container>
+
+  <!-- ==========================
+       WAITLIST SETTINGS
+  =========================== -->
+
+  <ng-container *ngIf="activeTab === 'waitlist'">
+
+    <section class="settings-section">
+      <h2>Waitlist rules</h2>
+
+      <div class="editable-value-row">
+        <strong>Max party size</strong>
+
+        <input
+          type="number"
+          min="1"
+          max="50"
+          [(ngModel)]="waitlistRules.maxPartySize">
+      </div>
+
+      <div class="editable-value-row">
+        <strong>Table-ready response window</strong>
+
+        <div class="input-with-suffix">
+          <input
+            type="number"
+            min="1"
+            [(ngModel)]="waitlistRules.responseWindow">
+
+          <span>min</span>
+        </div>
+      </div>
+
+      <div class="toggle-setting-row">
+        <div>
+          <strong>Walk-ins only (no online join)</strong>
+
+          <p>
+            Guests can only join the waitlist in person at the host
+            stand. Turning this on hides your QR code and online
+            join link.
+          </p>
+        </div>
+
+        <label class="switch">
+          <input
+            type="checkbox"
+            [(ngModel)]="waitlistRules.walkInsOnly">
+
+          <span></span>
+        </label>
+      </div>
+
+      <div class="toggle-setting-row">
+        <div>
+          <strong>Pause new joins after closing time</strong>
+
+          <p>
+            Automatically stop accepting new waitlist joins once
+            your posted closing time hits, so guests can't line up
+            for a table you won't seat.
+          </p>
+        </div>
+
+        <label class="switch">
+          <input
+            type="checkbox"
+            [(ngModel)]="waitlistRules.pauseAfterClosing">
+
+          <span></span>
+        </label>
+      </div>
+
+      <div class="toggle-setting-row">
+        <div>
+          <strong>Add from Google</strong>
+
+          <p>
+            Allow customers to join the waitlist directly from your
+            restaurant's Google Business Profile — no app or QR
+            code needed.
+          </p>
+        </div>
+
+        <label class="switch">
+          <input
+            type="checkbox"
+            [(ngModel)]="waitlistRules.addFromGoogle">
+
+          <span></span>
+        </label>
+      </div>
+
+      <div class="toggle-setting-row">
+        <div>
+          <strong>Accept waitlist joins online</strong>
+
+          <p>
+            Turn off to stop accepting new guests through the QR
+            code, join link, or Google — the waitlist becomes
+            walk-in and staff-added only.
+          </p>
+        </div>
+
+        <label class="switch">
+          <input
+            type="checkbox"
+            [(ngModel)]="waitlistRules.acceptOnline">
+
+          <span></span>
+        </label>
+      </div>
+
+      <button
+        type="button"
+        class="terms-row"
+        (click)="openTerms()">
+
+        <strong>Terms & conditions</strong>
+        <span>›</span>
+      </button>
+    </section>
+  </ng-container>
+
+  <!-- ==========================
+       TABLES
+  =========================== -->
+
+  <ng-container *ngIf="activeTab === 'tables'">
+
+    <section class="settings-section">
+      <h2>Edit tables & floor plan</h2>
+
+      <p class="section-description">
+        Drag tables and fixtures, resize walls and the bar, and set
+        seat counts. The live floor plan on the Tables page stays
+        view-only — all editing happens here.
+      </p>
+
+      <button
+        type="button"
+        class="outline-btn floor-plan-btn"
+        (click)="editFloorPlan()">
+        Edit Floor Plan
+      </button>
+    </section>
+
+    <section class="settings-section">
+      <h2>Floor plan overview</h2>
+
+      <div class="setting-value-row">
+        <strong>Sections</strong>
+        <span>{{ floorOverview.sections }}</span>
+      </div>
+
+      <div class="setting-value-row">
+        <strong>Total tables</strong>
+        <span>{{ floorOverview.totalTables }}</span>
+      </div>
+
+      <div class="setting-value-row">
+        <strong>Total seats</strong>
+        <span>{{ floorOverview.totalSeats }}</span>
+      </div>
+
+      <div class="setting-value-row">
+        <strong>Staff on file</strong>
+        <span>{{ staffOnFile }}</span>
+      </div>
+    </section>
+
+    <section class="settings-section staff-section">
+      <h2>Staff list</h2>
+
+      <p class="section-description">
+        Everyone who works here. Add them once, then pick from this
+        list on the Tables page instead of retyping names each shift.
       </p>
 
       <div class="staff-form">
@@ -88,124 +606,241 @@
           type="text"
           placeholder="Staff member name"
           [(ngModel)]="staffName"
-        />
+          (keyup.enter)="addStaff()">
 
         <select [(ngModel)]="staffRole">
-          <option *ngFor="let role of staffRoles" [value]="role">
+          <option
+            *ngFor="let role of staffRoles"
+            [value]="role">
             {{ role }}
           </option>
         </select>
 
-        <button class="primary-btn" (click)="addStaff()">+ Add</button>
+        <button
+          type="button"
+          class="small-primary-btn"
+          (click)="addStaff()">
+          + Add
+        </button>
       </div>
 
-      <div class="staff-list" *ngIf="staffList.length; else noStaff">
-        <div class="staff-chip" *ngFor="let staff of staffList">
-          <div class="avatar">{{ getInitial(staff.name) }}</div>
+      <div
+        class="staff-list"
+        *ngIf="staffList.length; else noStaff">
 
-          <div class="staff-info">
+        <article
+          class="staff-item"
+          *ngFor="let staff of staffList">
+
+          <div class="staff-avatar">
+            {{ getInitial(staff.name) }}
+          </div>
+
+          <div class="staff-details">
             <strong>{{ staff.name }}</strong>
             <span>{{ staff.role }}</span>
           </div>
 
           <button
-            class="floor-btn"
-            [class.on]="staff.onFloor"
+            type="button"
+            class="floor-status-btn"
+            [class.active]="staff.onFloor"
             (click)="toggleFloor(staff)">
-            + Floor
+
+            {{ staff.onFloor ? 'On floor' : '+ Floor' }}
           </button>
 
-          <button class="remove-btn" (click)="removeStaff(staff.id)">×</button>
-        </div>
+          <button
+            type="button"
+            class="remove-staff-btn"
+            (click)="removeStaff(staff.id)">
+            ×
+          </button>
+        </article>
       </div>
 
       <ng-template #noStaff>
-        <p class="empty-text">
-          No staff added yet — add your team here so they show up as suggestions on the Tables page.
+        <p class="empty-message">
+          No staff added yet — add your team here so they show up
+          as suggestions on the Tables page.
         </p>
       </ng-template>
     </section>
+  </ng-container>
 
-    <!-- Notifications -->
-    <section class="settings-card">
-      <h3>Notifications</h3>
+  <!-- ==========================
+       HOLIDAY HOURS
+  =========================== -->
 
-      <div class="toggle-row">
-        <span>Text guests when their table is ready</span>
-        <label class="switch">
-          <input type="checkbox" [(ngModel)]="notifications.textReady" />
-          <span></span>
-        </label>
-      </div>
+  <ng-container *ngIf="activeTab === 'holiday'">
 
-      <div class="toggle-row">
-        <span>Email me a nightly summary</span>
-        <label class="switch">
-          <input type="checkbox" [(ngModel)]="notifications.nightlySummary" />
-          <span></span>
-        </label>
-      </div>
+    <section class="settings-section">
+      <h2>Holiday hours</h2>
 
-      <div class="toggle-row">
-        <span>Auto-remove no-shows after 15 min</span>
-        <label class="switch">
-          <input type="checkbox" [(ngModel)]="notifications.autoRemoveNoShows" />
-          <span></span>
-        </label>
-      </div>
-    </section>
-
-    <!-- Floor Plan Overview -->
-    <section class="settings-card">
-      <h3>Floor plan overview</h3>
-
-      <div class="info-row">
-        <span>Sections</span>
-        <strong>{{ floorOverview.sections }}</strong>
-      </div>
-
-      <div class="info-row">
-        <span>Total tables</span>
-        <strong>{{ floorOverview.totalTables }}</strong>
-      </div>
-
-      <div class="info-row">
-        <span>Total seats</span>
-        <strong>{{ floorOverview.totalSeats }}</strong>
-      </div>
-
-      <div class="info-row">
-        <span>Staff on file</span>
-        <strong>{{ staffOnFile }}</strong>
-      </div>
-    </section>
-
-    <!-- Guest Join Link -->
-    <section class="settings-card guest-link-card">
-      <h3>Guest join link</h3>
-      <p class="card-subtitle">
-        Guests scan this to join the waitlist from their phone — same flow as "Simulate online join."
+      <p class="section-description">
+        Set different hours, or close entirely, for holidays and
+        special dates. These override your regular hours on the
+        Waitlist and guest join link.
       </p>
 
-      <div class="qr-area">
-        <div class="qr-box">
-          <img
-            src="https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=dinerly.app/join/brothers-cafe"
-            alt="QR Code"
-          />
+      <button
+        type="button"
+        class="holiday-row"
+        *ngFor="let holiday of holidayHours"
+        (click)="editHoliday(holiday)">
+
+        <strong>
+          {{ holiday.name }} — {{ holiday.date }}
+        </strong>
+
+        <span *ngIf="holiday.closed">
+          Closed
+        </span>
+
+        <span *ngIf="!holiday.closed">
+          {{ holiday.openTime }} – {{ holiday.closeTime }}
+        </span>
+      </button>
+
+      <button
+        type="button"
+        class="outline-btn add-holiday-btn"
+        (click)="addHoliday()">
+        + Add holiday
+      </button>
+    </section>
+  </ng-container>
+
+  <!-- ==========================
+       ADVANCED
+  =========================== -->
+
+  <ng-container *ngIf="activeTab === 'advanced'">
+
+    <section class="settings-section">
+      <h2>Advanced setting</h2>
+
+      <div class="toggle-setting-row">
+        <div>
+          <strong>Dark mode</strong>
+
+          <p>
+            Switch the whole portal to a dark theme — easier on the
+            eyes for late-night closing shifts.
+          </p>
         </div>
 
-        <div class="link-box">
-          <span>Link</span>
-          <strong>{{ guestJoinLink }}</strong>
+        <label class="switch">
+          <input
+            type="checkbox"
+            [(ngModel)]="advancedSettings.darkMode"
+            (ngModelChange)="toggleDarkMode()">
 
-          <div class="link-actions">
-            <button class="soft-btn" (click)="copyLink()">Copy link</button>
-            <button class="soft-btn" (click)="downloadQrCode()">Download QR code</button>
+          <span></span>
+        </label>
+      </div>
+
+      <div class="advanced-value-row">
+        <div>
+          <strong>Desktop notifications</strong>
+
+          <p>
+            Notifications are blocked for this site in your browser
+            settings. Allow them there to turn this back on.
+          </p>
+        </div>
+
+        <span class="status-pill">Blocked</span>
+      </div>
+
+      <div class="toggle-setting-row">
+        <div>
+          <strong>Keep me signed in</strong>
+
+          <p>
+            Stay logged in on this browser between visits instead of
+            signing out automatically.
+          </p>
+        </div>
+
+        <label class="switch">
+          <input
+            type="checkbox"
+            [(ngModel)]="advancedSettings.keepSignedIn">
+
+          <span></span>
+        </label>
+      </div>
+
+      <div class="advanced-value-row">
+        <strong>Language</strong>
+
+        <select
+          class="compact-select"
+          [(ngModel)]="advancedSettings.language">
+
+          <option
+            *ngFor="let language of languages"
+            [value]="language">
+            {{ language }}
+          </option>
+        </select>
+      </div>
+
+      <div class="advanced-value-row">
+        <strong>Time zone</strong>
+
+        <div class="time-zone-value">
+          <span>{{ advancedSettings.timeZone }}</span>
+
+          <button
+            type="button"
+            class="outline-btn"
+            (click)="updateTimeZone()">
+            Update
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <section class="settings-section guest-link-section">
+      <h2>Guest join link & barcode</h2>
+
+      <p class="section-description">
+        Guests scan this to join the waitlist from their phone —
+        same flow as "Simulate online join."
+      </p>
+
+      <div class="qr-content">
+        <div class="qr-code">
+          <img
+            [src]="'https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=' + guestJoinLink"
+            alt="Dinerly guest join QR code">
+        </div>
+
+        <div class="guest-link-details">
+          <div class="guest-link-row">
+            <strong>Link</strong>
+            <span>{{ guestJoinLink }}</span>
+          </div>
+
+          <div class="guest-link-actions">
+            <button
+              type="button"
+              class="outline-btn"
+              (click)="copyLink()">
+              Copy link
+            </button>
+
+            <button
+              type="button"
+              class="outline-btn"
+              (click)="downloadQrCode()">
+              Download QR code
+            </button>
           </div>
         </div>
       </div>
     </section>
-
-  </div>
+  </ng-container>
 </div>

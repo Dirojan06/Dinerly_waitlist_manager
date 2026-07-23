@@ -1,109 +1,218 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { NavigationEnd, Router } from '@angular/router';
+import {
+  ActivatedRoute,
+  NavigationEnd,
+  Router
+} from '@angular/router';
 import { filter, Subscription } from 'rxjs';
-import { DashboardStatus, tableList } from 'src/app/models/waitlist-api-guest-to-restaurant.model';
+
+import {
+  DashboardStatus,
+  tableList
+} from 'src/app/models/waitlist-api-guest-to-restaurant.model';
+
 import { NotificationService } from 'src/app/services/notification.service';
 import { WaitlistApiRestaurantService } from 'src/app/services/waitlist-api-restaurant.service';
+
+type SettingsTab =
+  | 'profile'
+  | 'notification'
+  | 'waitlist'
+  | 'tables'
+  | 'holiday'
+  | 'advanced';
 
 @Component({
   selector: 'app-waitlist-restaurant-component',
   templateUrl: './waitlist-restaurant-component.component.html',
   styleUrls: ['./waitlist-restaurant-component.component.css']
 })
-export class WaitlistRestaurantComponentComponent implements OnInit, OnDestroy {
+export class WaitlistRestaurantComponentComponent
+  implements OnInit, OnDestroy {
 
   activeRoute = 'waitlist';
+
+  activeSettingsTab: SettingsTab = 'profile';
+
+  showSettingsMenu = false;
+
   guestCount = 0;
   notifyCount = 0;
   openTablesCount = 0;
+
   showModal = false;
   restaurantId = 1;
+
   tables: tableList[] = [];
-  private subs = new Subscription();
-  isLoading: boolean = false;
   dashboardStatus: DashboardStatus[] = [];
 
+  isLoading = false;
+
+  settingsTabs: Array<{
+    label: string;
+    value: SettingsTab;
+  }> = [
+      { label: 'Profile', value: 'profile' },
+      { label: 'Notification', value: 'notification' },
+      { label: 'Waitlist settings', value: 'waitlist' },
+      { label: 'Tables', value: 'tables' },
+      { label: 'Holiday hours', value: 'holiday' },
+      { label: 'Advanced', value: 'advanced' }
+    ];
+
+  private subscriptions = new Subscription();
   private refreshSub?: Subscription;
-  constructor(private router: Router, private waitlistService: WaitlistApiRestaurantService,private notificationService : NotificationService) { }
+
+  constructor(
+    private router: Router,
+    private activatedRoute: ActivatedRoute,
+    private waitlistService: WaitlistApiRestaurantService,
+    private notificationService: NotificationService
+  ) { }
 
   ngOnInit(): void {
-
     this.setActiveRouteFromUrl(this.router.url);
-    this.subs.add(
+    this.readSettingsTabFromUrl(this.router.url);
+
+    this.subscriptions.add(
       this.router.events
-        .pipe(filter(event => event instanceof NavigationEnd))
-        .subscribe((event: any) => {
+        .pipe(
+          filter(
+            (event): event is NavigationEnd =>
+              event instanceof NavigationEnd
+          )
+        )
+        .subscribe((event: NavigationEnd) => {
           this.setActiveRouteFromUrl(event.urlAfterRedirects);
+          this.readSettingsTabFromUrl(event.urlAfterRedirects);
         })
     );
 
     this.getRestaurantTables();
     this.loadDashboardWaitlist();
-    
-    this.refreshSub = this.notificationService.restaurantRefresh$.subscribe(() => {
-    this.getRestaurantTables();
-    this.loadDashboardWaitlist();
-  });
 
+    this.refreshSub =
+      this.notificationService.restaurantRefresh$.subscribe(() => {
+        this.getRestaurantTables();
+        this.loadDashboardWaitlist();
+      });
   }
 
-  getRestaurantTables() {
+  toggleSettingsMenu(): void {
+    if (this.activeRoute !== 'settings') {
+      this.openSettingsTab('profile');
+      return;
+    }
 
-    this.waitlistService.getRestaurantTableslist(this.restaurantId).subscribe({
-      next: (res) => {
-        this.tables = res.data;
-        this.openTablesCount = this.tables.filter(
-
-          (table: any) => table.status === 'OPEN'
-
-        ).length;
-      }, error: () => {
-        alert('Unable to load the table');
-      }
-    })
+    this.showSettingsMenu = !this.showSettingsMenu;
   }
 
-  loadDashboardWaitlist(): void {
+  openSettingsTab(tab: SettingsTab): void {
+    this.activeSettingsTab = tab;
+    this.activeRoute = 'settings';
+    this.showSettingsMenu = true;
 
-    this.isLoading = true;
-
-
-    this.waitlistService.getDashboardStatus(this.restaurantId).subscribe({
-      next: (response) => {
-        this.isLoading = false;
-        if (response.success) {
-          this.guestCount = response.data.filter(
-
-        (guest: any) =>
-
-          guest.status === 'PENDING' ||
-
-          guest.status === 'WAITING' ||
-
-          guest.status === 'NOTIFIED'
-
-      ).length;
-        }
+    this.router.navigate(['/restaurant/settings'], {
+      queryParams: {
+        tab
       },
-      error: () => {
-        this.isLoading = false;
-        alert('Unable to load dashboard waitlist');
-      }
+      queryParamsHandling: 'merge'
     });
-
   }
-
-  setActiveRouteFromUrl(url: string): void {
-    const segments = url.split('/').filter(Boolean);
-    this.activeRoute = segments[segments.length - 1] || 'waitlist';
-  }
-
-  ngOnDestroy(): void { this.subs.unsubscribe(); this.refreshSub?.unsubscribe(); }
 
   navigate(route: string): void {
     this.activeRoute = route;
+
+    if (route !== 'settings') {
+      this.showSettingsMenu = false;
+    }
+
     this.router.navigate(['/restaurant', route]);
   }
 
-  get capacityPercent(): number { return Math.round((43 / 60) * 100); }
+  setActiveRouteFromUrl(url: string): void {
+    const cleanUrl = url.split('?')[0];
+    const segments = cleanUrl.split('/').filter(Boolean);
+
+    this.activeRoute =
+      segments[segments.length - 1] || 'waitlist';
+
+    this.showSettingsMenu =
+      this.activeRoute === 'settings';
+  }
+
+  readSettingsTabFromUrl(url: string): void {
+    const queryString = url.split('?')[1];
+
+    if (!queryString) {
+      this.activeSettingsTab = 'profile';
+      return;
+    }
+
+    const params = new URLSearchParams(queryString);
+    const tab = params.get('tab') as SettingsTab | null;
+
+    const validTabs: SettingsTab[] = [
+      'profile',
+      'notification',
+      'waitlist',
+      'tables',
+      'holiday',
+      'advanced'
+    ];
+
+    this.activeSettingsTab =
+      tab && validTabs.includes(tab) ? tab : 'profile';
+  }
+
+  getRestaurantTables(): void {
+    this.waitlistService
+      .getRestaurantTableslist(this.restaurantId)
+      .subscribe({
+        next: response => {
+          this.tables = response?.data || [];
+
+          this.openTablesCount = this.tables.filter(
+            (table: any) => table.status === 'OPEN'
+          ).length;
+        },
+        error: () => {
+          console.error('Unable to load restaurant tables');
+        }
+      });
+  }
+
+  loadDashboardWaitlist(): void {
+    this.isLoading = true;
+
+    this.waitlistService
+      .getDashboardStatus(this.restaurantId)
+      .subscribe({
+        next: response => {
+          this.isLoading = false;
+
+          if (response?.success) {
+            this.guestCount = (response.data || []).filter(
+              (guest: any) =>
+                guest.status === 'PENDING' ||
+                guest.status === 'WAITING' ||
+                guest.status === 'NOTIFIED'
+            ).length;
+          }
+        },
+        error: () => {
+          this.isLoading = false;
+          console.error('Unable to load dashboard waitlist');
+        }
+      });
+  }
+
+  get capacityPercent(): number {
+    return Math.round((43 / 60) * 100);
+  }
+
+  ngOnDestroy(): void {
+    this.subscriptions.unsubscribe();
+    this.refreshSub?.unsubscribe();
+  }
 }

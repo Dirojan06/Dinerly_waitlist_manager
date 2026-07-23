@@ -25,7 +25,7 @@
 
       <button class="restaurant-btn" type="button">
         <span>B</span>
-        Brothers Café
+        The Commons
         <i class="fa-solid fa-chevron-down"></i>
       </button>
 
@@ -48,7 +48,7 @@
           {{ latestPendingGuest.guestName }} — party of {{ latestPendingGuest.partySize }}
         </h2>
         <span>
-          {{ latestPendingGuest.guestPhone }} · joined via QR code
+          {{ latestPendingGuest.guestPhone }}
         </span>
       </div>
     </div>
@@ -176,15 +176,16 @@
       <!-- ACTIONS -->
       <div class="action-cell">
 
-        <button class="notify-action" type="button" *ngIf="guest.status === 'WAITING'" (click)="notifyGuest(guest)">
+        <button class="notify-action" type="button" *ngIf="guest.status === 'WAITING'" (click)="notifyGuest(guest);">
           <i class="fa-regular fa-paper-plane"></i>
           Notify
         </button>
 
-        <button class="seat-action" type="button" *ngIf="guest.status === 'NOTIFIED'"
-          (click)="openAvailableTableModal(guest)">
-          <i class="fa-solid fa-check"></i>
-          Seat
+        <button class="action-btn call" type="button" *ngIf="guest.status === 'NOTIFIED'">
+          <i class="fa-solid fa-phone-volume" style="color: rgb(177, 151, 252);"></i>
+          /
+          <i class="fa-solid fa-comment-sms" style="color: rgb(177, 151, 252);"></i>
+
         </button>
 
         <!-- <button
@@ -195,12 +196,14 @@
           <i class="fa-solid fa-xmark"></i>
         </button> -->
 
-        <button class="action-btn sms" *ngIf="guest.status === 'WAITING' || guest.status === 'NOTIFIED'">
-          SMS
+        <button class="action-btn sms" *ngIf="guest.status === 'WAITING' || guest.status === 'NOTIFIED'"
+          (click)="openAvailableTableModal(guest)">
+          <i class="fa-solid fa-check" style="color: rgb(177, 151, 252);"></i>
         </button>
 
-        <button class="action-btn call" *ngIf="guest.status === 'WAITING' || guest.status === 'NOTIFIED'">
-          Call
+        <button class="action-btn call" *ngIf="guest.status === 'WAITING' || guest.status === 'NOTIFIED'"
+          (click)="openLeaveConfirm(guest)">
+          <i class="fa-solid fa-x" style="color: rgb(177, 151, 252);"></i>
         </button>
 
       </div>
@@ -212,6 +215,50 @@
     </div>
 
   </section>
+
+
+  <!-- <section class="restore-request-section" *ngIf="restoreRequestedGuests.length">
+
+  <div class="restore-section-title">
+    <div>
+      <p>RESTORE REQUESTS</p>
+      <h3>
+        Guests requesting to rejoin
+      </h3>
+    </div>
+
+    <span>
+      {{ restoreRequestedGuests.length }}
+    </span>
+  </div>
+
+  <div class="restore-request-row" *ngFor="
+      let guest of restoreRequestedGuests
+    ">
+    <div class="guest-avatar">
+      {{ getGuestInitials(guest.guestName) }}
+    </div>
+
+    <div class="restore-guest-details">
+      <strong>{{ guest.guestName }}</strong>
+
+      <p>
+        {{ guest.guestPhone }}
+        · Party of {{ guest.partySize }}
+      </p>
+    </div>
+
+    <div class="restore-request-message">
+      <i class="fa-solid fa-rotate-left"></i>
+      Wants to restore the waitlist
+    </div>
+
+    <button type="button" class="restore-action-btn" (click)="openRestorePopup(guest)">
+      Review
+    </button>
+  </div>
+
+</section> -->
 
   <section class="history-summary-grid">
 
@@ -255,7 +302,7 @@
         <span>Guest</span>
         <span>Party size</span>
         <span>Cancelled at</span>
-        <span>Reason</span>
+        <span>Action</span>
       </div>
 
       <div class="summary-row" *ngFor="let guest of cancelledGuests.slice(0, 3); let i = index">
@@ -268,6 +315,19 @@
 
         <span>👥 {{ guest.partySize }}</span>
 
+        <strong>
+
+          {{ formatTime(guest.joinedAt) }}
+
+        </strong>
+
+        <div class="summary-actions">
+
+          <button class="restore-action-btn" type="button" *ngIf=" guest.status === 'CANCELLED'"
+            (click)="openRestorePopup(guest)">
+            Restore
+          </button>
+        </div>
       </div>
     </div>
 
@@ -382,178 +442,166 @@
   </div>
 </div>
 
+<!-- notification section -->
+ <!-- custom notification -->
+<!-- <div class="modal-backdrop" *ngIf="shownotificationPopup">
 
-<!-- 
-/* MODAL */
-.modal-backdrop {
-  position: fixed;
-  inset: 0;
-  background: rgba(15, 23, 42, 0.55);
-  display: grid;
-  place-items: center;
-  z-index: 9999;
-  padding: 18px;
-}
+  <div class="leave-modal">
+    <div class="modal-title-row">
+      <h2>Send Notification</h2>
+      <button type="button" class="close-modal" (click)="closeNotificationPopup()">×</button>
+    </div>
 
-.guest-modal {
-  width: min(520px, 100%);
-  background: #ffffff;
-  border-radius: 24px;
-  padding: 24px;
-  box-shadow: 0 24px 80px rgba(15, 23, 42, 0.25);
-}
+    <h2>Send Notification Instantly</h2>
+    
+    <div class="actions">
+      <button class="btn-danger" type="button" [disabled]="isNotifying" (click)="notifyGuest(selectedGuest);">
+        {{ isNotifying ? 'Sending...' : 'Send' }}
+      </button>
+    </div>
 
-.modal-title-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
+    <p>or</p>
 
-.modal-title-row h2 {
-  margin: 0;
-}
+    <h2>Send Custom Notification </h2>
 
-.close-modal {
-  width: 38px;
-  height: 38px;
-  border-radius: 12px;
-  border: 1px solid #e5e7eb;
-  background: #ffffff;
-  font-size: 22px;
-  cursor: pointer;
-}
+    <div class="form-field">
+        <label for="specificMessage">
+          Send a specific message
+        </label>
 
-.guest-preview {
-  display: flex;
-  gap: 14px;
-  align-items: center;
-  background: #f8fafc;
-  border-radius: 18px;
-  padding: 16px;
-  margin: 18px 0;
-}
+        <textarea id="specificMessage" name="specificMessage" rows="4" maxlength="250"
+          placeholder="Example: Wait for another 10 minutes or call us." [(ngModel)]="specificMessage" [class.field-error]="showMessageValidationError"></textarea>
 
-.guest-preview h3 {
-  margin: 0;
-}
+        <div class="field-footer">
+          <small>You can select a time or enter your own message.</small>
 
-.guest-preview p {
-  margin: 4px 0 0;
-  color: #64748b;
-}
+          <small>
+            {{ specificMessage.length }}/250
+          </small>
+        </div>
+      </div>
 
-.detail-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 12px;
-  margin-bottom: 18px;
-}
+    <div class="actions">
+      <button class="btn-cancel" type="button" (click)="closeLeaveConfirm()">No</button>
 
-.detail-grid div {
-  background: #f8fafc;
-  border-radius: 14px;
-  padding: 12px;
-}
+      <button class="btn-danger" type="button" [disabled]="isNotifying" >
+        {{ isNotifying ? 'Sending...' : 'Send' }}
+      </button>
+    </div>
+  </div>
 
-.detail-grid span {
-  display: block;
-  font-size: 12px;
-  color: #64748b;
-}
+</div> -->
 
-.detail-grid b {
-  display: block;
-  margin-top: 5px;
-  color: #111827;
-}
 
-.time-label {
-  display: block;
-  font-weight: 900;
-  margin-bottom: 10px;
-}
+<!-- cancel pop up -->
+<div class="modal-backdrop" *ngIf="showLeaveConfirm">
 
-.time-options,
-.table-options {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(95px, 1fr));
-  gap: 10px;
-}
+  <div class="leave-modal">
+    <h2>Remove Person from Waitlist</h2>
 
-.time-options button,
-.table-options button {
-  min-height: 44px;
-  border-radius: 12px;
-  border: 1px solid #e5e7eb;
-  background: #ffffff;
-  font-weight: 900;
-  cursor: pointer;
-}
+    <p>Do you want to remove the user from the waitlist?</p>
 
-.time-options button.active,
-.table-options button.active {
-  background: #5b16c9;
-  color: #ffffff;
-  border-color: #5b16c9;
-}
+    <div class="actions">
+      <button class="btn-cancel" type="button" (click)="closeLeaveConfirm()">No</button>
 
-.reject-box {
-  margin-top: 16px;
-}
+      <button class="btn-danger" type="button" [disabled]="isLeaving" (click)="confirmLeaveWaitlist()">
+        {{ isLeaving ? 'Cancelling...' : 'Yes, cancel' }}
+      </button>
+    </div>
+  </div>
 
-.reject-box label {
-  display: block;
-  font-weight: 900;
-  margin-bottom: 8px;
-}
+</div>
 
-.reject-box textarea {
-  width: 100%;
-  min-height: 90px;
-  resize: vertical;
-  border-radius: 14px;
-  border: 1px solid #e5e7eb;
-  padding: 12px;
-  outline: none;
-  font-family: inherit;
-}
 
-.modal-actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 10px;
-  margin-top: 22px;
-}
+<!-- <div class="modal-backdrop" *ngIf="showRestorePopup">
 
-.cancel-btn,
-.delete-btn,
-.modal-approve-btn {
-  border: none;
-  border-radius: 14px;
-  padding: 12px 18px;
-  font-weight: 900;
-  cursor: pointer;
-}
+  <div class="guest-modal restore-modal" *ngIf="selectedRestoreGuest">
 
-.cancel-btn {
-  background: #f1f5f9;
-  color: #334155;
-}
+    <div class="modal-title-row">
+      <h2>Restore waitlist request</h2>
 
-.delete-btn {
-  background: #fee2e2;
-  color: #b91c1c;
-}
+      <button type="button" class="close-modal" [disabled]="isRestoringGuest" (click)="closeRestorePopup()">
+        ×
+      </button>
+    </div>
 
-.modal-approve-btn {
-  background: #15803d;
-  color: #ffffff;
-}
+    <div class="restore-alert">
+      <div class="restore-alert-icon">
+        <i class="fa-solid fa-rotate-left"></i>
+      </div>
 
-.modal-approve-btn:disabled,
-.delete-btn:disabled {
-  opacity: 0.55;
-  cursor: not-allowed;
-}
+      <div>
+        <h3>
+          Hey, this guest wants to restore their waitlist
+        </h3>
 
--->
+        <p>
+          Review the request and assign a new estimated
+          wait time.
+        </p>
+      </div>
+    </div>
+
+    <div class="guest-preview">
+      <div class="guest-avatar large">
+        {{getGuestInitials(selectedRestoreGuest.guestName)}}
+      </div>
+      <div>
+        <h3>
+          {{ selectedRestoreGuest.guestName }}
+        </h3>
+
+        <p>
+          {{ selectedRestoreGuest.guestPhone }}
+        </p>
+      </div>
+    </div>
+
+    <div class="detail-grid">
+      <div>
+        <span>Party size</span>
+        <b>
+          {{ selectedRestoreGuest.partySize }}
+        </b>
+      </div>
+
+      <div>
+        <span>Preference</span>
+        <b>
+          {{getPreferenceLabel(selectedRestoreGuest.preference)}}
+        </b>
+      </div>
+
+      <div>
+        <span>Previous status</span>
+        <b>
+          {{selectedRestoreGuest.previousStatus || 'Cancelled'}}
+        </b>
+      </div>
+    </div>
+
+    <label class="time-label">
+      New estimated wait time
+    </label>
+
+    <div class="time-options">
+      <button type="button" *ngFor="let time of waitTimeOptions" [class.active]="
+          selectedRestoreWaitTime === time" (click)="selectedRestoreWaitTime = time">
+        {{ time }} min
+      </button>
+    </div>
+
+    <div class="modal-actions">
+
+      <button type="button" class="cancel-btn" [disabled]="isRestoringGuest" (click)="closeRestorePopup()">
+        Not now
+      </button>
+
+      <button type="button" class="modal-approve-btn" [disabled]="isRestoringGuest" (click)="approveRestoreRequest()">
+        {{isRestoringGuest ? 'Restoring...': 'Restore guest'}}
+      </button>
+
+    </div>
+
+  </div>
+</div> -->

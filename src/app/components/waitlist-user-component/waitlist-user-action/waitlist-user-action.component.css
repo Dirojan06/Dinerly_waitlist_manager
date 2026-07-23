@@ -70,6 +70,124 @@
   color: #232329;
 }
 
+.restore-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  margin-bottom: 24px;
+  padding: 24px;
+  border: 1px solid #e3d7ff;
+  border-radius: 20px;
+  background:
+    linear-gradient(135deg,
+      #fbf9ff,
+      #f4efff);
+  box-shadow:
+    0 14px 35px rgba(91, 33, 182, 0.1);
+}
+
+.restore-card-content {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.restore-icon {
+  width: 54px;
+  height: 54px;
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  border-radius: 16px;
+  background: #6d28d9;
+  color: #ffffff;
+  font-size: 21px;
+}
+
+.restore-label {
+  margin: 0 0 5px;
+  color: #7c3aed;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+}
+
+.restore-card h3 {
+  margin: 0 0 6px;
+  color: #272230;
+  font-size: 19px;
+}
+
+.restore-card-content p:last-child {
+  margin: 0;
+  color: #746d7d;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.restore-btn {
+  min-width: 175px;
+  min-height: 48px;
+  padding: 0 20px;
+  border: 0;
+  border-radius: 13px;
+  background: linear-gradient(135deg,
+      #7430df,
+      #5415c7);
+  color: #ffffff;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 750;
+  cursor: pointer;
+  box-shadow:
+    0 10px 22px rgba(104, 40, 210, 0.25);
+}
+
+.restore-btn i {
+  margin-right: 7px;
+}
+
+.restore-btn:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+.restore-pending {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 220px;
+  padding: 12px 16px;
+  border: 1px solid #f1d78d;
+  border-radius: 12px;
+  background: #fff9e8;
+  color: #946c00;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.restore-error {
+  width: 100%;
+  margin: 10px 0 0;
+  color: #d93b3b;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+@media (max-width: 700px) {
+  .restore-card {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .restore-btn,
+  .restore-pending {
+    width: 100%;
+    box-sizing: border-box;
+  }
+}
+
 @media (max-width: 768px) {
   .action-grid {
     grid-template-columns: 1fr;

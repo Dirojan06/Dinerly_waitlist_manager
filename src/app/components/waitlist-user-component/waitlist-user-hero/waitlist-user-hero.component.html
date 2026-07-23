@@ -6,17 +6,11 @@
 
       <div class="profile-pill" (click)="toggleProfileMenu()">
         <span>{{ guestInitial }}</span>
-        <b>{{ guestShortName }}</b>
+        <b>{{ guestName }}</b>
         <i class="fa-solid fa-chevron-down"></i>
       </div>
 
       <div class="profile-dropdown" *ngIf="showProfileMenu">
-        <!-- <button type="button">
-        <i class="fa-regular fa-gear"></i>
-        Profile settings
-      </button> -->
-
-        <hr>
 
         <button type="button" class="logout-btn" (click)="logoutGuest()">
           <i class="fa-solid fa-arrow-right-from-bracket"></i>

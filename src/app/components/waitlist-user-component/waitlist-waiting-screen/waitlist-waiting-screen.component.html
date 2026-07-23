@@ -44,7 +44,7 @@
       </ng-container>
 
       <ng-container *ngIf="guest?.status === 'WAITING'">
-        <h1 class="big-time">{{ waitingMinutesOnly }}</h1>
+        <h1 class="big-time">{{ waitingTimerText || '0:00' }}</h1>
         <p class="time-label">estimated minutes remaining</p>
 
         <div class="mini-stats">
@@ -80,6 +80,11 @@
         (click)="openLeaveConfirm()">
         Cancel my spot
       </button>
+
+      <!-- <button class="edit-btn" type="button" *ngIf="guest?.status === 'NOTIFIED' && !confirmationSent "
+        (click)="openConfirmationModal()">
+        Send Confirmation
+      </button> -->
     </div>
 
   </div>
@@ -170,3 +175,92 @@
   </div>
 
 </div>
+
+
+<!-- <div class="modal-backdrop" *ngIf="showMessageConfirm">
+
+  <div class="leave-modal message-modal">
+
+    <div class="message-modal-header">
+      <div class="message-icon">
+        <i class="fa-regular fa-message"></i>
+      </div>
+
+      <div>
+        <h2>Send confirmation to restaurant</h2>
+        <p>Let the restaurant know when you expect to arrive.</p>
+      </div>
+    </div>
+
+    <div class="message-form">
+
+      
+      <div class="form-field">
+        <label for="arrivalTime">
+          Estimated arrival time
+        </label>
+
+        <div class="select-wrapper" [class.field-error]="showMessageValidationError">
+          <select id="arrivalTime" name="arrivalTime" [(ngModel)]="selectedArrivalTime"
+            (ngModelChange)="onMessageFieldChange()">
+            <option value="" disabled>
+              Select your arrival time
+            </option>
+
+            <option *ngFor="let option of arrivalTimeOptions" [value]="option.value">
+              {{ option.label }}
+            </option>
+          </select>
+
+          <i class="fa-solid fa-chevron-down"></i>
+        </div>
+      </div>
+
+      <div class="or-divider">
+        <span></span>
+        <p>OR</p>
+        <span></span>
+      </div>
+
+      
+      <div class="form-field">
+        <label for="specificMessage">
+          Send a specific message
+        </label>
+
+        <textarea id="specificMessage" name="specificMessage" rows="4" maxlength="250"
+          placeholder="Example: I am parking now and will be there in 5 minutes." [(ngModel)]="specificMessage"
+          (ngModelChange)="onMessageFieldChange()" [class.field-error]="showMessageValidationError"></textarea>
+
+        <div class="field-footer">
+          <small>You can select a time or enter your own message.</small>
+
+          <small>
+            {{ specificMessage.length }}/250
+          </small>
+        </div>
+      </div>
+
+      
+      <div class="validation-message" *ngIf="showMessageValidationError">
+        <i class="fa-solid fa-circle-exclamation"></i>
+        Please select an arrival-time option or enter a specific message.
+      </div>
+
+    </div>
+
+    <div class="actions">
+      <button class="btn-cancel" type="button" [disabled]="isSending" (click)="closeMessageConfirm()">
+        No
+      </button>
+
+      <button class="btn-send" type="button" [disabled]="isSending" (click)="sendArrivalMessage()">
+        <i class="fa-regular fa-paper-plane" *ngIf="!isSending"></i>
+
+        {{ isSending ? 'Sending...' : 'Yes, send' }}
+      </button>
+    </div>
+
+  </div>
+
+</div> -->
