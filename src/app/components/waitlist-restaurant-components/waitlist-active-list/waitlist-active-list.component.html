@@ -132,8 +132,28 @@
   <!-- LIST -->
   <section class="guest-list">
 
-    <div class="guest-row" *ngFor="let guest of liveWaitlistGuests; trackBy: trackByGuest"
-      [ngClass]="['status-' + (guest.status || '').toLowerCase(),recentChangedGuestId === guest.id ? 'row-changed' : '']">
+    <div class="guest-row" *ngFor="
+    let guest of liveWaitlistGuests;
+    trackBy: trackByGuest
+  " [ngClass]="[
+    'status-' + (guest.status || '').toLowerCase(),
+
+    recentChangedGuestId === guest.id
+      ? 'row-changed'
+      : '',
+
+    shakingGuestIds.has(guest.id)
+      ? 'customer-reply-shake'
+      : '',
+
+    unreadReplyGuestIds.has(guest.id)
+      ? 'has-unread-reply'
+      : '',
+
+    hasCustomerReply(guest)
+      ? 'reply-clickable'
+      : ''
+  ]" (click)="openCustomerReplyPopup(guest)">
 
       <!-- PARTY -->
       <div class="party-cell">
@@ -152,6 +172,24 @@
           </div>
 
           <p>{{ guest.notes }} . {{ guest.guestPhone }}</p>
+
+          <div class="reply-preview" *ngIf="
+
+      unreadReplyGuestIds.has(guest.id)
+
+    ">
+
+            <i class="fa-solid fa-reply"></i>
+
+            Customer replied:
+
+            <strong>
+
+              {{ getCustomerReplyText(guest) }}
+
+            </strong>
+
+          </div>
         </div>
       </div>
 
@@ -174,35 +212,57 @@
       </div>
 
       <!-- ACTIONS -->
-      <div class="action-cell">
+      <div class="action-cell" (click)="$event.stopPropagation()">
 
-        <button class="notify-action" type="button" *ngIf="guest.status === 'WAITING'" (click)="notifyGuest(guest);">
+        <button class="notify-action" type="button" *ngIf="guest.status === 'WAITING'" (click)="notifyGuest(guest)">
           <i class="fa-regular fa-paper-plane"></i>
           Notify
         </button>
 
-        <button class="action-btn call" type="button" *ngIf="guest.status === 'NOTIFIED'">
-          <i class="fa-solid fa-phone-volume" style="color: rgb(177, 151, 252);"></i>
-          /
-          <i class="fa-solid fa-comment-sms" style="color: rgb(177, 151, 252);"></i>
+        <div class="contact-action-wrapper">
 
-        </button>
+          <button class="action-btn call" type="button" *ngIf="guest.status === 'NOTIFIED'"
+            (click)="toggleContactActions(guest, $event)">
+            <i class="fa-solid fa-phone-volume" style="color: rgb(177, 151, 252);"></i>
 
-        <!-- <button
-          class="remove-action"
-          type="button"
-          *ngIf="guest.status === 'WAITING' || guest.status === 'NOTIFIED'"
-          (click)="openRemoveGuest(guest)">
-          <i class="fa-solid fa-xmark"></i>
-        </button> -->
+            <span>/</span>
 
-        <button class="action-btn sms" *ngIf="guest.status === 'WAITING' || guest.status === 'NOTIFIED'"
-          (click)="openAvailableTableModal(guest)">
+            <i class="fa-solid fa-comment-sms" style="color: rgb(177, 151, 252);"></i>
+          </button>
+
+          <div class="contact-tooltip" *ngIf="selectedContactGuestId === guest.id" (click)="$event.stopPropagation()">
+
+            <button type="button" class="tooltip-action call-option" (click)="openCallingPopup(guest)">
+              <i class="fa-solid fa-phone"></i>
+              Call
+            </button>
+
+            <button type="button" class="tooltip-action sms-option" [disabled]="isSendingSms"
+              (click)="sendSmsToGuest(guest)">
+              <i class="fa-solid" [ngClass]="
+            isSendingSms
+              ? 'fa-spinner fa-spin'
+              : 'fa-comment-sms'
+          "></i>
+
+              {{ isSendingSms ? 'Sending...' : 'SMS' }}
+            </button>
+
+          </div>
+
+        </div>
+
+        <button class="action-btn sms" type="button" *ngIf="
+      guest.status === 'WAITING' ||
+      guest.status === 'NOTIFIED'
+    " (click)="openAvailableTableModal(guest)">
           <i class="fa-solid fa-check" style="color: rgb(177, 151, 252);"></i>
         </button>
 
-        <button class="action-btn call" *ngIf="guest.status === 'WAITING' || guest.status === 'NOTIFIED'"
-          (click)="openLeaveConfirm(guest)">
+        <button class="action-btn call" type="button" *ngIf="
+      guest.status === 'WAITING' ||
+      guest.status === 'NOTIFIED'
+    " (click)="openLeaveConfirm(guest)">
           <i class="fa-solid fa-x" style="color: rgb(177, 151, 252);"></i>
         </button>
 
@@ -279,16 +339,22 @@
 
         <div>
           <strong>{{ guest.guestName }}</strong>
-          <p>{{ guest.guestPhone }}</p>
+          
+          <p *ngIf="guest.tableName">
+
+             Table No: {{ guest.tableName }}
+
+          </p>
         </div>
 
-        <span>👥 {{ guest.partySize }}</span>
+        <span style="text-align: center;"> {{ guest.partySize }}</span>
 
         <strong>{{ formatTime(guest.seatedAt) }}</strong>
 
-        <div class="summary-actions">
-          <span class="completed-pill">Completed</span>
-        </div>
+        <button class="restore-action-btn" type="button" *ngIf=" guest.status === 'SEATED'"
+          (click)="openEditSeatedGuestModal(guest)">
+          Edit
+        </button>
       </div>
 
     </div>
@@ -324,7 +390,7 @@
         <div class="summary-actions">
 
           <button class="restore-action-btn" type="button" *ngIf=" guest.status === 'CANCELLED'"
-            (click)="openRestorePopup(guest)">
+            (click)="openRestoremethod(guest)">
             Restore
           </button>
         </div>
@@ -443,7 +509,7 @@
 </div>
 
 <!-- notification section -->
- <!-- custom notification -->
+<!-- custom notification -->
 <!-- <div class="modal-backdrop" *ngIf="shownotificationPopup">
 
   <div class="leave-modal">
@@ -512,6 +578,446 @@
 
 </div>
 
+<!-- Calling Popup -->
+<div class="calling-popup-backdrop" *ngIf="showCallingPopup" (click)="closeCallingPopup()">
+
+  <div class="calling-popup" (click)="$event.stopPropagation()">
+
+    <button type="button" class="close-calling-popup" (click)="closeCallingPopup()" aria-label="Close calling popup">
+
+      <i class="fa-solid fa-xmark"></i>
+    </button>
+
+    <div class="calling-icon">
+      <i class="fa-solid fa-phone-volume"></i>
+    </div>
+
+    <p class="calling-label">Calling</p>
+
+    <h3>{{ callingGuest?.guestName || callingGuest?.name }}</h3>
+
+    <p class="calling-phone">
+      {{ callingGuest?.guestPhone || callingGuest?.phone }}
+    </p>
+
+    <div class="calling-animation">
+      <span></span>
+      <span></span>
+      <span></span>
+    </div>
+
+    <button type="button" class="cancel-call-btn" (click)="closeCallingPopup()">
+
+      <i class="fa-solid fa-phone-slash"></i>
+      Cancel call
+    </button>
+
+  </div>
+
+</div>
+
+<!-- shpw customer reply modal -->
+
+<div class="customer-reply-backdrop" *ngIf="
+    showCustomerReplyPopup &&
+    selectedReplyGuest
+  " (click)="closeCustomerReplyPopup()">
+
+  <div class="customer-reply-popup" (click)="$event.stopPropagation()">
+
+    <button type="button" class="close-reply-popup" aria-label="Close customer reply"
+      (click)="closeCustomerReplyPopup()">
+      <i class="fa-solid fa-xmark"></i>
+    </button>
+
+    <div class="reply-popup-icon" [ngClass]="
+        getCustomerReplyClass(
+          selectedReplyGuest
+        )
+      ">
+      <i [ngClass]="
+          getCustomerReplyIcon(
+            selectedReplyGuest
+          )
+        "></i>
+    </div>
+
+    <p class="reply-popup-label">
+      Customer response
+    </p>
+
+    <h2>
+      {{ selectedReplyGuest.guestName }}
+    </h2>
+
+    <p class="reply-popup-phone">
+      {{ selectedReplyGuest.guestPhone }}
+    </p>
+
+    <div class="reply-message-box" [ngClass]="
+        getCustomerReplyClass(
+          selectedReplyGuest
+        )
+      ">
+      <span>Customer replied</span>
+
+      <strong>
+        {{
+        getCustomerReplyText(
+        selectedReplyGuest
+        )
+        }}
+      </strong>
+    </div>
+
+    <div class="reply-details">
+
+      <div>
+        <span>Party size</span>
+
+        <strong>
+          {{
+          selectedReplyGuest.partySize
+          }}
+        </strong>
+      </div>
+
+      <div>
+        <span>Current status</span>
+
+        <strong>
+          {{
+          selectedReplyGuest.status
+          }}
+        </strong>
+      </div>
+
+      <div *ngIf="
+          selectedReplyGuest
+            .customerReplyReceivedAt
+        ">
+        <span>Received at</span>
+
+        <strong>
+          {{
+          formatTime(
+          selectedReplyGuest
+          .customerReplyReceivedAt
+          )
+          }}
+        </strong>
+      </div>
+
+    </div>
+
+    <div class="custom-reply-content" *ngIf="
+        selectedReplyGuest
+          .customerReplyDescription &&
+        selectedReplyGuest
+          .customerReplyDescription !==
+          getCustomerReplyText(
+            selectedReplyGuest
+          )
+      ">
+      <span>Additional message</span>
+
+      <p>
+        {{
+        selectedReplyGuest
+        .customerReplyDescription
+        }}
+      </p>
+    </div>
+
+    <button type="button" class="reply-popup-done" (click)="closeCustomerReplyPopup()">
+      <i class="fa-solid fa-check"></i>
+      Got it
+    </button>
+
+  </div>
+
+</div>
+
+<!-- show edit customer modal -->
+
+<div class="modal-backdrop" *ngIf="
+    showEditSeatedGuestModal &&
+    selectedSeatedGuest
+  " (click)="closeEditSeatedGuestModal()">
+
+  <div class="guest-modal edit-seated-modal" (click)="$event.stopPropagation()">
+
+    <div class="modal-title-row">
+
+      <div>
+        <h3 class="muted">
+          Update party size and seating for
+          {{ selectedSeatedGuest.guestName }}
+        </h3>
+      </div>
+
+      <button type="button" class="close-modal" [disabled]="isUpdatingSeatedGuest"
+        (click)="closeEditSeatedGuestModal()">
+        ×
+      </button>
+
+    </div>
+
+    <!-- Current details -->
+
+    <div class="current-seating-card">
+
+      <div class="current-seating-icon">
+        <i class="fa-solid fa-chair"></i>
+      </div>
+
+      <div>
+        <span>Currently seated</span>
+
+        <strong>
+          {{ currentSeatedPartySize }}
+          guest{{
+          currentSeatedPartySize === 1
+          ? ''
+          : 's'
+          }}
+        </strong>
+
+        <p>
+          Table:
+          {{
+          selectedSeatedGuest.tableName ||
+          'Not assigned'
+          }}
+        </p>
+      </div>
+
+    </div>
+
+    <!-- Additional guests -->
+
+    <div class="edit-form-section">
+
+      <label>
+        Additional guests arriving
+      </label>
+
+      <div class="guest-count-picker">
+
+        <button type="button" (click)="decreaseAdditionalGuests()" [disabled]="
+            additionalGuestCount <= 0 ||
+            isUpdatingSeatedGuest
+          ">
+          −
+        </button>
+
+        <input type="number" min="0" [(ngModel)]="additionalGuestCount" (ngModelChange)="
+            onAdditionalGuestCountChange()
+          " [disabled]="isUpdatingSeatedGuest" />
+
+        <button type="button" (click)="increaseAdditionalGuests()" [disabled]="isUpdatingSeatedGuest">
+          +
+        </button>
+
+      </div>
+
+      <div class="party-size-summary">
+
+        <span>Existing guests</span>
+        <strong>
+          {{ currentSeatedPartySize }}
+        </strong>
+
+        <span>Additional guests</span>
+        <strong>
+          {{ additionalGuestCount }}
+        </strong>
+
+        <span class="total-party-label">
+          Total required seats
+        </span>
+
+        <strong class="total-party-value">
+          {{ requiredPartyCapacity }}
+        </strong>
+
+      </div>
+
+    </div>
+
+    <!-- Action selection -->
+
+    <div class="edit-form-section">
+
+      <label>
+        What would you like to do?
+      </label>
+
+      <div class="seated-edit-options">
+
+        <button type="button" [class.active]="
+            editSeatedAction === 'RESEAT'
+          " (click)="
+            editSeatedAction = 'RESEAT'
+          ">
+          <i class="fa-solid fa-chair"></i>
+
+          Move to larger table
+        </button>
+
+        <button type="button" [class.active]="
+            editSeatedAction === 'WAITING'
+          " (click)="
+            editSeatedAction = 'WAITING';
+            selectedEditTable = null
+          ">
+          <i class="fa-regular fa-clock"></i>
+
+          Move back to waiting
+        </button>
+
+      </div>
+
+    </div>
+
+    <!-- Re-seat option -->
+
+    <div class="edit-form-section" *ngIf="editSeatedAction === 'RESEAT'">
+
+      <div class="section-title-line">
+
+        <label>
+          Available tables for
+          {{ requiredPartyCapacity }} guests
+        </label>
+
+        <span>
+          {{ suitableOpenTables.length }}
+          available
+        </span>
+
+      </div>
+
+      <div class="table-options edit-table-options" *ngIf="suitableOpenTables.length > 0">
+
+        <button type="button" *ngFor="
+            let table of suitableOpenTables
+          " [class.active]="
+            selectedEditTable?.id === table.id
+          " (click)="selectedEditTable = table">
+
+          <span class="table-number">
+            {{ table.tableNumber }}
+          </span>
+
+          <span class="table-capacity">
+            <i class="fa-solid fa-user-group"></i>
+
+            {{ table.capacity }} seats
+          </span>
+
+        </button>
+
+      </div>
+
+      <div class="no-table-available" *ngIf="suitableOpenTables.length === 0">
+
+        <i class="fa-solid fa-circle-exclamation"></i>
+
+        <div>
+          <strong>
+            No table currently has
+            {{ requiredPartyCapacity }} seats
+          </strong>
+
+          <p>
+            Move the guest back to waiting and
+            provide an estimated waiting time.
+          </p>
+        </div>
+
+        <button type="button" (click)="
+            editSeatedAction = 'WAITING'
+          ">
+          Add waiting time
+        </button>
+
+      </div>
+
+    </div>
+
+    <!-- Waiting option -->
+
+    <div class="edit-form-section" *ngIf="editSeatedAction === 'WAITING'">
+
+      <label for="editWaitingMinutes">
+        Estimated waiting time
+      </label>
+
+      <div class="waiting-time-input">
+
+        <input id="editWaitingMinutes" type="number" min="1" max="240" placeholder="Example: 15"
+          [(ngModel)]="editWaitingMinutes" [disabled]="isUpdatingSeatedGuest" />
+
+        <span>minutes</span>
+
+      </div>
+
+      <p class="waiting-help-text">
+        The party size will be updated to
+        {{ requiredPartyCapacity }} and the guest
+        will appear in the live waiting list.
+      </p>
+
+    </div>
+
+    <!-- Footer -->
+
+    <div class="modal-actions">
+
+      <button type="button" class="cancel-btn" [disabled]="isUpdatingSeatedGuest" (click)="closeEditSeatedGuestModal()">
+        Cancel
+      </button>
+
+      <button type="button" class="modal-approve-btn" [disabled]="
+          isUpdatingSeatedGuest ||
+          additionalGuestCount <= 0 ||
+          (
+            editSeatedAction === 'RESEAT' &&
+            !selectedEditTable
+          ) ||
+          (
+            editSeatedAction === 'WAITING' &&
+            (
+              !editWaitingMinutes ||
+              editWaitingMinutes <= 0
+            )
+          )
+        " (click)="submitSeatedGuestEdit()">
+
+        <i class="fa-solid" [ngClass]="
+            isUpdatingSeatedGuest
+              ? 'fa-spinner fa-spin'
+              : editSeatedAction === 'RESEAT'
+              ? 'fa-chair'
+              : 'fa-clock'
+          "></i>
+
+        {{
+        isUpdatingSeatedGuest
+        ? 'Updating...'
+        : editSeatedAction === 'RESEAT'
+        ? 'Seat at New Table'
+        : 'Move to Waiting'
+        }}
+
+      </button>
+
+    </div>
+
+  </div>
+
+</div>
 
 <!-- <div class="modal-backdrop" *ngIf="showRestorePopup">
 

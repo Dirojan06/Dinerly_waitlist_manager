@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, HostListener, OnDestroy, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { forkJoin, Subscription } from 'rxjs';
 
@@ -32,6 +32,18 @@ interface DashboardLiveGuest {
   notifiedAt?: string;
   seatedAt?: string;
   cancelledAt?: string;
+  smsStatus?: string;
+  smsMessage?: string;
+  smsError?: string;
+  latestCustomerReply?: string;
+  customerReplyDescription?: string;
+  customerReplyReceivedAt?: string;
+  customerReplySid?: string;
+  latestVoiceReply?: string;
+  callStatus?: string;
+  callResponse?: string;
+  voiceReplyReceivedAt?: string;
+  voiceReplyDigits?: string;
   tableName?: string;
 }
 
@@ -108,11 +120,48 @@ export class WaitlistActiveListComponent implements OnInit, OnDestroy {
   recentChangedGuestId: number | null = null;
 
   showLeaveConfirm = false;
-  isSending= false;
+  isSending = false;
   isLeaving = false;
   shownotificationPopup: boolean = false;
   specificMessage = '';
   messageFormSubmitted = false;
+
+  selectedContactGuestId: number | string | null = null;
+  showCallingPopup = false;
+  callingGuest: any = null;
+  isSendingSms = false;
+
+  selectedReplyGuest: DashboardLiveGuest | null = null;
+  showCustomerReplyPopup = false;
+
+
+  private previousCustomerReplies = new Map<number, string>();
+
+
+  shakingGuestIds = new Set<number>();
+
+
+  unreadReplyGuestIds = new Set<number>();
+
+
+  private customerReplyInitialLoadCompleted = false;
+
+
+  private replyShakeTimeouts = new Map<number, ReturnType<typeof setTimeout>>();
+
+  showEditSeatedGuestModal = false;
+
+  selectedSeatedGuest: DashboardLiveGuest | null = null;
+
+  additionalGuestCount = 0;
+
+  editSeatedAction: 'RESEAT' | 'WAITING' = 'RESEAT';
+
+  selectedEditTable: any = null;
+
+  editWaitingMinutes: number | null = null;
+
+  isUpdatingSeatedGuest = false;
 
   constructor(
     private router: Router,
@@ -135,38 +184,131 @@ export class WaitlistActiveListComponent implements OnInit, OnDestroy {
     }, 5000);
   }
 
-  loadDashboardAllData(showLoader: boolean = true): void {
+  loadDashboardAllData(
+    showLoader: boolean = true
+  ): void {
+
     if (showLoader) {
       this.isLoading = true;
     }
 
     forkJoin({
-      dashboard: this.waitlistApi.getDashboardData(this.restaurantId),
-      pending: this.waitlistApi.getGuestsStatus(this.restaurantId, 'PENDING', ''),
-      waiting: this.waitlistApi.getWaitingGuests(this.restaurantId, 'WAITING', ''),
-      notified: this.waitlistApi.getNotifiedGuests(this.restaurantId, 'NOTIFIED', ''),
-      seated: this.waitlistApi.getSeatedGuests(this.restaurantId, 'SEATED', ''),
-      cancelled: this.waitlistApi.getCancelledGuests(this.restaurantId, 'CANCELLED', ''),
-      tables: this.waitlistApi.getRestaurantTableslist(this.restaurantId)
+      dashboard:
+        this.waitlistApi.getDashboardData(
+          this.restaurantId
+        ),
+
+      pending:
+        this.waitlistApi.getGuestsStatus(
+          this.restaurantId,
+          'PENDING',
+          ''
+        ),
+
+      waiting:
+        this.waitlistApi.getWaitingGuests(
+          this.restaurantId,
+          'WAITING',
+          ''
+        ),
+
+      notified:
+        this.waitlistApi.getNotifiedGuests(
+          this.restaurantId,
+          'NOTIFIED',
+          ''
+        ),
+
+      seated:
+        this.waitlistApi.getSeatedGuests(
+          this.restaurantId,
+          'SEATED',
+          ''
+        ),
+
+      cancelled:
+        this.waitlistApi.getCancelledGuests(
+          this.restaurantId,
+          'CANCELLED',
+          ''
+        ),
+
+      tables:
+        this.waitlistApi.getRestaurantTableslist(
+          this.restaurantId
+        )
     }).subscribe({
       next: (res) => {
         this.isLoading = false;
 
         if (res.dashboard.success) {
-          this.dashboardData = res.dashboard.data;
+          this.dashboardData =
+            res.dashboard.data;
         }
 
-        this.pendingGuests = res.pending.data || [];
-        this.waitingGuests = res.waiting.data || [];
-        this.notifiedGuests = res.notified.data || [];
-        this.seatedGuests = res.seated.data || [];
-        this.cancelledGuests = res.cancelled.data || [];
+        this.pendingGuests =
+          res.pending.data || [];
 
-        this.tables = res.tables.data || [];
-        this.openTables = this.tables.filter(table => table.status === 'OPEN');
+        this.waitingGuests =
+          res.waiting.data || [];
+
+        this.notifiedGuests =
+          res.notified.data || [];
+
+        this.seatedGuests =
+          res.seated.data || [];
+
+        this.cancelledGuests =
+          res.cancelled.data || [];
+
+        this.tables =
+          res.tables.data || [];
+
+        this.openTables =
+          this.tables.filter(
+            table => table.status === 'OPEN'
+          );
 
         this.calculateTableStats();
+
+        /*
+         * Detect new customer replies after the latest
+         * API response has been assigned.
+         */
+        const currentGuests: DashboardLiveGuest[] = [
+          ...this.pendingGuests,
+          ...this.waitingGuests,
+          ...this.notifiedGuests,
+          ...this.seatedGuests,
+          ...this.cancelledGuests
+        ];
+
+        this.detectNewCustomerReplies(
+          currentGuests
+        );
+
+        /*
+         * Keep the selected popup guest updated with the
+         * latest API response while the popup is open.
+         */
+        if (
+          this.showCustomerReplyPopup &&
+          this.selectedReplyGuest
+        ) {
+          const updatedSelectedGuest =
+            currentGuests.find(
+              guest =>
+                guest.id ===
+                this.selectedReplyGuest?.id
+            );
+
+          if (updatedSelectedGuest) {
+            this.selectedReplyGuest =
+              updatedSelectedGuest;
+          }
+        }
       },
+
       error: () => {
         this.isLoading = false;
         alert('Unable to load dashboard data');
@@ -189,13 +331,48 @@ export class WaitlistActiveListComponent implements OnInit, OnDestroy {
       notes: guest.notes,
       status: guest.status,
       position: guest.position,
-      estimatedWaitTime: guest.estimatedWaitTime,
+      estimatedWaitTime:
+        guest.estimatedWaitTime,
+
       joinedAt: guest.joinedAt,
       approvedAt: guest.approvedAt,
       notifiedAt: guest.notifiedAt,
       seatedAt: guest.seatedAt,
       cancelledAt: guest.cancelledAt,
-      tableName: guest.tableName
+
+      smsStatus: guest.smsStatus,
+      smsMessage: guest.smsMessage,
+      smsError: guest.smsError,
+
+      latestCustomerReply:
+        guest.latestCustomerReply,
+
+      customerReplyDescription:
+        guest.customerReplyDescription,
+
+      customerReplyReceivedAt:
+        guest.customerReplyReceivedAt,
+
+      customerReplySid:
+        guest.customerReplySid,
+
+      latestVoiceReply:
+        guest.latestVoiceReply,
+
+      callStatus:
+        guest.callStatus,
+
+      callResponse:
+        guest.callResponse,
+
+      voiceReplyReceivedAt:
+        guest.voiceReplyReceivedAt,
+
+      voiceReplyDigits:
+        guest.voiceReplyDigits,
+
+      tableName:
+        guest.tableName
     }));
   }
 
@@ -536,17 +713,7 @@ export class WaitlistActiveListComponent implements OnInit, OnDestroy {
     this.router.navigate(['/login']);
   }
 
-  ngOnDestroy(): void {
-    this.sub.unsubscribe();
 
-    if (this.clockInterval) {
-      clearInterval(this.clockInterval);
-    }
-
-    if (this.refreshInterval) {
-      clearInterval(this.refreshInterval);
-    }
-  }
 
   get latestPendingGuest(): PendingGuest | null {
     return this.pendingGuests.length ? this.pendingGuests[0] : null;
@@ -571,7 +738,40 @@ export class WaitlistActiveListComponent implements OnInit, OnDestroy {
       notifiedAt: guest.notifiedAt,
       seatedAt: guest.seatedAt,
       cancelledAt: guest.cancelledAt,
-      tableName: guest.tableName
+
+      smsStatus: guest.smsStatus,
+      smsMessage: guest.smsMessage,
+      smsError: guest.smsError,
+
+      latestCustomerReply:
+        guest.latestCustomerReply,
+
+      customerReplyDescription:
+        guest.customerReplyDescription,
+
+      customerReplyReceivedAt:
+        guest.customerReplyReceivedAt,
+
+      customerReplySid:
+        guest.customerReplySid,
+
+      latestVoiceReply:
+        guest.latestVoiceReply,
+
+      callStatus:
+        guest.callStatus,
+
+      callResponse:
+        guest.callResponse,
+
+      voiceReplyReceivedAt:
+        guest.voiceReplyReceivedAt,
+
+      voiceReplyDigits:
+        guest.voiceReplyDigits,
+
+      tableName:
+        guest.tableName
     }));
   }
 
@@ -618,7 +818,7 @@ export class WaitlistActiveListComponent implements OnInit, OnDestroy {
     return 'fa-regular fa-building';
   }
 
-  openNotificationPopup(guest:any): void {
+  openNotificationPopup(guest: any): void {
     this.selectedGuest = guest;
     this.shownotificationPopup = true;
   }
@@ -629,34 +829,10 @@ export class WaitlistActiveListComponent implements OnInit, OnDestroy {
   }
 
   get showMessageValidationError(): boolean {
-    return this.messageFormSubmitted ;
+    return this.messageFormSubmitted;
   }
 
-   sendSms(): void {
-    this.restaurantId = 1;
-    if (!this.selectedGuest) return;
 
-    if (!this.specificMessage.trim()) {
-      alert('Please enter SMS message');
-      return;
-    }
-    this.isNotifying = true;
-    this.isLoading = true;
-
-    this.waitlistApi.sendNoficationToGuest(this.restaurantId, this.selectedGuest.id, { message: this.specificMessage }).subscribe({
-      next: (res) => {
-        alert(`SMS sent`);
-
-        this.isLoading = false;
-      },
-      error: () => {
-        this.isLoading = false;
-        alert('Unable to load notifications');
-      }
-    })
-
-
-  }
 
 
   openRemoveGuest(guest: DashboardLiveGuest): void {
@@ -666,155 +842,739 @@ export class WaitlistActiveListComponent implements OnInit, OnDestroy {
     this.showGuestPopup = true;
   }
 
+  toggleContactActions(guest: any, event: MouseEvent): void {
+    event.stopPropagation();
+
+    if (this.selectedContactGuestId === guest.id) {
+      this.selectedContactGuestId = null;
+      return;
+    }
+
+    this.selectedContactGuestId = guest.id;
+  }
+
+  openCallingPopup(guest: any): void {
+    this.selectedContactGuestId = null;
+    this.callingGuest = guest;
+    this.showCallingPopup = true;
+
+    const phoneNumber = guest?.guestPhone || guest?.phone;
+
+    if (!phoneNumber) {
+      alert('Guest phone number is not available');
+      this.closeCallingPopup();
+      return;
+    }
+
+    this.waitlistApi.makecallToGuest(this.restaurantId, this.callingGuest.id, { message: this.specificMessage }).subscribe({
+      next: (res) => {
+
+        this.isLoading = false;
+      },
+      error: () => {
+        this.isLoading = false;
+        this.showCallingPopup = false;
+        alert('Unable to make call');
+      }
+    })
+  }
+
+  @HostListener('document:click')
+
+  closeContactActions(): void {
+
+    this.selectedContactGuestId = null;
+
+  }
+
+  closeCallingPopup(): void {
+    this.showCallingPopup = false;
+    this.callingGuest = null;
+  }
+
+  sendSmsToGuest(guest: any): void {
+    if (this.isSendingSms) {
+      return;
+    }
+
+    const guestId = guest?.id;
+    const phoneNumber = guest?.guestPhone || guest?.phone;
+
+    if (!guestId) {
+      alert('Guest details are not available');
+      return;
+    }
+
+    if (!phoneNumber) {
+      alert('Guest phone number is not available');
+      return;
+    }
+
+    this.isSendingSms = true;
+
+    const payload = {
+      phone: phoneNumber,
+      message: `Hello ${guest?.guestName || guest?.name || 'Guest'
+        }, your table is ready.`
+    };
+
+    this.waitlistApi
+      .sendNoficationToGuest(this.restaurantId, guestId, payload)
+      .subscribe({
+        next: (response: any) => {
+          this.isSendingSms = false;
+          this.selectedContactGuestId = null;
+
+          if (response?.success === false) {
+            alert(response?.message || 'Unable to send SMS');
+            return;
+          }
+
+          alert(response?.message || 'SMS sent successfully');
+        },
+        error: (error: any) => {
+          this.isSendingSms = false;
+
+          alert(
+            error?.error?.message ||
+            error?.message ||
+            'Unable to send SMS. Please try again.'
+          );
+        }
+      });
+  }
 
   // section is for restore and edit guest functionality, which is not implemented yet
 
-  openRestorePopup(guest: any): void { //RestoreRequestedGuest = any; // this is a placeholder type, replace with actual type when available
-    // this.selectedRestoreGuest = guest;
+  openRestoremethod(guest: any): void { //RestoreRequestedGuest = any; // this is a placeholder type, replace with actual type when available
 
-    // this.selectedRestoreWaitTime =
-    //   guest.estimatedWaitTime || 10;
-
-    // this.showRestorePopup = true;
+    this.waitlistApi.rejoinGuestApi(this.restaurantId, guest.id).subscribe({
+      next: (response) => {
+        alert(response?.message || 'Restore guest successfully');
+      }, error: (error) => {
+        alert(
+          error?.error?.message ||
+          error?.message ||
+          'Unable to restore guest. Please try again.'
+        );
+      }
+    })
   }
 
-  closeRestorePopup(): void {
-    // if (this.isRestoringGuest) {
-    //   return;
-    // }
+  private detectNewCustomerReplies(
+    guests: DashboardLiveGuest[]
+  ): void {
 
-    // this.showRestorePopup = false;
-    // this.selectedRestoreGuest = null;
-    // this.selectedRestoreWaitTime = 10;
+    guests.forEach((guest: DashboardLiveGuest) => {
+      const currentReplySignature =
+        this.getCustomerReplySignature(guest);
+
+      const previousReplySignature =
+        this.previousCustomerReplies.get(guest.id);
+
+      const hasCustomerReply =
+        this.hasCustomerReply(guest);
+
+      /*
+       * During the first API load, only save the existing values.
+       * Do not shake cards for replies that already existed before
+       * the dashboard was opened.
+       */
+      if (!this.customerReplyInitialLoadCompleted) {
+        if (currentReplySignature) {
+          this.previousCustomerReplies.set(
+            guest.id,
+            currentReplySignature
+          );
+        }
+
+        return;
+      }
+
+      /*
+       * New reply conditions:
+       *
+       * 1. The guest now has a reply.
+       * 2. The reply signature is different from the previous one.
+       */
+      if (
+        hasCustomerReply &&
+        currentReplySignature &&
+        currentReplySignature !== previousReplySignature
+      ) {
+        this.previousCustomerReplies.set(
+          guest.id,
+          currentReplySignature
+        );
+
+        this.triggerGuestReplyNotification(guest);
+      }
+    });
+
+    this.customerReplyInitialLoadCompleted = true;
   }
 
-  approveRestoreRequest(): void {
-    // if (!this.selectedRestoreGuest) {
-    //   return;
-    // }
+  private getCustomerReplySignature(
+    guest: DashboardLiveGuest
+  ): string {
 
-    // this.isRestoringGuest = true;
+    const replySid =
+      guest.customerReplySid?.trim() || '';
 
-    // this.waitlistApi
-    //   .approveRestoreRequest(
-    //     this.restaurantId,
-    //     this.selectedRestoreGuest.id,
-    //     {
-    //       estimatedWaitTime:
-    //         this.selectedRestoreWaitTime
-    //     }
-    //   )
-    //   .subscribe({
-    //     next: (res: any) => {
-    //       const restoredGuest =
-    //         res?.data ||
-    //         this.selectedRestoreGuest;
+    const latestReply =
+      guest.latestCustomerReply?.trim() || '';
 
-    //       this.restoreRequestedGuests =
-    //         this.restoreRequestedGuests.filter(
-    //           guest =>
-    //             guest.id !==
-    //             this.selectedRestoreGuest?.id
-    //         );
+    const replyDescription =
+      guest.customerReplyDescription?.trim() || '';
 
-    //       this.cancelledGuests =
-    //         this.cancelledGuests.filter(
-    //           guest =>
-    //             guest.id !==
-    //             this.selectedRestoreGuest?.id
-    //         );
+    const receivedAt =
+      guest.customerReplyReceivedAt || '';
 
-    //       this.activeTab = 'WAITING';
+    const voiceDigits =
+      guest.voiceReplyDigits?.trim() || '';
 
-    //       this.markRowChanged(
-    //         restoredGuest.id
-    //       );
+    const latestVoiceReply =
+      guest.latestVoiceReply?.trim() || '';
 
-    //       this.isRestoringGuest = false;
-    //       this.closeRestorePopup();
-
-    //       this.loadDashboardAllData(false);
-
-    //       this.notificationService
-    //         .triggerRestaurantRefresh();
-    //     },
-    //     error: (error) => {
-    //       this.isRestoringGuest = false;
-
-    //       alert(
-    //         error?.error?.message ||
-    //         'Unable to restore the guest.'
-    //       );
-    //     }
-    //   });
+    return [
+      replySid,
+      latestReply,
+      replyDescription,
+      receivedAt,
+      voiceDigits,
+      latestVoiceReply
+    ].join('|');
   }
 
-  private startRestoreStatusPolling(): void {
-    // this.stopRestoreStatusPolling();
+  hasCustomerReply(
+    guest: DashboardLiveGuest
+  ): boolean {
 
-    // this.restorePollingInterval = setInterval(
-    //   () => {
-    //     this.checkRestoreStatus();
-    //   },
-    //   5000
-    // );
+    return !!(
+      guest.customerReplySid ||
+      guest.latestCustomerReply ||
+      guest.customerReplyDescription ||
+      guest.customerReplyReceivedAt ||
+      guest.voiceReplyDigits ||
+      guest.latestVoiceReply
+    );
   }
 
-  private stopRestoreStatusPolling(): void {
-    // if (this.restorePollingInterval) {
-    //   clearInterval(
-    //     this.restorePollingInterval
-    //   );
+  private triggerGuestReplyNotification(
+    guest: DashboardLiveGuest
+  ): void {
 
-    //   this.restorePollingInterval = null;
-    // }
+    /*
+     * Add the guest to the shaking and unread sets.
+     */
+    this.shakingGuestIds.add(guest.id);
+    this.unreadReplyGuestIds.add(guest.id);
+
+    /*
+     * Clear an old timeout in case another response arrives
+     * before the previous animation has completed.
+     */
+    const existingTimeout =
+      this.replyShakeTimeouts.get(guest.id);
+
+    if (existingTimeout) {
+      clearTimeout(existingTimeout);
+    }
+
+    /*
+     * Remove the shake class after the CSS animation completes.
+     *
+     * The animation below lasts about 1.2 seconds.
+     */
+    const timeout = setTimeout(() => {
+      this.shakingGuestIds.delete(guest.id);
+      this.replyShakeTimeouts.delete(guest.id);
+    }, 1400);
+
+    this.replyShakeTimeouts.set(
+      guest.id,
+      timeout
+    );
   }
 
-  private checkRestoreStatus(): void {
-    // if (!this.cancelledGuest) {
-    //   return;
-    // }
+  openCustomerReplyPopup(
+    guest: DashboardLiveGuest
+  ): void {
 
-    // const restaurantId = Number(
-    //   localStorage.getItem('waitlistRestaurantId')
-    // );
+    if (!this.hasCustomerReply(guest)) {
+      return;
+    }
 
-    // const phone =
-    //   this.cancelledGuest.guestPhone ||
-    //   this.cancelledGuest.phone;
+    this.selectedReplyGuest = guest;
+    this.showCustomerReplyPopup = true;
 
-    // if (!restaurantId || !phone) {
-    //   return;
-    // }
+    /*
+     * Mark this reply as read.
+     */
+    this.unreadReplyGuestIds.delete(guest.id);
 
-    // this.waitlistApi
-    //   .getWaitlistStatus({
-    //     restaurantId,
-    //     phone
-    //   })
-    //   .subscribe({
-    //     next: (res: any) => {
-    //       if (!res?.success || !res?.data) {
-    //         return;
-    //       }
+    /*
+     * Stop shaking immediately when the restaurant
+     * employee opens the reply.
+     */
+    this.shakingGuestIds.delete(guest.id);
 
-    //       const updatedGuest = res.data;
+    const existingTimeout =
+      this.replyShakeTimeouts.get(guest.id);
 
-    //       localStorage.setItem(
-    //         'waitlistGuest',
-    //         JSON.stringify(updatedGuest)
-    //       );
+    if (existingTimeout) {
+      clearTimeout(existingTimeout);
+      this.replyShakeTimeouts.delete(guest.id);
+    }
+  }
 
-    //       if (
-    //         updatedGuest.status === 'WAITING' ||
-    //         updatedGuest.status === 'NOTIFIED'
-    //       ) {
-    //         this.stopRestoreStatusPolling();
+  closeCustomerReplyPopup(): void {
+    this.showCustomerReplyPopup = false;
+    this.selectedReplyGuest = null;
+  }
 
-    //         this.guestJoined.emit(updatedGuest);
-    //       }
-    //     }
-    //   });
+  getCustomerReplyText(
+    guest: DashboardLiveGuest | null
+  ): string {
+
+    if (!guest) {
+      return '';
+    }
+
+    /*
+     * Prefer the actual customer reply value.
+     */
+    const rawReply =
+      guest.latestCustomerReply ||
+      guest.customerReplyDescription ||
+      guest.voiceReplyDigits ||
+      guest.latestVoiceReply ||
+      guest.customerReplySid ||
+      '';
+
+    const normalizedReply =
+      rawReply.toString().trim().toLowerCase();
+
+    switch (normalizedReply) {
+      case '1':
+        return 'On my way';
+
+      case '2':
+        return 'Arriving in 5 minutes';
+
+      case '3':
+        return 'Unable to make it';
+
+      case 'on my way':
+        return 'On my way';
+
+      case 'arriving in 5 minutes':
+        return 'Arriving in 5 minutes';
+
+      case 'unable to make it':
+        return 'Unable to make it';
+
+      default:
+        return rawReply || 'Customer replied';
+    }
+  }
+
+  getCustomerReplyIcon(
+    guest: DashboardLiveGuest | null
+  ): string {
+
+    if (!guest) {
+      return 'fa-regular fa-message';
+    }
+
+    const reply =
+      (
+        guest.latestCustomerReply ||
+        guest.customerReplyDescription ||
+        guest.voiceReplyDigits ||
+        guest.customerReplySid ||
+        ''
+      )
+        .toString()
+        .trim()
+        .toLowerCase();
+
+    switch (reply) {
+      case '1':
+      case 'on my way':
+        return 'fa-solid fa-car-side';
+
+      case '2':
+      case 'arriving in 5 minutes':
+        return 'fa-solid fa-clock';
+
+      case '3':
+      case 'unable to make it':
+        return 'fa-solid fa-circle-xmark';
+
+      default:
+        return 'fa-solid fa-comment-sms';
+    }
+  }
+
+  getCustomerReplyClass(
+    guest: DashboardLiveGuest | null
+  ): string {
+
+    if (!guest) {
+      return 'reply-custom';
+    }
+
+    const reply =
+      (
+        guest.latestCustomerReply ||
+        guest.customerReplyDescription ||
+        guest.voiceReplyDigits ||
+        guest.customerReplySid ||
+        ''
+      )
+        .toString()
+        .trim()
+        .toLowerCase();
+
+    switch (reply) {
+      case '1':
+      case 'on my way':
+        return 'reply-coming';
+
+      case '2':
+      case 'arriving in 5 minutes':
+        return 'reply-delayed';
+
+      case '3':
+      case 'unable to make it':
+        return 'reply-unavailable';
+
+      default:
+        return 'reply-custom';
+    }
+  }
+
+  // seated guest edit option
+
+  get currentSeatedPartySize(): number {
+    return Number(
+      this.selectedSeatedGuest?.partySize || 0
+    );
+  }
+
+  get requiredPartyCapacity(): number {
+    return (
+      this.currentSeatedPartySize +
+      Number(this.additionalGuestCount || 0)
+    );
+  }
+
+  get suitableOpenTables(): any[] {
+    return this.openTables.filter((table: any) => {
+      return Number(table.capacity) >=
+        this.requiredPartyCapacity;
+    });
+  }
+
+  get currentSeatedTable(): any | null {
+    const tableName =
+      this.selectedSeatedGuest?.tableName;
+
+    if (!tableName) {
+      return null;
+    }
+
+    return this.tables.find(
+      (table: any) =>
+        table.tableNumber === tableName
+    ) || null;
+  }
+
+  get hasSuitableOpenTable(): boolean {
+    return this.suitableOpenTables.length > 0;
+  }
+
+  openEditSeatedGuestModal(
+    guest: DashboardLiveGuest
+  ): void {
+
+    this.selectedSeatedGuest = guest;
+
+    this.additionalGuestCount = 0;
+    this.editWaitingMinutes = null;
+
+    this.selectedEditTable = null;
+
+    this.editSeatedAction = 'RESEAT';
+
+    this.showEditSeatedGuestModal = true;
+  }
+
+  closeEditSeatedGuestModal(): void {
+    if (this.isUpdatingSeatedGuest) {
+      return;
+    }
+
+    this.showEditSeatedGuestModal = false;
+
+    this.selectedSeatedGuest = null;
+    this.selectedEditTable = null;
+
+    this.additionalGuestCount = 0;
+    this.editWaitingMinutes = null;
+
+    this.editSeatedAction = 'RESEAT';
+  }
+
+  decreaseAdditionalGuests(): void {
+    if (this.additionalGuestCount > 0) {
+      this.additionalGuestCount--;
+
+      this.checkSelectedEditTableCapacity();
+    }
+  }
+
+  increaseAdditionalGuests(): void {
+    this.additionalGuestCount++;
+
+    this.checkSelectedEditTableCapacity();
+  }
+
+  onAdditionalGuestCountChange(): void {
+    if (
+      this.additionalGuestCount === null ||
+      this.additionalGuestCount < 0
+    ) {
+      this.additionalGuestCount = 0;
+    }
+
+    this.checkSelectedEditTableCapacity();
+  }
+
+  private checkSelectedEditTableCapacity(): void {
+    if (
+      this.selectedEditTable &&
+      Number(this.selectedEditTable.capacity) <
+      this.requiredPartyCapacity
+    ) {
+      this.selectedEditTable = null;
+    }
+  }
+
+  submitSeatedGuestEdit(): void {
+    if (!this.selectedSeatedGuest) {
+      return;
+    }
+
+    if (this.additionalGuestCount <= 0) {
+      alert(
+        'Please enter the number of additional guests'
+      );
+      return;
+    }
+
+    if (this.editSeatedAction === 'RESEAT') {
+      this.reseatGuestAtLargerTable();
+      return;
+    }
+
+    this.moveSeatedGuestBackToWaiting();
+  }
+
+  private reseatGuestAtLargerTable(): void {
+    if (
+      !this.selectedSeatedGuest ||
+      !this.selectedEditTable
+    ) {
+      alert('Please select an available table');
+      return;
+    }
+
+    if (
+      Number(this.selectedEditTable.capacity) <
+      this.requiredPartyCapacity
+    ) {
+      alert(
+        'The selected table does not have enough seats'
+      );
+      return;
+    }
+
+    const oldTable = this.currentSeatedTable;
+
+    this.isUpdatingSeatedGuest = true;
+    this.isLoading = true;
+
+    const requests: {
+      oldTableStatus?: any;
+      newTableStatus: any;
+      seatedGuest: any;
+    } = {
+      newTableStatus:
+        this.waitlistApi.updateTableStatus(
+          this.restaurantId,
+          this.selectedEditTable.id,
+          'OCCUPIED'
+        ),
+
+      seatedGuest:
+        this.waitlistApi.updateSeatedGuest(
+          this.restaurantId,
+          this.selectedSeatedGuest.id,
+          {
+            partySize: this.requiredPartyCapacity,
+            tableName:
+              this.selectedEditTable.tableNumber
+          }
+        )
+    };
+
+    /*
+     * Only open the old table when the customer
+     * is moving to a different table.
+     */
+    if (
+      oldTable &&
+      oldTable.id !== this.selectedEditTable.id
+    ) {
+      requests.oldTableStatus =
+        this.waitlistApi.updateTableStatus(
+          this.restaurantId,
+          oldTable.id,
+          'OPEN'
+        );
+    }
+
+    forkJoin(requests).subscribe({
+      next: (response: any) => {
+        this.isUpdatingSeatedGuest = false;
+        this.isLoading = false;
+
+        this.closeEditSeatedGuestModal();
+
+        this.loadDashboardAllData(false);
+
+        this.notificationService
+          .triggerRestaurantRefresh();
+
+        alert(
+          `${this.selectedSeatedGuest?.guestName || 'Guest'} moved successfully`
+        );
+      },
+
+      error: (error: any) => {
+        this.isUpdatingSeatedGuest = false;
+        this.isLoading = false;
+
+        alert(
+          error?.error?.message ||
+          'Unable to update the seated guest'
+        );
+      }
+    });
+  }
+
+  private moveSeatedGuestBackToWaiting(): void {
+    if (!this.selectedSeatedGuest) {
+      return;
+    }
+
+    if (
+      !this.editWaitingMinutes ||
+      this.editWaitingMinutes <= 0
+    ) {
+      alert(
+        'Please enter the estimated waiting time'
+      );
+      return;
+    }
+
+    const guestName =
+      this.selectedSeatedGuest.guestName;
+
+    const oldTable =
+      this.currentSeatedTable;
+
+    this.isUpdatingSeatedGuest = true;
+    this.isLoading = true;
+
+    const requests: Record<string, any> = {
+      waitingGuest:
+        this.waitlistApi.moveSeatedGuestToWaiting(
+          this.restaurantId,
+          this.selectedSeatedGuest.id,
+          {
+            partySize:
+              this.requiredPartyCapacity,
+
+            estimatedWaitTime:
+              Number(this.editWaitingMinutes)
+          }
+        )
+    };
+
+    /*
+     * The previously occupied table becomes open.
+     */
+    if (oldTable) {
+      requests['oldTableStatus'] =
+        this.waitlistApi.updateTableStatus(
+          this.restaurantId,
+          oldTable.id,
+          'OPEN'
+        );
+    }
+
+    forkJoin(requests).subscribe({
+      next: () => {
+        this.isUpdatingSeatedGuest = false;
+        this.isLoading = false;
+
+        this.closeEditSeatedGuestModal();
+
+        this.activeTab = 'WAITING';
+
+        this.loadDashboardAllData(false);
+
+        this.notificationService
+          .triggerRestaurantRefresh();
+
+        alert(
+          `${guestName} moved back to the waiting list`
+        );
+      },
+
+      error: (error: any) => {
+        this.isUpdatingSeatedGuest = false;
+        this.isLoading = false;
+
+        alert(
+          error?.error?.message ||
+          'Unable to move the guest to waiting'
+        );
+      }
+    });
+  }
+
+
+  ngOnDestroy(): void {
+    this.sub.unsubscribe();
+
+    if (this.clockInterval) {
+      clearInterval(this.clockInterval);
+    }
+
+    if (this.refreshInterval) {
+      clearInterval(this.refreshInterval);
+    }
+
+    this.replyShakeTimeouts.forEach(
+      timeout => clearTimeout(timeout)
+    );
+
+    this.replyShakeTimeouts.clear();
+
   }
 
 

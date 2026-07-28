@@ -88,9 +88,27 @@ export interface NotifiedGuest {
   status: string;
   position: number;
   estimatedWaitTime: number;
+
   joinedAt: string;
-  approvedAt: string;
-  notifiedAt: string
+  approvedAt?: string;
+  notifiedAt?: string;
+
+  smsStatus?: string;
+  smsMessage?: string;
+  smsError?: string;
+
+  latestCustomerReply?: string;
+  customerReplyDescription?: string;
+  customerReplyReceivedAt?: string;
+  customerReplySid?: string;
+
+  latestVoiceReply?: string;
+  callStatus?: string;
+  callResponse?: string;
+  voiceReplyReceivedAt?: string;
+  voiceReplyDigits?: string;
+
+  tableName?: string;
 }
 
 export interface NotifiedGuestResponse {
@@ -108,6 +126,7 @@ export interface SeatedGuest {
   notes: string;
   status: string;
   seatedAt: string;
+  tableName:string;
 }
 
 export interface SeatedGuestResponse {

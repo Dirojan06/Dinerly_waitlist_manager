@@ -145,7 +145,7 @@ export class WaitlistApiRestaurantService {
     if (date) {
       params = params.set('date', date);
     }
-    return this.http.get<NotifiedGuestResponse>(`${this.baseUrl}/restaurants/${restaurantId}/waitlist`, { headers, params });
+    return this.http.get<any>(`${this.baseUrl}/restaurants/${restaurantId}/waitlist`, { headers, params });
 
   }
 
@@ -274,13 +274,36 @@ export class WaitlistApiRestaurantService {
   // send custom notification to guest api
 
   sendNoficationToGuest(restaurantId: number, waitlistId: number, payload: sendNotificationRequest): Observable<any> {
-      const token = this.auth.getToken();
-  
-      const headers = new HttpHeaders({
-        Authorization: `Bearer ${token}`
-      });
-      return this.http.post(`${this.baseUrl}/restaurants/${restaurantId}/notifications/${waitlistId}/send-sms`, payload, { headers });
-    }
+    const token = this.auth.getToken();
+
+    const headers = new HttpHeaders({
+      Authorization: `Bearer ${token}`
+    });
+    return this.http.post(`${this.baseUrl}/restaurants/${restaurantId}/notifications/${waitlistId}/send-sms`, payload, { headers });
+  }
+
+  // make call api
+
+  makecallToGuest(restaurantId: number, waitlistId: number, payload: sendNotificationRequest): Observable<any> {
+    const token = this.auth.getToken();
+
+    const headers = new HttpHeaders({
+      Authorization: `Bearer ${token}`
+    });
+    return this.http.post(`${this.baseUrl}/restaurants/${restaurantId}/notifications/${waitlistId}/make-call`, payload, { headers });
+  }
+
+  // rejoin API
+  rejoinGuestApi(restaurantId: number, waitlistId: number): Observable<any> {
+    const token = this.auth.getToken();
+
+    const headers = new HttpHeaders({
+      Authorization: `Bearer ${token}`
+    });
+    return this.http.post(`${this.baseUrl}/restaurants/${restaurantId}/waitlist/rejoin/${waitlistId}`, { headers });
+  }
+
+
 
   // delete guest from waitlist api
   deleteGuestFromWaitlist(restaurantId: number, waitlistId: number): Observable<any> {
@@ -291,6 +314,47 @@ export class WaitlistApiRestaurantService {
     });
 
     return this.http.delete(`${this.baseUrl}/restaurants/${restaurantId}/waitlist/${waitlistId}`, { headers });
+  }
+
+  //update seated guest 
+
+  updateSeatedGuest(
+    restaurantId: number,
+    waitlistId: number,
+    payload: {
+      partySize: number;
+      tableName: string;
+    }
+  ): Observable<any> {
+
+    return this.http.put(
+      `/api/restaurants/${restaurantId}/waitlist/${waitlistId}/seated`,
+      payload
+    );
+  }
+
+  moveSeatedGuestToWaiting(
+    restaurantId: number,
+    waitlistId: number,
+    payload: {
+      partySize: number;
+      estimatedWaitTime: number;
+    }
+  ): Observable<any> {
+
+    const token = this.auth.getToken();
+
+    const headers = new HttpHeaders({
+      Authorization: `Bearer ${token}`
+    });
+
+    return this.http.post(
+      `/api/restaurants/${restaurantId}/waitlist/${waitlistId}/move-to-waiting`,
+      payload, { headers }
+    );
+
+
+
   }
 
 
