@@ -449,6 +449,8 @@
   border: 1.5px solid #f4c15d;
   background: #fffaf0;
   color: #c47a00;
+  position: relative;
+  left: 10px;
 }
 
 .seat-action {
@@ -459,11 +461,11 @@
 }
 
 .action-btn {
-  min-width: 78px;
-  padding: 0 16px;
-  border: 1px solid #e5e7eb;
-  background: #ffffff;
-  color: #000000;
+    min-width: 78px;
+    padding: 0 16px;
+    background: #ffffff;
+    border: 1px solid;
+    border-color: #008e10;
 }
 
 .empty-state {
@@ -998,7 +1000,6 @@
   position: relative;
   display: inline-flex;
 }
-
 .action-btn.call {
   display: inline-flex;
   align-items: center;
@@ -1007,11 +1008,29 @@
   min-width: 76px;
   min-height: 40px;
   padding: 8px 12px;
-  border: 1px solid rgba(177, 151, 252, 0.35);
   border-radius: 10px;
-  background: rgba(177, 151, 252, 0.08);
+  background: rgb(255 255 255);
   cursor: pointer;
   transition: 0.2s ease;
+  border: 1px solid;
+  border-color: #5b32e1;
+  min-width: clamp(92px, 6vw, 124px);
+}
+
+.action-btn.cancel {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  min-width: 76px;
+  min-height: 40px;
+  padding: 8px 12px;
+  border-radius: 10px;
+  background: #ffffff;
+  cursor: pointer;
+  transition: 0.2s ease;
+  border: 1px solid;
+  border-color: red;
 }
 
 .action-btn.call:hover {
@@ -1450,21 +1469,72 @@
 }
 
 .reply-preview {
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: 7px;
 
   width: fit-content;
-  margin-top: 7px;
-  padding: 6px 10px;
+  margin-top: 8px;
+  padding: 8px 12px;
 
-  border: 1px solid #ddd2ff;
-  border-radius: 8px;
+  border: 1px solid;
+  border-radius: 10px;
 
-  color: #6645c1;
-  background: #f6f2ff;
+  font-size: 13px;
+  font-weight: 500;
 
-  font-size: 12px;
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease;
+}
+
+.reply-preview i {
+  font-size: 14px;
+}
+
+.reply-preview span {
+  font-weight: 500;
+}
+
+.reply-preview strong {
+  font-weight: 500;
+}
+
+/* Option 1: On my way */
+
+.reply-preview.reply-coming {
+  color: #6546c4;
+  border-color: #d7c8ff;
+  background: #f5f1ff;
+}
+
+.reply-preview.reply-coming i {
+  color: #7351d2;
+}
+
+/* Option 2: Arriving in 5 minutes */
+
+.reply-preview.reply-delayed {
+  color: #8b5a16;
+  border-color: #f0d09e;
+  background: #fff8eb;
+}
+
+.reply-preview.reply-delayed i {
+  color: #d48b25;
+}
+
+/* Option 3: Unable to make it */
+
+.reply-preview.reply-unavailable {
+  color: #c52f2f;
+  border-color: #f2bcbc;
+  background: #fff1f1;
+}
+
+.reply-preview.reply-unavailable i,
+.reply-preview.reply-unavailable strong {
+  color: #d62828;
 }
 
 /* Popup */

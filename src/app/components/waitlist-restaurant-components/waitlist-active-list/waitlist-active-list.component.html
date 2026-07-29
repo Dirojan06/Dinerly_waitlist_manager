@@ -144,16 +144,8 @@
 
     shakingGuestIds.has(guest.id)
       ? 'customer-reply-shake'
-      : '',
-
-    unreadReplyGuestIds.has(guest.id)
-      ? 'has-unread-reply'
-      : '',
-
-    hasCustomerReply(guest)
-      ? 'reply-clickable'
       : ''
-  ]" (click)="openCustomerReplyPopup(guest)">
+  ]">
 
       <!-- PARTY -->
       <div class="party-cell">
@@ -174,21 +166,17 @@
           <p>{{ guest.notes }} . {{ guest.guestPhone }}</p>
 
           <div class="reply-preview" *ngIf="
+    guest.status === 'NOTIFIED' &&
+    hasCustomerReply(guest)
+  " [ngClass]="getCustomerReplyClass(guest)">
+            <i [ngClass]="
+      getCustomerReplyPreviewIcon(guest)
+    "></i>
 
-      unreadReplyGuestIds.has(guest.id)
-
-    ">
-
-            <i class="fa-solid fa-reply"></i>
-
-            Customer replied:
 
             <strong>
-
               {{ getCustomerReplyText(guest) }}
-
             </strong>
-
           </div>
         </div>
       </div>
@@ -223,11 +211,7 @@
 
           <button class="action-btn call" type="button" *ngIf="guest.status === 'NOTIFIED'"
             (click)="toggleContactActions(guest, $event)">
-            <i class="fa-solid fa-phone-volume" style="color: rgb(177, 151, 252);"></i>
-
-            <span>/</span>
-
-            <i class="fa-solid fa-comment-sms" style="color: rgb(177, 151, 252);"></i>
+            <i class="fa-solid fa-phone-volume" style="color: #5b32e1;"></i>
           </button>
 
           <div class="contact-tooltip" *ngIf="selectedContactGuestId === guest.id" (click)="$event.stopPropagation()">
@@ -256,14 +240,14 @@
       guest.status === 'WAITING' ||
       guest.status === 'NOTIFIED'
     " (click)="openAvailableTableModal(guest)">
-          <i class="fa-solid fa-check" style="color: rgb(177, 151, 252);"></i>
+          <i class="fa-solid fa-check" style="color: #008e10;"></i>
         </button>
 
-        <button class="action-btn call" type="button" *ngIf="
+        <button class="action-btn cancel" type="button" *ngIf="
       guest.status === 'WAITING' ||
       guest.status === 'NOTIFIED'
     " (click)="openLeaveConfirm(guest)">
-          <i class="fa-solid fa-x" style="color: rgb(177, 151, 252);"></i>
+          <i class="fa-solid fa-x" style="color: rgb(255, 0, 0);"></i>
         </button>
 
       </div>
@@ -339,10 +323,10 @@
 
         <div>
           <strong>{{ guest.guestName }}</strong>
-          
+
           <p *ngIf="guest.tableName">
 
-             Table No: {{ guest.tableName }}
+            Table No: {{ guest.tableName }}
 
           </p>
         </div>
@@ -618,7 +602,7 @@
 
 <!-- shpw customer reply modal -->
 
-<div class="customer-reply-backdrop" *ngIf="
+<!-- <div class="customer-reply-backdrop" *ngIf="
     showCustomerReplyPopup &&
     selectedReplyGuest
   " (click)="closeCustomerReplyPopup()">
@@ -736,7 +720,7 @@
 
   </div>
 
-</div>
+</div> -->
 
 <!-- show edit customer modal -->
 
