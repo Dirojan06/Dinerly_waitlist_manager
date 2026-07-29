@@ -1,42 +1,86 @@
-<div class="menu-page">
+<section class="food-page">
 
- 
-
- 
-
-  <div class="menu-filter">
-    <div class="search-box">
-      <i class="fa-solid fa-magnifying-glass"></i>
-      <input
-        type="text"
-        placeholder="Search..."
-        [(ngModel)]="searchText">
+  <div class="page-heading">
+    <div>
+      <p>DISCOVER FOOD</p>
+      <h1>Find something delicious</h1>
     </div>
+  </div>
 
+  <div class="food-search">
+    <i class="fa-solid fa-magnifying-glass"></i>
+
+    <input
+      type="text"
+      [(ngModel)]="searchText"
+      placeholder="Search restaurants or cuisines"
+    />
+  </div>
+
+  <div class="food-categories">
     <button
-      *ngFor="let category of categories"
-      [class.active]="selectedCategory === category"
-      (click)="selectCategory(category)">
-      {{ category }}
+      type="button"
+      *ngFor="let cuisine of cuisines"
+      [class.active]="
+        selectedCuisine === cuisine
+      "
+      (click)="selectedCuisine = cuisine"
+    >
+      {{ cuisine }}
     </button>
   </div>
 
-  <div class="menu-grid">
-    <div class="menu-card" *ngFor="let item of filteredItems">
-      <div class="item-image">
-        {{ item.emoji }}
+  <div class="food-grid">
+
+    <article
+      class="food-card"
+      *ngFor="
+        let restaurant of
+        filteredRestaurants
+      "
+    >
+
+      <div
+        class="food-image"
+        [ngClass]="restaurant.imageClass"
+      >
+        <div class="food-plate"></div>
       </div>
 
-      <div class="item-content">
-        <h4>{{ item.name }}</h4>
-        <p>{{ item.description }}</p>
+      <div class="food-body">
 
-        <div class="item-footer">
-          <strong>${{ item.price }}</strong>
-          <button>+</button>
+        <h3>
+          {{ restaurant.name }}
+        </h3>
+
+        <p>
+          {{ restaurant.cuisine }}
+          ·
+          {{ restaurant.distance }}
+        </p>
+
+        <div class="food-meta">
+          <span>
+            ★ {{ restaurant.rating }}
+          </span>
+
+          <span>
+            {{ restaurant.deliveryTime }}
+          </span>
+
+          <span>
+            {{ restaurant.priceLevel }}
+          </span>
         </div>
+
+        <button type="button">
+          View menu
+        </button>
+
       </div>
-    </div>
+
+    </article>
+
   </div>
 
-</div>
+</section>

@@ -1,0 +1,156 @@
+.rewards-page {
+  padding: 26px;
+}
+
+.rewards-hero {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 25px;
+
+  padding: 30px;
+
+  border-radius: 20px;
+
+  color: #ffffff;
+  background:
+    linear-gradient(
+      120deg,
+      #6e29a8,
+      #3d135e
+    );
+}
+
+.rewards-hero p {
+  margin: 0;
+
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 1px;
+}
+
+.rewards-hero h1 {
+  max-width: 570px;
+  margin: 9px 0;
+
+  font-size: 31px;
+}
+
+.rewards-hero span {
+  color: rgba(255, 255, 255, 0.75);
+}
+
+.points-card {
+  min-width: 190px;
+  padding: 22px;
+
+  border: 1px solid rgba(255, 255, 255, 0.17);
+  border-radius: 16px;
+
+  background: rgba(255, 255, 255, 0.1);
+  text-align: center;
+}
+
+.points-card small,
+.points-card span {
+  display: block;
+}
+
+.points-card strong {
+  display: block;
+  margin: 7px 0;
+
+  font-size: 38px;
+}
+
+.rewards-page > h2 {
+  margin: 27px 0 16px;
+}
+
+.rewards-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 17px;
+}
+
+.reward-card {
+  padding: 20px;
+
+  border: 1px solid #e4dce9;
+  border-radius: 15px;
+
+  background: #ffffff;
+}
+
+.reward-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 46px;
+  height: 46px;
+
+  border-radius: 12px;
+
+  color: #ffffff;
+  background: #6b2ca2;
+}
+
+.reward-card h3 {
+  margin: 15px 0 7px;
+}
+
+.reward-card p {
+  min-height: 36px;
+
+  color: #82788a;
+  font-size: 12px;
+}
+
+.reward-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  margin-top: 18px;
+}
+
+.reward-footer strong {
+  color: #623092;
+  font-size: 13px;
+}
+
+.reward-footer button {
+  padding: 8px 12px;
+
+  border: 0;
+  border-radius: 8px;
+
+  color: #ffffff;
+  background: #612492;
+
+  cursor: pointer;
+}
+
+.reward-footer button:disabled {
+  color: #9e94a6;
+  background: #ece8ef;
+
+  cursor: not-allowed;
+}
+
+@media (max-width: 850px) {
+  .rewards-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .rewards-hero {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 600px) {
+  .rewards-grid {
+    grid-template-columns: 1fr;
+  }
+}

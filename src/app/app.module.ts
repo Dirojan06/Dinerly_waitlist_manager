@@ -33,6 +33,11 @@ import { WaitlistSettingsComponent } from './components/waitlist-restaurant-comp
 import { WaitlistRestaurantHistoryComponent } from './components/waitlist-restaurant-components/waitlist-restaurant-history/waitlist-restaurant-history.component';
 import { DinerlyLoaderComponent } from './components/dinerly-loader/dinerly-loader.component';
 import { WaitlistUserActionComponent } from './components/waitlist-user-component/waitlist-user-action/waitlist-user-action.component';
+import { GuestAccountLoginComponent } from './components/waitlist-user-component/guest-account-login/guest-account-login.component';
+import { CustomerAuthInterceptor } from './interceptor/customer-auth.interceptor';
+import { WaitlistUserHomeComponent } from './components/waitlist-user-component/waitlist-user-home/waitlist-user-home.component';
+import { WaitlistUserDiscountsComponent } from './components/waitlist-user-component/waitlist-user-discounts/waitlist-user-discounts.component';
+import { WaitlistUserRewardsComponent } from './components/waitlist-user-component/waitlist-user-offers/waitlist-user-rewards.component';
 
 @NgModule({
   declarations: [
@@ -59,7 +64,11 @@ import { WaitlistUserActionComponent } from './components/waitlist-user-componen
     WaitlistSettingsComponent,
     WaitlistRestaurantHistoryComponent,
     DinerlyLoaderComponent,
-    WaitlistUserActionComponent
+    WaitlistUserActionComponent,
+    GuestAccountLoginComponent,
+    WaitlistUserHomeComponent,
+    WaitlistUserDiscountsComponent,
+    WaitlistUserRewardsComponent
   ],
   imports: [
     BrowserModule,
@@ -78,6 +87,11 @@ import { WaitlistUserActionComponent } from './components/waitlist-user-componen
     {
       provide: HTTP_INTERCEPTORS,
       useClass: AuthInterceptor,
+      multi: true
+    },
+    {
+      provide: HTTP_INTERCEPTORS,
+      useClass: CustomerAuthInterceptor,
       multi: true
     }
   ],

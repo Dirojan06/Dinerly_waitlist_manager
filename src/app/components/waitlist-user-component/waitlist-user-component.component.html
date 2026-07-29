@@ -1,38 +1,93 @@
-<div class="app-wrapper" [ngClass]="isDarkMode ? 'dark-mode' : 'light-mode'">
+<div
+  class="app-wrapper"
+  [ngClass]="
+    isDarkMode
+      ? 'dark-mode'
+      : 'light-mode'
+  "
+>
 
   <div class="customer-shell">
 
-    <app-waitlist-user-sidebar [activeTab]="activeTab" [isLoggedGuest]="isLoggedGuest" (tabChange)="changeTab($event)">
+    <app-waitlist-user-sidebar
+      [activeTab]="activeTab"
+      [hasWaitlistAccess]="hasWaitlistAccess"
+      [hasAccountAccess]="hasAccountAccess"
+      [customerAccount]="customerAccount"
+      (tabChange)="changeTab($event)"
+      (accountLogin)="openAccountLoginPopup()"
+      (accountLogout)="logoutCustomerAccount()"
+    >
     </app-waitlist-user-sidebar>
 
     <main class="customer-main">
 
-      <app-waitlist-user-hero *ngIf="isLoggedGuest" [guest]="guest" (logout)="logoutGuest()">
-      </app-waitlist-user-hero>
+      <!-- HOME -->
+      <app-waitlist-user-home
+        *ngIf="activeTab === 'HOME'"
+        [waitlistGuest]="waitlistGuest"
+        [customerAccount]="customerAccount"
+        [hasWaitlistAccess]="hasWaitlistAccess"
+        [hasAccountAccess]="hasAccountAccess"
+        [cancelledGuest]="cancelledGuest"
+        [restoreRequestSent]="restoreRequestSent"
+        (tabChange)="changeTab($event)"
+        (accountLogin)="openAccountLoginPopup()"
+        (guestJoined)="onGuestJoined($event)"
+        (restoreRequested)="onRestoreRequested($event)"
+      >
+      </app-waitlist-user-home>
 
-      <ng-container *ngIf="isLoggedGuest">
+      <!-- WAITLIST -->
+      <ng-container
+        *ngIf="activeTab === 'WAITLIST'"
+      >
 
-        <ng-container *ngIf="activeTab === 'WAITLIST'">
-          <app-waitlist-user-banner></app-waitlist-user-banner>
+        <app-waitlist-user-hero
+          [guest]="waitlistGuest"
+          [customerAccount]="customerAccount"
+          [hasWaitlistAccess]="hasWaitlistAccess"
+          [hasAccountAccess]="hasAccountAccess"
+          (accountLogin)="openAccountLoginPopup()"
+          (logout)="logoutWaitlistGuest()"
+        >
+        </app-waitlist-user-hero>
 
-          <app-waitlist-waiting-screen (leaveSuccess)="onLeaveSuccess($event)">
-          </app-waitlist-waiting-screen>
-        </ng-container>
-
-        <ng-container *ngIf="activeTab === 'MENU'">
-          <app-waitlist-user-menu></app-waitlist-user-menu>
-        </ng-container>
-
-        <ng-container *ngIf="activeTab === 'DISCOUNT'">
-          <!-- discount component here -->
-        </ng-container>
+        <app-waitlist-waiting-screen
+          *ngIf="hasWaitlistAccess"
+          [guest]="waitlistGuest"
+          (leaveSuccess)="onLeaveSuccess($event)"
+        >
+        </app-waitlist-waiting-screen>
 
       </ng-container>
 
-      <app-waitlist-user-action *ngIf="!isLoggedGuest" [cancelledGuest]="cancelledGuest"
-        [restoreRequestSent]="restoreRequestSent" (guestJoined)="onGuestJoined($event)"
-        (restoreRequested)="onRestoreRequested($event)">
-      </app-waitlist-user-action>
+      <!-- FOOD / MENU -->
+      <app-waitlist-user-menu
+        *ngIf="
+          activeTab === 'MENU' &&
+          hasAccountAccess
+        "
+      >
+      </app-waitlist-user-menu>
+
+      <!-- OFFERS -->
+      <app-waitlist-user-discounts
+        *ngIf="
+          activeTab === 'OFFERS' &&
+          hasAccountAccess
+        "
+      >
+      </app-waitlist-user-discounts>
+
+      <!-- REWARDS -->
+      <app-waitlist-user-rewards
+        *ngIf="
+          activeTab === 'REWARDS' &&
+          hasAccountAccess
+        "
+      >
+      </app-waitlist-user-rewards>
 
     </main>
 
@@ -40,26 +95,100 @@
 
 </div>
 
-<div class="access-backdrop" *ngIf="showAccessPopup">
-  <div class="access-popup">
-    <button class="access-close" type="button" (click)="closeAccessPopup()">✕</button>
+<!-- WAITLIST ACCESS POPUP -->
+<div
+  class="access-backdrop"
+  *ngIf="showWaitlistAccessPopup"
+  (click)="closeWaitlistAccessPopup()"
+>
+
+  <div
+    class="access-popup"
+    (click)="$event.stopPropagation()"
+  >
+
+    <button
+      class="access-close"
+      type="button"
+      (click)="closeWaitlistAccessPopup()"
+    >
+      ✕
+    </button>
 
     <div class="access-icon">
-      <i class="fa-solid fa-lock"></i>
+      <i class="fa-solid fa-mobile-screen"></i>
     </div>
 
-    <h2>Join the waitlist first</h2>
-    <p>Please join the waitlist to access Waitlist, Menu and Discounts.</p>
+    <h2>Join or check your waitlist</h2>
 
-    <button type="button" class="access-btn" (click)="closeAccessPopup()">
-      Okay
+    <p>
+      Enter your mobile number from the Home
+      page to join a waitlist or check your
+      current waitlist status.
+    </p>
+
+    <button
+      type="button"
+      class="access-btn"
+      (click)="
+        closeWaitlistAccessPopup();
+        activeTab = 'HOME'
+      "
+    >
+      Go to Home
     </button>
+
   </div>
+
 </div>
 
-<div class="access-backdrop" *ngIf="showCancelledPopup">
-  <div class="access-popup cancelled-popup">
-    <button class="access-close" type="button" (click)="closeCancelledPopup()">
+<!-- EMAIL LOGIN POPUP -->
+<div
+  class="access-backdrop"
+  *ngIf="showAccountLoginPopup"
+  (click)="closeAccountLoginPopup()"
+>
+
+  <div
+    class="account-login-popup"
+    (click)="$event.stopPropagation()"
+  >
+
+    <button
+      class="access-close"
+      type="button"
+      (click)="closeAccountLoginPopup()"
+    >
+      ✕
+    </button>
+
+    <app-guest-account-login
+      (loginSuccess)="onAccountLoginSuccess($event)"
+      (cancel)="closeAccountLoginPopup()"
+    >
+    </app-guest-account-login>
+
+  </div>
+
+</div>
+
+<!-- CANCELLED POPUP -->
+<div
+  class="access-backdrop"
+  *ngIf="showCancelledPopup"
+  (click)="closeCancelledPopup()"
+>
+
+  <div
+    class="access-popup cancelled-popup"
+    (click)="$event.stopPropagation()"
+  >
+
+    <button
+      class="access-close"
+      type="button"
+      (click)="closeCancelledPopup()"
+    >
       ✕
     </button>
 
@@ -70,12 +199,22 @@
     <h2>Your waitlist was cancelled</h2>
 
     <p>
-      Your previous waitlist request has been cancelled.
-      Please join the waitlist again to continue.
+      Your previous waitlist request was
+      cancelled. Join the waitlist again
+      from the Home page.
     </p>
 
-    <button type="button" class="access-btn" (click)="closeCancelledPopup()">
-      Join Again
+    <button
+      type="button"
+      class="access-btn"
+      (click)="
+        closeCancelledPopup();
+        activeTab = 'HOME'
+      "
+    >
+      Join again
     </button>
+
   </div>
+
 </div>

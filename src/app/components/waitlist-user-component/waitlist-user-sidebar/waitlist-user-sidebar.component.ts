@@ -1,6 +1,7 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { Restaurant } from 'src/app/models/waitlist-api-guest-to-restaurant.model';
 import { WaitlistApiRestaurantService } from 'src/app/services/waitlist-api-restaurant.service';
+import { GuestAccount, GuestPortalTab } from '../waitlist-user-component.component';
 
 @Component({
   selector: 'app-waitlist-user-sidebar',
@@ -9,19 +10,84 @@ import { WaitlistApiRestaurantService } from 'src/app/services/waitlist-api-rest
 })
 export class WaitlistUserSidebarComponent implements OnInit {
 
-  @Input() activeTab: 'WAITLIST' | 'MENU' | 'DISCOUNT' = 'WAITLIST';
-  @Input() isLoggedGuest = false;
-  @Output() tabChange = new EventEmitter<'WAITLIST' | 'MENU' | 'DISCOUNT'>();
+   @Input()
+
+  activeTab: GuestPortalTab = 'HOME';
+
+  @Input()
+
+  hasWaitlistAccess = false;
+
+  @Input()
+
+  hasAccountAccess = false;
+
+  @Input()
+
+  customerAccount:
+
+    GuestAccount | null = null;
+
+  @Output()
+
+  tabChange =
+
+    new EventEmitter<GuestPortalTab>();
+
+  @Output()
+
+  accountLogin =
+
+    new EventEmitter<void>();
+
+  @Output()
+
+  accountLogout =
+
+    new EventEmitter<void>();
+
+  selectTab(
+
+    tab: GuestPortalTab
+
+  ): void {
+
+    this.tabChange.emit(tab);
+
+  }
+
+  loginWithEmail(): void {
+
+    this.accountLogin.emit();
+
+  }
+
+  logoutAccount(): void {
+
+    this.accountLogout.emit();
+
+  }
+
+  getInitial(): string {
+
+    return (
+
+      this.customerAccount?.name
+
+        ?.charAt(0)
+
+        ?.toUpperCase() || 'G'
+
+    );
+
+  }
+
   restaurant?: Restaurant;
   restaurantId = 1;
-
-  selectTab(tab: 'WAITLIST' | 'MENU' | 'DISCOUNT'): void {
-    this.tabChange.emit(tab);
-  }
   constructor(private waitlistApi: WaitlistApiRestaurantService) { }
 
   ngOnInit(): void {
-    this.restaurantId = Number(localStorage.getItem('waitlistRestaurantId')) ;
+    this.restaurantId = Number(localStorage.getItem('waitlistRestaurantId')) || 1;
     this.loadRestaurantDetails();
   }
   

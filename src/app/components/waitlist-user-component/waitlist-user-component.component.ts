@@ -1,4 +1,12 @@
-import { Component, OnInit } from '@angular/core';
+import {
+  Component,
+  OnInit
+} from '@angular/core';
+
+import {
+  GuestAccount,
+  GuestPortalTab
+} from 'src/app/models/guest-portal.model';
 
 @Component({
   selector: 'app-waitlist-user-component',
@@ -8,199 +16,316 @@ import { Component, OnInit } from '@angular/core';
 export class WaitlistUserComponentComponent implements OnInit {
 
   isDarkMode = false;
-  activeTab: 'WAITLIST' | 'MENU' | 'DISCOUNT' = 'WAITLIST';
 
-  guest: any = null;
-  isLoggedGuest = false;
+  activeTab: GuestPortalTab = 'HOME';
 
-  showAccessPopup = false;
-  showCancelledPopup = false;
+  waitlistGuest: any = null;
+
+  customerAccount: GuestAccount | null = null;
 
   cancelledGuest: any = null;
+
   restoreRequestSent = false;
 
+  showWaitlistAccessPopup = false;
+
+  showAccountLoginPopup = false;
+
+  showCancelledPopup = false;
+
+  private requestedAccountTab: GuestPortalTab | null = null;
+
   ngOnInit(): void {
-    const savedTheme = localStorage.getItem('dinerly-theme');
-    this.isDarkMode = savedTheme === 'dark';
-
-    document.body.classList.toggle('dark-mode', this.isDarkMode);
-
-    this.loadGuest();
+    this.loadTheme();
+    this.loadWaitlistGuest();
+    this.loadCustomerAccount();
   }
 
-  // loadGuest(): void {
-  //   const guestData = localStorage.getItem('waitlistGuest');
+  get hasWaitlistAccess(): boolean {
+    return !!this.waitlistGuest;
+  }
 
-  //   if (guestData) {
-  //     const parsedGuest = JSON.parse(guestData);
+  get hasAccountAccess(): boolean {
+    return !!this.customerAccount;
+  }
 
-  //     if (parsedGuest?.status === 'CANCELLED') {
-  //       this.showCancelledPopup = true;
+  private loadTheme(): void {
+    const savedTheme =
+      localStorage.getItem('dinerly-theme');
 
-  //       this.guest = null;
-  //       this.isLoggedGuest = false;
-  //       this.activeTab = 'WAITLIST';
+    this.isDarkMode =
+      savedTheme === 'dark';
 
-  //       localStorage.removeItem('waitlistGuest');
-  //       localStorage.removeItem('waitlistRestaurantId');
-  //       return;
-  //     }
+    document.body.classList.toggle(
+      'dark-mode',
+      this.isDarkMode
+    );
+  }
 
-  //     this.guest = parsedGuest;
-  //     this.isLoggedGuest = true;
-  //   } else {
-  //     this.guest = null;
-  //     this.isLoggedGuest = false;
-  //   }
-  // }
-
-  loadGuest(): void {
-    const guestData = localStorage.getItem('waitlistGuest');
+  loadWaitlistGuest(): void {
+    const guestData =
+      localStorage.getItem('waitlistGuest');
 
     if (!guestData) {
-      this.guest = null;
+      this.waitlistGuest = null;
       this.cancelledGuest = null;
-      this.isLoggedGuest = false;
       return;
     }
 
     try {
-      const parsedGuest = JSON.parse(guestData);
-      if (parsedGuest?.status === 'CANCELLED') {
-        this.showAccessPopup = true;
-      }
+      const parsedGuest =
+        JSON.parse(guestData);
 
       if (
         parsedGuest?.status === 'CANCELLED' ||
         parsedGuest?.status === 'RESTORE_REQUESTED'
       ) {
-        this.guest = null;
-        this.cancelledGuest = parsedGuest;
-        this.isLoggedGuest = false;
-        this.activeTab = 'WAITLIST';
+        this.waitlistGuest = null;
+
+        this.cancelledGuest =
+          parsedGuest;
 
         this.restoreRequestSent =
-          parsedGuest.status === 'RESTORE_REQUESTED';
+          parsedGuest.status ===
+          'RESTORE_REQUESTED';
 
         return;
       }
 
-      this.guest = parsedGuest;
-      this.cancelledGuest = null;
-      this.restoreRequestSent = false;
-      this.isLoggedGuest = true;
-    } catch {
-      localStorage.removeItem('waitlistGuest');
-      localStorage.removeItem('waitlistRestaurantId');
+      this.waitlistGuest =
+        parsedGuest;
 
-      this.guest = null;
       this.cancelledGuest = null;
-      this.isLoggedGuest = false;
+
+      this.restoreRequestSent = false;
+    } catch {
+      this.clearWaitlistStorage();
+
+      this.waitlistGuest = null;
+      this.cancelledGuest = null;
     }
   }
 
-  changeTab(tab: 'WAITLIST' | 'MENU' | 'DISCOUNT'): void {
-    if (!this.isLoggedGuest) {
-      this.showAccessPopup = true;
+  loadCustomerAccount(): void {
+    const accountData =
+      localStorage.getItem(
+        'dinerlyCustomerAccount'
+      );
+
+    if (!accountData) {
+      this.customerAccount = null;
       return;
     }
 
-    this.activeTab = tab;
+    try {
+      this.customerAccount =
+        JSON.parse(accountData);
+    } catch {
+      localStorage.removeItem(
+        'dinerlyCustomerAccount'
+      );
+
+      localStorage.removeItem(
+        'dinerlyCustomerToken'
+      );
+
+      this.customerAccount = null;
+    }
   }
 
-  // onGuestJoined(guest: any): void {
-  //   if (guest?.status === 'CANCELLED') {
-  //     this.showCancelledPopup = true;
-  //     this.logoutGuest();
-  //     return;
-  //   }
+  changeTab(tab: GuestPortalTab): void {
+    if (tab === 'HOME') {
+      this.activeTab = 'HOME';
+      return;
+    }
 
-  //   this.guest = guest;
-  //   this.isLoggedGuest = true;
-  //   this.activeTab = 'WAITLIST';
-  // }
+    if (tab === 'WAITLIST') {
+      if (!this.hasWaitlistAccess) {
+        this.showWaitlistAccessPopup = true;
+        return;
+      }
 
+      this.activeTab = 'WAITLIST';
+      return;
+    }
+
+    if (this.isEmailProtectedTab(tab)) {
+      if (!this.hasAccountAccess) {
+        this.requestedAccountTab = tab;
+        this.showAccountLoginPopup = true;
+        return;
+      }
+
+      this.activeTab = tab;
+    }
+  }
+
+  private isEmailProtectedTab(
+    tab: GuestPortalTab
+  ): boolean {
+    return (
+      tab === 'MENU' ||
+      tab === 'OFFERS' ||
+      tab === 'REWARDS'
+    );
+  }
 
   onGuestJoined(guest: any): void {
-
-    if (guest?.status === 'CANCELLED') {
-      this.showAccessPopup = true;
+    if (!guest) {
+      return;
     }
 
     if (
-      guest?.status === 'CANCELLED' ||
-      guest?.status === 'RESTORE_REQUESTED'
+      guest.status === 'CANCELLED' ||
+      guest.status === 'RESTORE_REQUESTED'
     ) {
-      this.cancelledGuest = guest;
-      this.restoreRequestSent =
-        guest.status === 'RESTORE_REQUESTED';
+      this.waitlistGuest = null;
 
-      this.guest = null;
-      this.isLoggedGuest = false;
+      this.cancelledGuest = guest;
+
+      this.restoreRequestSent =
+        guest.status ===
+        'RESTORE_REQUESTED';
+
+      this.showCancelledPopup =
+        guest.status === 'CANCELLED';
+
       return;
     }
 
-    this.guest = guest;
+    this.waitlistGuest = guest;
+
     this.cancelledGuest = null;
+
     this.restoreRequestSent = false;
-    this.isLoggedGuest = true;
+
+    localStorage.setItem(
+      'waitlistGuest',
+      JSON.stringify(guest)
+    );
+
     this.activeTab = 'WAITLIST';
   }
 
-  // logoutGuest(): void {
-  //   localStorage.removeItem('waitlistGuest');
-  //   localStorage.removeItem('waitlistRestaurantId');
+  onAccountLoginSuccess(
+    account: GuestAccount
+  ): void {
+    this.customerAccount = account;
 
-  //   this.guest = null;
-  //   this.isLoggedGuest = false;
-  //   this.activeTab = 'WAITLIST';
-  // }
+    localStorage.setItem(
+      'dinerlyCustomerAccount',
+      JSON.stringify(account)
+    );
 
-  logoutGuest(): void {
-    localStorage.removeItem('waitlistGuest');
-    localStorage.removeItem('waitlistRestaurantId');
+    if (account.token) {
+      localStorage.setItem(
+        'dinerlyCustomerToken',
+        account.token
+      );
+    }
 
-    this.guest = null;
+    this.showAccountLoginPopup = false;
+
+    if (
+      this.requestedAccountTab &&
+      this.isEmailProtectedTab(
+        this.requestedAccountTab
+      )
+    ) {
+      this.activeTab =
+        this.requestedAccountTab;
+    } else {
+      this.activeTab = 'HOME';
+    }
+
+    this.requestedAccountTab = null;
+  }
+
+  logoutWaitlistGuest(): void {
+    this.clearWaitlistStorage();
+
+    this.waitlistGuest = null;
     this.cancelledGuest = null;
     this.restoreRequestSent = false;
-    this.isLoggedGuest = false;
-    this.activeTab = 'WAITLIST';
+
+    if (this.activeTab === 'WAITLIST') {
+      this.activeTab = 'HOME';
+    }
+  }
+
+  logoutCustomerAccount(): void {
+    localStorage.removeItem(
+      'dinerlyCustomerAccount'
+    );
+
+    localStorage.removeItem(
+      'dinerlyCustomerToken'
+    );
+
+    this.customerAccount = null;
+
+    if (
+      this.activeTab === 'MENU' ||
+      this.activeTab === 'OFFERS' ||
+      this.activeTab === 'REWARDS'
+    ) {
+      this.activeTab = 'HOME';
+    }
+  }
+
+  private clearWaitlistStorage(): void {
+    localStorage.removeItem(
+      'waitlistGuest'
+    );
+
+    localStorage.removeItem(
+      'waitlistRestaurantId'
+    );
+  }
+
+  openAccountLoginPopup(
+    requestedTab?: GuestPortalTab
+  ): void {
+    if (requestedTab) {
+      this.requestedAccountTab =
+        requestedTab;
+    }
+
+    this.showAccountLoginPopup = true;
+  }
+
+  closeAccountLoginPopup(): void {
+    this.showAccountLoginPopup = false;
+    this.requestedAccountTab = null;
+  }
+
+  closeWaitlistAccessPopup(): void {
+    this.showWaitlistAccessPopup = false;
   }
 
   closeCancelledPopup(): void {
     this.showCancelledPopup = false;
   }
 
-  closeAccessPopup(): void {
-    this.showAccessPopup = false;
-  }
+  onLeaveSuccess(
+    cancelledGuest: any
+  ): void {
+    this.waitlistGuest = null;
 
-  toggleTheme(): void {
-    this.isDarkMode = !this.isDarkMode;
+    this.cancelledGuest =
+      cancelledGuest;
 
-    localStorage.setItem(
-      'dinerly-theme',
-      this.isDarkMode ? 'dark' : 'light'
-    );
-
-    document.body.classList.toggle('dark-mode', this.isDarkMode);
-  }
-
-  onLeaveSuccess(cancelledGuest: any): void {
-    this.guest = null;
-    this.cancelledGuest = cancelledGuest;
-    this.isLoggedGuest = false;
     this.restoreRequestSent = false;
-    this.activeTab = 'WAITLIST';
+
+    this.activeTab = 'HOME';
   }
 
-  // onLeaveSuccess(): void {
-  //   this.logoutGuest();
-  // }
+  onRestoreRequested(
+    restoredGuest: any
+  ): void {
+    this.cancelledGuest =
+      restoredGuest;
 
-
-  onRestoreRequested(restoredGuest: any): void {
-    this.cancelledGuest = restoredGuest;
     this.restoreRequestSent = true;
 
     localStorage.setItem(
@@ -208,4 +333,23 @@ export class WaitlistUserComponentComponent implements OnInit {
       JSON.stringify(restoredGuest)
     );
   }
+
+  toggleTheme(): void {
+    this.isDarkMode =
+      !this.isDarkMode;
+
+    localStorage.setItem(
+      'dinerly-theme',
+      this.isDarkMode
+        ? 'dark'
+        : 'light'
+    );
+
+    document.body.classList.toggle(
+      'dark-mode',
+      this.isDarkMode
+    );
+  }
 }
+
+export { GuestAccount, GuestPortalTab };

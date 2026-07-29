@@ -1,4 +1,5 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { GuestAccount } from 'src/app/models/guest-portal.model';
 import { Restaurant } from 'src/app/models/waitlist-api-guest-to-restaurant.model';
 import { WaitlistApiRestaurantService } from 'src/app/services/waitlist-api-restaurant.service';
 
@@ -15,6 +16,14 @@ export class WaitlistUserHeroComponent implements OnInit {
   @Input() guest: any;
   restaurant?: Restaurant;
   @Output() logout = new EventEmitter<void>();
+  @Input()
+    customerAccount: GuestAccount | null = null;
+  
+    @Input()
+    hasWaitlistAccess = false;
+  
+    @Input()
+    hasAccountAccess = false;
 
   showProfileMenu = false;
 

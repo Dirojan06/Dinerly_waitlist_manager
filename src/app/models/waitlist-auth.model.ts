@@ -1,25 +1,44 @@
 export type UserRole = 'guest' | 'restaurant' | 'admin';
 
-export interface LoginRequest {
-  username: string;
-  password: string;
-  role: UserRole;
+export interface AuthUser {
+  id: number;
+
+  name?: string;
+
+  username?: string;
+
+  email: string;
+
+  phone?: string;
+
+  role?: string;
+
+  restaurantId?: number;
 }
 
-export interface AuthUser {
-  id: string;
-  email: string;
-  username: string;
-  fullName: string;
-  phone: string;
-  role: UserRole;
+
+export interface AuthData {
+  token: string;
+
+  user: AuthUser;
 }
+
 
 export interface LoginResponse {
   success: boolean;
-  message: string;
-  data: {
-    token: string;
-    user: AuthUser;
-  };
+
+  message?: string;
+
+  data: AuthData;
+}
+
+
+export interface RegisterRequest {
+  name: string;
+
+  email: string;
+
+  phone: string;
+
+  password: string;
 }

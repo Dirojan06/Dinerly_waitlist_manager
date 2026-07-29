@@ -14,38 +14,166 @@
   <p class="section-label">YOUR VISIT</p>
 
   <nav class="side-nav">
-    <button [class.active]="activeTab === 'WAITLIST'" (click)="selectTab('WAITLIST')">
+
+    <!-- HOME: PUBLIC -->
+
+    <button type="button" [class.active]="activeTab === 'HOME'" (click)="selectTab('HOME')">
+
+      <i class="fa-solid fa-house"></i>
+
+      <span>Home</span>
+
+    </button>
+
+    <!-- WAITLIST: PHONE ACCESS -->
+
+    <button type="button" [class.active]="
+
+        activeTab === 'WAITLIST'
+
+      " [class.locked]="
+
+        !hasWaitlistAccess
+
+      " (click)="selectTab('WAITLIST')">
+
       <i class="fa-regular fa-clock"></i>
-      Waitlist
+
+      <span>Waitlist</span>
+
+      <i class="fa-solid fa-lock nav-lock" *ngIf="!hasWaitlistAccess"></i>
+
     </button>
 
-    <button [class.active]="activeTab === 'MENU'" (click)="selectTab('MENU')">
-      <i class="fa-solid fa-utensils"></i>
-      Menu
-    </button>
+    <!-- OFFERS: EMAIL LOGIN -->
 
-    <button [class.active]="activeTab === 'DISCOUNT'" (click)="selectTab('DISCOUNT')">
+    <button type="button" [class.active]="
+
+        activeTab === 'OFFERS'
+
+      " [class.locked]="
+
+        !hasAccountAccess
+
+      " (click)="selectTab('OFFERS')">
+
       <i class="fa-solid fa-tag"></i>
-      Discounts
+
+      <span>Offers</span>
+
+      <i class="fa-solid fa-lock nav-lock" *ngIf="!hasAccountAccess"></i>
+
     </button>
 
-    <!-- <button>
-      <i class="fa-regular fa-square-check"></i>
-      Orders
+    <!-- MENU: EMAIL LOGIN -->
+
+    <button type="button" [class.active]="activeTab === 'MENU'" [class.locked]="
+
+        !hasAccountAccess
+
+      " (click)="selectTab('MENU')">
+
+      <i class="fa-solid fa-utensils"></i>
+
+      <span>Food</span>
+
+      <i class="fa-solid fa-lock nav-lock" *ngIf="!hasAccountAccess"></i>
+
     </button>
 
-    <button>
-      <i class="fa-regular fa-award"></i>
-      Rewards
-      <span>🔒</span>
+    <!-- REWARDS: EMAIL LOGIN -->
+
+    <button type="button" [class.active]="
+
+        activeTab === 'REWARDS'
+
+      " [class.locked]="
+
+        !hasAccountAccess
+
+      " (click)="selectTab('REWARDS')">
+
+      <i class="fa-solid fa-gift"></i>
+
+      <span>Rewards</span>
+
+      <i class="fa-solid fa-lock nav-lock" *ngIf="!hasAccountAccess"></i>
+
     </button>
 
-    <button>
-      <i class="fa-regular fa-star"></i>
-      Reviews
-      <span>🔒</span>
-    </button> -->
   </nav>
+
+  <div class="sidebar-spacer"></div>
+
+  <!-- NOT LOGGED IN WITH EMAIL -->
+
+  <div class="sidebar-login-card" *ngIf="!hasAccountAccess">
+
+    <div class="login-card-icon">
+
+      <i class="fa-regular fa-user"></i>
+
+    </div>
+
+    <div>
+
+      <strong>Unlock rewards</strong>
+
+      <p>
+
+        Login with email for offers,
+
+        rewards and food.
+
+      </p>
+
+    </div>
+
+    <button type="button" (click)="loginWithEmail()">
+
+      Login
+
+    </button>
+
+  </div>
+
+  <div class="sidebar-profile" *ngIf="
+
+      hasAccountAccess &&
+
+      customerAccount
+
+    ">
+
+    <div class="profile-avatar">
+
+      {{ getInitial() }}
+
+    </div>
+
+    <div class="profile-info">
+
+      <strong>
+
+        {{ customerAccount.name }}
+
+      </strong>
+
+      <p>
+
+        {{ customerAccount.email }}
+
+      </p>
+
+    </div>
+
+    <button type="button" class="profile-logout" title="Logout" (click)="logoutAccount()">
+
+      <i class="fa-solid fa-arrow-right-from-bracket"></i>
+
+    </button>
+
+  </div>
 
   <div class="sidebar-footer" *ngIf="restaurant">
     <p>

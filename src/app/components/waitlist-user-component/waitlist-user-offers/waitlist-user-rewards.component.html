@@ -1,0 +1,80 @@
+<section class="rewards-page">
+
+  <div class="rewards-hero">
+
+    <div>
+      <p>DINERLY REWARDS</p>
+
+      <h1>
+        Earn points every time you dine
+      </h1>
+
+      <span>
+        Redeem points for dining credits,
+        free food and exclusive benefits.
+      </span>
+    </div>
+
+    <div class="points-card">
+      <small>Your points</small>
+
+      <strong>
+        {{ currentPoints }}
+      </strong>
+
+      <span>Dinerly points</span>
+    </div>
+
+  </div>
+
+  <h2>Available rewards</h2>
+
+  <div class="rewards-grid">
+
+    <article
+      class="reward-card"
+      *ngFor="let reward of rewards"
+    >
+
+      <div class="reward-icon">
+        <i [ngClass]="reward.icon"></i>
+      </div>
+
+      <h3>
+        {{ reward.title }}
+      </h3>
+
+      <p>
+        {{ reward.description }}
+      </p>
+
+      <div class="reward-footer">
+
+        <strong>
+          {{ reward.pointsRequired }}
+          points
+        </strong>
+
+        <button
+          type="button"
+          [disabled]="
+            currentPoints <
+            reward.pointsRequired
+          "
+          (click)="redeemReward(reward)"
+        >
+          {{
+            currentPoints >=
+            reward.pointsRequired
+              ? 'Redeem'
+              : 'Locked'
+          }}
+        </button>
+
+      </div>
+
+    </article>
+
+  </div>
+
+</section>

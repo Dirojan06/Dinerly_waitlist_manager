@@ -156,12 +156,10 @@ textarea {
   gap: 20px;
 
   background:
-    linear-gradient(
-      100deg,
+    linear-gradient(100deg,
       #862be5 0%,
       #570ac4 75%,
-      #4a08ad 100%
-    );
+      #4a08ad 100%);
 
   color: #ffffff;
 
@@ -186,7 +184,7 @@ textarea {
   font-size: 16px;
 }
 
-.request-main > div:last-child {
+.request-main>div:last-child {
   display: flex;
   flex-direction: column;
 }
@@ -244,7 +242,7 @@ textarea {
   padding: 0 0 28px;
 }
 
-.settings-section + .settings-section {
+.settings-section+.settings-section {
   margin-top: 10px;
   padding-top: 28px;
   border-top: 1px solid #eee9f3;
@@ -288,7 +286,7 @@ textarea {
   font-weight: 750;
 }
 
-.setting-value-row > span {
+.setting-value-row>span {
   color: #756e7e;
   font-size: 13px;
   text-align: right;
@@ -300,7 +298,7 @@ textarea {
   gap: 10px;
 }
 
-.plan-value > span:first-child {
+.plan-value>span:first-child {
   color: #756e7e;
   font-size: 13px;
 }
@@ -380,11 +378,9 @@ textarea {
 }
 
 .notification-progress {
-  background: linear-gradient(
-    90deg,
-    #c84cf1,
-    #d59be9
-  );
+  background: linear-gradient(90deg,
+      #c84cf1,
+      #d59be9);
 }
 
 .marketing-progress {
@@ -416,7 +412,7 @@ textarea {
   border-bottom: 1px solid #ede8f2;
 }
 
-.toggle-setting-row > div {
+.toggle-setting-row>div {
   max-width: 650px;
 }
 
@@ -474,11 +470,11 @@ textarea {
   transition: transform 0.2s ease;
 }
 
-.switch input:checked + span {
+.switch input:checked+span {
   background: #5b10c6;
 }
 
-.switch input:checked + span::before {
+.switch input:checked+span::before {
   transform: translateX(18px);
 }
 
@@ -557,11 +553,9 @@ textarea {
   padding: 14px 18px;
   border-radius: 8px 18px 18px 18px;
 
-  background: linear-gradient(
-    135deg,
-    #6c1bd2,
-    #4d06b5
-  );
+  background: linear-gradient(135deg,
+      #6c1bd2,
+      #4d06b5);
 
   color: #ffffff;
   font-size: 12px;
@@ -785,7 +779,7 @@ textarea {
    ADVANCED
 ========================= */
 
-.advanced-value-row > div:first-child {
+.advanced-value-row>div:first-child {
   max-width: 620px;
 }
 
@@ -813,7 +807,7 @@ textarea {
   gap: 16px;
 }
 
-.time-zone-value > span {
+.time-zone-value>span {
   color: #756e7e;
   font-size: 12px;
 }
@@ -915,6 +909,187 @@ textarea {
   }
 }
 
+.save-message {
+  display: block;
+  margin-top: 14px;
+  color: #667085;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.compact-input {
+  width: min(320px, 100%);
+  padding: 10px 12px;
+  border: 1px solid #d0d5dd;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #101828;
+  outline: none;
+}
+
+.compact-input:focus {
+  border-color: #7f56d9;
+  box-shadow: 0 0 0 3px rgba(127, 86, 217, 0.12);
+}
+
+.holiday-form-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: rgba(15, 23, 42, 0.55);
+}
+
+.holiday-form-modal {
+  width: min(620px, 100%);
+  max-height: calc(100vh - 40px);
+  overflow-y: auto;
+  padding: 24px;
+  border-radius: 18px;
+  background: #ffffff;
+  box-shadow:
+    0 24px 48px rgba(15, 23, 42, 0.2);
+}
+
+.holiday-modal-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20px;
+  margin-bottom: 24px;
+}
+
+.holiday-modal-header h3 {
+  margin: 0 0 6px;
+  color: #101828;
+  font-size: 21px;
+}
+
+.holiday-modal-header p {
+  margin: 0;
+  color: #667085;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.holiday-close-btn {
+  width: 36px;
+  height: 36px;
+  flex-shrink: 0;
+  border: 0;
+  border-radius: 50%;
+  background: #f2f4f7;
+  color: #344054;
+  font-size: 24px;
+  cursor: pointer;
+}
+
+.holiday-form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.holiday-field {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.holiday-field.full-width,
+.holiday-closed-row {
+  grid-column: 1 / -1;
+}
+
+.holiday-field label {
+  color: #344054;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.holiday-field input,
+.holiday-field textarea {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 11px 12px;
+  border: 1px solid #d0d5dd;
+  border-radius: 9px;
+  background: #ffffff;
+  color: #101828;
+  font: inherit;
+  outline: none;
+}
+
+.holiday-field textarea {
+  resize: vertical;
+}
+
+.holiday-field input:focus,
+.holiday-field textarea:focus {
+  border-color: #7f56d9;
+  box-shadow: 0 0 0 3px rgba(127, 86, 217, 0.12);
+}
+
+.holiday-modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 24px;
+}
+
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.restaurant-dark-mode .holiday-form-modal {
+  background: #171717;
+}
+
+.restaurant-dark-mode .holiday-modal-header h3,
+.restaurant-dark-mode .holiday-field label {
+  color: #f9fafb;
+}
+
+.restaurant-dark-mode .holiday-modal-header p,
+.restaurant-dark-mode .save-message {
+  color: #9ca3af;
+}
+
+.restaurant-dark-mode .holiday-field input,
+.restaurant-dark-mode .holiday-field textarea,
+.restaurant-dark-mode .compact-input {
+  border-color: #374151;
+  background: #111827;
+  color: #f9fafb;
+}
+
+@media (max-width: 600px) {
+  .holiday-form-modal {
+    padding: 18px;
+  }
+
+  .holiday-form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .holiday-field.full-width,
+  .holiday-closed-row {
+    grid-column: auto;
+  }
+
+  .holiday-modal-actions {
+    flex-direction: column-reverse;
+  }
+
+  .holiday-modal-actions button {
+    width: 100%;
+  }
+}
+
 /* =========================
    SMALL TABLET
 ========================= */
@@ -936,6 +1111,35 @@ textarea {
   .template-control-row {
     grid-template-columns: 50px minmax(0, 1fr) auto;
   }
+}
+
+.settings-error {
+  margin: 0 0 16px;
+  padding: 12px 16px;
+  border: 1px solid #fecaca;
+  border-radius: 10px;
+  background: #fef2f2;
+  color: #b91c1c;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.status-pill.enabled {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.empty-message {
+  margin: 16px 0;
+  color: #6b7280;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.restaurant-dark-mode .settings-error {
+  border-color: #7f1d1d;
+  background: #450a0a;
+  color: #fecaca;
 }
 
 /* =========================
@@ -1019,7 +1223,7 @@ textarea {
     gap: 8px;
   }
 
-  .setting-value-row > span {
+  .setting-value-row>span {
     text-align: left;
   }
 

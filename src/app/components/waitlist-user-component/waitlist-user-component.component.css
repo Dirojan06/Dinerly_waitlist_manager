@@ -129,3 +129,295 @@
     transform: scale(1) translateY(0);
   }
 }
+
+.account-benefits-banner {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 16px;
+
+  margin-top: 20px;
+  padding: 20px;
+
+  border: 1px solid #ded3fb;
+  border-radius: 18px;
+
+  background:
+    linear-gradient(
+      115deg,
+      #f8f4ff,
+      #ffffff
+    );
+
+  box-shadow:
+    0 12px 34px
+    rgba(73, 42, 130, 0.08);
+}
+
+.benefit-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 52px;
+  height: 52px;
+
+  border-radius: 14px;
+
+  color: #ffffff;
+  background:
+    linear-gradient(
+      135deg,
+      #8c65e7,
+      #54239e
+    );
+
+  font-size: 21px;
+}
+
+.benefit-content h3 {
+  margin: 0 0 5px;
+
+  color: #271b38;
+  font-size: 17px;
+}
+
+.benefit-content p {
+  margin: 0;
+
+  color: #7b7285;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.account-benefits-banner > button {
+  min-height: 42px;
+  padding: 0 17px;
+
+  border: 0;
+  border-radius: 10px;
+
+  color: #ffffff;
+  background: #5b239f;
+
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.account-benefits-banner > button:hover {
+  background: #481781;
+}
+
+.access-backdrop {
+  position: fixed;
+  z-index: 3000;
+  inset: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 20px;
+
+  background: rgba(18, 10, 31, 0.58);
+  backdrop-filter: blur(5px);
+}
+
+.account-login-popup {
+  position: relative;
+
+  width: min(100%, 450px);
+  max-height: calc(100vh - 40px);
+
+  overflow-y: auto;
+
+  border-radius: 24px;
+  background: #ffffff;
+
+  box-shadow:
+    0 30px 90px
+    rgba(25, 12, 46, 0.35);
+
+  animation:
+    account-popup-in 0.25s ease;
+}
+
+.side-nav button {
+  position: relative;
+}
+
+.side-nav button.locked {
+  color: #8b8495;
+}
+
+.nav-lock {
+  margin-left: auto;
+
+  color: #a89cb6;
+  font-size: 10px;
+}
+
+.sidebar-spacer {
+  flex: 1;
+}
+
+.sidebar-login-card {
+  margin: 14px;
+  padding: 14px;
+
+  border: 1px solid #ded3f5;
+  border-radius: 14px;
+
+  background:
+    linear-gradient(
+      145deg,
+      #f8f3ff,
+      #ffffff
+    );
+}
+
+.login-card-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 36px;
+  height: 36px;
+  margin-bottom: 9px;
+
+  border-radius: 10px;
+
+  color: #ffffff;
+  background: #6c38bb;
+}
+
+.sidebar-login-card strong {
+  color: #332541;
+  font-size: 13px;
+}
+
+.sidebar-login-card p {
+  margin: 5px 0 11px;
+
+  color: #82768c;
+  font-size: 11px;
+  line-height: 1.4;
+}
+
+.sidebar-login-card button {
+  width: 100%;
+  min-height: 34px;
+
+  border: 0;
+  border-radius: 8px;
+
+  color: #ffffff;
+  background: #5d249f;
+
+  font-size: 12px;
+  font-weight: 700;
+
+  cursor: pointer;
+}
+
+.sidebar-profile {
+  display: grid;
+  grid-template-columns:
+    auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+
+  margin: 14px;
+  padding: 11px;
+
+  border: 1px solid #e5deee;
+  border-radius: 12px;
+
+  background: #faf8fc;
+}
+
+.profile-avatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 35px;
+  height: 35px;
+
+  border-radius: 50%;
+
+  color: #ffffff;
+  background: #6d3aba;
+
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.profile-info {
+  min-width: 0;
+}
+
+.profile-info strong,
+.profile-info p {
+  display: block;
+  overflow: hidden;
+
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.profile-info strong {
+  color: #342940;
+  font-size: 12px;
+}
+
+.profile-info p {
+  margin: 3px 0 0;
+
+  color: #8b8196;
+  font-size: 10px;
+}
+
+.profile-logout {
+  border: 0;
+
+  color: #83768e;
+  background: transparent;
+
+  cursor: pointer;
+}
+
+.account-login-popup .access-close {
+  position: absolute;
+  z-index: 2;
+  top: 16px;
+  right: 16px;
+}
+
+@keyframes account-popup-in {
+  from {
+    opacity: 0;
+    transform:
+      translateY(15px)
+      scale(0.96);
+  }
+
+  to {
+    opacity: 1;
+    transform:
+      translateY(0)
+      scale(1);
+  }
+}
+
+@media (max-width: 700px) {
+  .account-benefits-banner {
+    grid-template-columns:
+      auto 1fr;
+  }
+
+  .account-benefits-banner > button {
+    grid-column: 1 / -1;
+    width: 100%;
+  }
+}

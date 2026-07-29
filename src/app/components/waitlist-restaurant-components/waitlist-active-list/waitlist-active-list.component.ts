@@ -516,6 +516,11 @@ export class WaitlistActiveListComponent
     this.showRejectReason = true;
   }
 
+  removequeue(guest: PendingGuest){
+    this.selectedGuest = guest;
+    this.rejectSelectedGuest()
+  }
+
   rejectSelectedGuest(): void {
     if (!this.selectedGuest) {
       return;

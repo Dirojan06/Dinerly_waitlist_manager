@@ -1,6 +1,39 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
-import { Subscription, timer } from 'rxjs';
+import {
+  Component,
+  OnDestroy,
+  OnInit
+} from '@angular/core';
+
+import {
+  ActivatedRoute,
+  Router
+} from '@angular/router';
+
+import {
+  Subscription,
+  timer
+} from 'rxjs';
+
+import {
+  AdvancedSettingsResponse,
+  CreateHolidayRequest,
+  GuestNotificationSettings,
+  HolidayHour,
+  MessageTemplateSettings,
+  NotificationSettingsResponse,
+  SettingsPlan,
+  SettingsRestaurant,
+  StaffNotificationSettings,
+  UpdateAdvancedSettingsRequest,
+  UpdateNotificationRequest,
+  UpdateProfileRequest,
+  UpdateWaitlistSettingsRequest,
+  WaitlistSettingsResponse
+} from '../../../models/waitlist-settings.model';
+
+import {
+  SettingService
+} from 'src/app/services/setting.service';
 
 type SettingsTab =
   | 'profile'
@@ -17,13 +50,10 @@ interface StaffMember {
   onFloor: boolean;
 }
 
-interface HolidayHour {
-  id: number;
-  name: string;
-  date: string;
-  closed: boolean;
-  openTime?: string;
-  closeTime?: string;
+interface FloorOverview {
+  sections: number;
+  totalTables: number;
+  totalSeats: number;
 }
 
 @Component({
@@ -34,76 +64,136 @@ interface HolidayHour {
 export class WaitlistSettingsComponent
   implements OnInit, OnDestroy {
 
+  readonly encodeURIComponent = encodeURIComponent;
+  isSavingProfile = false;
+  isSavingNotifications = false;
+  isSavingWaitlist = false;
+  isSavingAdvanced = false;
+  isCreatingHoliday = false;
+
+  profileSaveMessage = '';
+  notificationSaveMessage = '';
+  waitlistSaveMessage = '';
+  advancedSaveMessage = '';
+  holidaySaveMessage = '';
+  private savedRestaurant: SettingsRestaurant | null = null;
+
+  private savedNotificationConfiguration:
+    NotificationSettingsResponse | null = null;
+
+  private savedWaitlistRules:
+    WaitlistSettingsResponse | null = null;
+
+  private savedAdvancedSettings:
+    AdvancedSettingsResponse | null = null;
+
+  private cloneData<T>(value: T): T {
+    return JSON.parse(JSON.stringify(value));
+  }
   activeTab: SettingsTab = 'profile';
 
   currentTimeOnly = '';
 
-  restaurant = {
-    name: 'Brothers Café',
-    address: '123 Market St, Winnipeg',
-    hours: '11:00 AM – 10:00 PM',
-    phone: '(204) 555-0142'
+  restaurantId = '';
+
+  isLoading = false;
+
+  profileError = '';
+  notificationError = '';
+  waitlistError = '';
+  holidayError = '';
+  advancedError = '';
+  showHolidayForm = false;
+
+  newHoliday: CreateHolidayRequest = {
+    date: '',
+    title: '',
+    openTime: '',
+    closeTime: '',
+    notes: '',
+    closed: false
   };
 
-  currentPlan = {
-    name: 'Basic',
-    notificationUsed: 142,
-    notificationLimit: 150,
-    marketingUsed: 31,
-    marketingLimit: 50,
-    overageCharges: '$0.000',
-    renewalDate: 'Aug 10, 2026'
-  };
+  /* =====================================================
+     PROFILE API VALUES
+  ===================================================== */
 
-  guestNotifications = {
-    textWhenReady: true,
-    callWhenReady: true,
-    joinConfirmation: true,
-    reservationConfirmation: true,
-    autoRemoveNoShows: false
-  };
+  restaurant: SettingsRestaurant | null = null;
 
-  staffNotifications = {
-    waitingPastQuotedTime: true,
-    tableOpenTooLong: false
-  };
+  currentPlan: SettingsPlan | null = null;
 
-  textTemplate = 'Friendly';
-  callScript = 'Friendly';
+  /* =====================================================
+     NOTIFICATION API VALUES
+  ===================================================== */
+
+  notificationConfiguration:
+    NotificationSettingsResponse | null = null;
+
+  guestNotifications:
+    GuestNotificationSettings | null = null;
+
+  staffNotifications:
+    StaffNotificationSettings | null = null;
+
+  messageTemplates!:
+    MessageTemplateSettings;
+
+  textTemplate = '';
+  callScript = '';
   selectedVoice = '';
 
-  textTemplates = [
-    'Friendly',
-    'Professional',
-    'Short and simple'
-  ];
-
-  callScripts = [
-    'Friendly',
-    'Professional',
-    'Short and simple'
-  ];
+  textTemplates: string[] = [];
+  callScripts: string[] = [];
 
   voices = [
-    'Female voice',
-    'Male voice',
-    'Natural voice'
+    'female',
+    'male',
+    'natural'
   ];
 
-  waitlistRules = {
-    maxPartySize: 10,
-    responseWindow: 10,
-    walkInsOnly: false,
-    pauseAfterClosing: true,
-    addFromGoogle: true,
-    acceptOnline: true
-  };
+  /* =====================================================
+     WAITLIST API VALUES
+  ===================================================== */
 
-  floorOverview = {
-    sections: 1,
-    totalTables: 12,
-    totalSeats: 48
-  };
+  waitlistRules:
+    WaitlistSettingsResponse | null = null;
+
+  /* =====================================================
+     HOLIDAY API VALUES
+  ===================================================== */
+
+  holidayHours: HolidayHour[] = [];
+
+  /* =====================================================
+     ADVANCED API VALUES
+  ===================================================== */
+
+  advancedSettings!:
+    AdvancedSettingsResponse;
+
+  languages = [
+    {
+      value: 'en',
+      label: 'English'
+    },
+    {
+      value: 'fr',
+      label: 'French'
+    },
+    {
+      value: 'es',
+      label: 'Spanish'
+    }
+  ];
+
+  /* =====================================================
+     TABLE AND STAFF VALUES
+
+     No API response was supplied for these fields.
+     They are kept empty instead of using static data.
+  ===================================================== */
+
+  floorOverview: FloorOverview | null = null;
 
   staffName = '';
   staffRole = 'Server';
@@ -118,43 +208,7 @@ export class WaitlistSettingsComponent
 
   staffList: StaffMember[] = [];
 
-  holidayHours: HolidayHour[] = [
-    {
-      id: 1,
-      name: 'Canada Day',
-      date: 'Jul 1, 2026',
-      closed: true
-    },
-    {
-      id: 2,
-      name: 'Labour Day',
-      date: 'Sep 7, 2026',
-      closed: false,
-      openTime: '11:00 AM',
-      closeTime: '6:00 PM'
-    },
-    {
-      id: 3,
-      name: 'Christmas Day',
-      date: 'Dec 25, 2026',
-      closed: true
-    }
-  ];
-
-  advancedSettings = {
-    darkMode: false,
-    keepSignedIn: true,
-    language: 'English',
-    timeZone: 'Canada/Central (GMT-6:00)'
-  };
-
-  languages = [
-    'English',
-    'French',
-    'Spanish'
-  ];
-
-  guestJoinLink = 'dinerly.app/join/brothers-cafe';
+  guestJoinLink = '';
 
   showPendingRequest = true;
 
@@ -162,10 +216,14 @@ export class WaitlistSettingsComponent
 
   constructor(
     private route: ActivatedRoute,
-    private router: Router
-  ) {}
+    private router: Router,
+    private settingApi: SettingService
+  ) { }
 
   ngOnInit(): void {
+    this.restaurantId =
+      localStorage.getItem('restaurantId') || '1';
+
     this.subscription.add(
       this.route.queryParamMap.subscribe(params => {
         const requestedTab =
@@ -178,18 +236,951 @@ export class WaitlistSettingsComponent
       })
     );
 
-    this.updateCurrentTime();
-
     this.subscription.add(
       timer(0, 30000).subscribe(() => {
         this.updateCurrentTime();
       })
     );
+
+    this.loadAllSettings();
   }
+
+  /* =====================================================
+     LOAD ALL SETTINGS
+  ===================================================== */
+
+  private loadAllSettings(): void {
+    this.getSettingsProfile();
+    this.getSettingsNotifications();
+    this.getWaitlistSettings();
+    this.getHolidaySettings();
+    this.getAdvancedSettings();
+  }
+
+  /* =====================================================
+     PROFILE
+  ===================================================== */
+
+  getSettingsProfile(): void {
+    this.profileError = '';
+
+    const dateParts =
+      this.getWinnipegYearAndMonth();
+
+    this.subscription.add(
+      this.settingApi.settingProfile(
+        this.restaurantId,
+        dateParts.year,
+        dateParts.month
+      ).subscribe({
+        next: response => {
+          if (
+            response?.success &&
+            response?.data?.profile
+          ) {
+            this.restaurant =
+              response.data.profile.restaurant;
+
+            this.currentPlan =
+              response.data.profile.plan;
+
+            this.savedRestaurant =
+              this.cloneData(this.restaurant);
+
+            this.createGuestJoinLink();
+          } else {
+            this.profileError =
+              response?.message ||
+              'Unable to load profile settings.';
+          }
+        },
+        error: error => {
+          console.error(
+            'Profile settings error:',
+            error
+          );
+
+          this.profileError =
+            'Unable to load profile settings.';
+        }
+      })
+    );
+  }
+
+  updateProfileSettings(): void {
+    if (
+      !this.restaurant ||
+      this.isSavingProfile
+    ) {
+      return;
+    }
+
+    const payload: UpdateProfileRequest = {
+      name: this.restaurant.name?.trim() || '',
+      email: this.restaurant.email?.trim() || '',
+      phone: this.restaurant.phone?.trim() || '',
+      address: this.restaurant.address?.trim() || '',
+      hours: {
+        open:
+          this.restaurant.hours?.open?.trim() || '',
+        close:
+          this.restaurant.hours?.close?.trim() || ''
+      }
+    };
+
+    if (
+      !payload.name ||
+      !payload.email ||
+      !payload.phone ||
+      !payload.address ||
+      !payload.hours.open ||
+      !payload.hours.close
+    ) {
+      this.profileSaveMessage =
+        'Please complete all restaurant fields.';
+
+      return;
+    }
+
+    this.isSavingProfile = true;
+    this.profileSaveMessage = '';
+
+    this.settingApi
+      .updateSettingProfile(
+        this.restaurantId,
+        payload
+      )
+      .subscribe({
+        next: response => {
+          this.isSavingProfile = false;
+
+          if (response?.success) {
+            this.savedRestaurant =
+              this.cloneData(this.restaurant);
+
+            this.profileSaveMessage =
+              response.message ||
+              'Profile updated successfully.';
+
+            this.createGuestJoinLink();
+          } else {
+            this.restoreProfileValues();
+
+            this.profileSaveMessage =
+              response?.message ||
+              'Unable to update profile.';
+          }
+        },
+        error: error => {
+          console.error(
+            'Update profile error:',
+            error
+          );
+
+          this.isSavingProfile = false;
+
+          this.restoreProfileValues();
+
+          this.profileSaveMessage =
+            'Unable to update profile.';
+        }
+      });
+  }
+
+  private restoreProfileValues(): void {
+    if (!this.savedRestaurant) {
+      return;
+    }
+
+    this.restaurant =
+      this.cloneData(this.savedRestaurant);
+  }
+
+
+
+
+  /* =====================================================
+     NOTIFICATIONS
+  ===================================================== */
+
+  getSettingsNotifications(): void {
+    this.notificationError = '';
+
+    this.subscription.add(
+      this.settingApi
+        .settingNotification(this.restaurantId)
+        .subscribe({
+          next: response => {
+            if (
+              response?.success &&
+              response?.data?.notificationSettings
+            ) {
+              this.notificationConfiguration =
+                response.data;
+
+              this.guestNotifications =
+                response.data
+                  .notificationSettings
+                  .guestNotifications;
+
+              this.staffNotifications =
+                response.data
+                  .notificationSettings
+                  .staffNotifications;
+
+              this.messageTemplates =
+                response.data
+                  .notificationSettings
+                  .messageTemplates;
+
+              this.savedNotificationConfiguration =
+                this.cloneData(response.data);
+
+              this.mapMessageTemplateValues();
+            } else {
+              this.notificationError =
+                response?.message ||
+                'Unable to load notification settings.';
+            }
+          },
+          error: error => {
+            console.error(
+              'Notification settings error:',
+              error
+            );
+
+            this.notificationError =
+              'Unable to load notification settings.';
+          }
+        })
+    );
+  }
+
+  private mapMessageTemplateValues(): void {
+    if (!this.messageTemplates) {
+      return;
+    }
+
+    this.textTemplate =
+      this.messageTemplates.notifySmsTemplateName;
+
+    this.callScript =
+      this.messageTemplates.voiceTemplateName;
+
+    this.selectedVoice =
+      this.messageTemplates.voice || '';
+
+    this.textTemplates = [
+      this.messageTemplates.smsTemplateName,
+      this.messageTemplates.approveSmsTemplateName,
+      this.messageTemplates.notifySmsTemplateName
+    ].filter(
+      (template, index, templates) =>
+        Boolean(template) &&
+        templates.indexOf(template) === index
+    );
+
+    this.callScripts = [
+      this.messageTemplates.voiceTemplateName
+    ].filter(Boolean);
+  }
+
+
+  updateNotificationSettings(): void {
+    if (
+      !this.notificationConfiguration ||
+      !this.guestNotifications ||
+      !this.staffNotifications ||
+      !this.messageTemplates ||
+      this.isSavingNotifications
+    ) {
+      return;
+    }
+
+    const payload: UpdateNotificationRequest = {
+      sendSmsNotifications:
+        Boolean(
+          this.notificationConfiguration
+            .sendSmsNotifications
+        ),
+
+      sendEmailNotifications:
+        Boolean(
+          this.notificationConfiguration
+            .sendEmailNotifications
+        ),
+
+      nightlySummaryEmail:
+        this.notificationConfiguration
+          .nightlySummaryEmail || '',
+
+      averageServiceTime:
+        Number(
+          this.notificationConfiguration
+            .averageServiceTime
+        ),
+
+      bufferTime:
+        Number(
+          this.notificationConfiguration.bufferTime
+        ),
+
+      operatingHours:
+        this.notificationConfiguration
+          .operatingHours || '',
+
+      maxWaitlistSize:
+        Number(
+          this.notificationConfiguration
+            .maxWaitlistSize
+        ),
+
+      notificationSettings: {
+        guestNotifications: {
+          notifysmsenabled:
+            Boolean(
+              this.guestNotifications
+                .notifysmsenabled
+            ),
+
+          notifycallenabled:
+            Boolean(
+              this.guestNotifications
+                .notifycallenabled
+            ),
+
+          approvesmsenabled:
+            Boolean(
+              this.guestNotifications
+                .approvesmsenabled
+            ),
+
+          joinedwaitlistsmsenabled:
+            Boolean(
+              this.guestNotifications
+                .joinedwaitlistsmsenabled
+            ),
+
+          autoRemoveNoShowEnabled:
+            Boolean(
+              this.guestNotifications
+                .autoRemoveNoShowEnabled
+            ),
+
+          autoRemoveMinutes:
+            Number(
+              this.guestNotifications
+                .autoRemoveMinutes
+            )
+        },
+
+        messageTemplates: {
+          smsTemplateId:
+            Number(
+              this.messageTemplates
+                .smsTemplateId
+            ),
+
+          smsTemplateName:
+            this.messageTemplates
+              .smsTemplateName || '',
+
+          smsTemplatePreview:
+            this.messageTemplates
+              .smsTemplatePreview || '',
+
+          approveSmsTemplateId:
+            Number(
+              this.messageTemplates
+                .approveSmsTemplateId
+            ),
+
+          approveSmsTemplateName:
+            this.messageTemplates
+              .approveSmsTemplateName || '',
+
+          approveSmsTemplatePreview:
+            this.messageTemplates
+              .approveSmsTemplatePreview || '',
+
+          notifySmsTemplateId:
+            Number(
+              this.messageTemplates
+                .notifySmsTemplateId
+            ),
+
+          notifySmsTemplateName:
+            this.messageTemplates
+              .notifySmsTemplateName || '',
+
+          notifySmsTemplatePreview:
+            this.messageTemplates
+              .notifySmsTemplatePreview || '',
+
+          voiceTemplateId:
+            Number(
+              this.messageTemplates
+                .voiceTemplateId
+            ),
+
+          voiceTemplateName:
+            this.messageTemplates
+              .voiceTemplateName || '',
+
+          voiceTemplatePreview:
+            this.messageTemplates
+              .voiceTemplatePreview || '',
+
+          voice:
+            this.selectedVoice ||
+            this.messageTemplates.voice ||
+            ''
+        },
+
+        staffNotifications: {
+          partyWaitingTooLong:
+            Boolean(
+              this.staffNotifications
+                .partyWaitingTooLong
+            ),
+
+          tableOccupiedTooLong:
+            Boolean(
+              this.staffNotifications
+                .tableOccupiedTooLong
+            )
+        }
+      }
+    };
+
+    this.isSavingNotifications = true;
+    this.notificationSaveMessage = '';
+
+    this.settingApi
+      .updateSettingNotification(
+        this.restaurantId,
+        payload
+      )
+      .subscribe({
+        next: response => {
+          this.isSavingNotifications = false;
+
+          if (response?.success) {
+            this.messageTemplates.voice =
+              this.selectedVoice;
+
+            this.savedNotificationConfiguration =
+              this.cloneData({
+                ...this.notificationConfiguration!,
+                notificationSettings: {
+                  guestNotifications:
+                    this.guestNotifications!,
+
+                  messageTemplates:
+                    this.messageTemplates!,
+
+                  staffNotifications:
+                    this.staffNotifications!
+                }
+              });
+
+            this.notificationSaveMessage =
+              response.message ||
+              'Notification settings updated.';
+          } else {
+            this.restoreNotificationValues();
+
+            this.notificationSaveMessage =
+              response?.message ||
+              'Unable to update notification settings.';
+          }
+        },
+        error: error => {
+          console.error(
+            'Update notification error:',
+            error
+          );
+
+          this.isSavingNotifications = false;
+
+          this.restoreNotificationValues();
+
+          this.notificationSaveMessage =
+            'Unable to update notification settings.';
+        }
+      });
+  }
+
+  private restoreNotificationValues(): void {
+    if (!this.savedNotificationConfiguration) {
+      return;
+    }
+
+    this.notificationConfiguration =
+      this.cloneData(
+        this.savedNotificationConfiguration
+      );
+
+    this.guestNotifications =
+      this.notificationConfiguration
+        .notificationSettings
+        .guestNotifications;
+
+    this.messageTemplates =
+      this.notificationConfiguration
+        .notificationSettings
+        .messageTemplates;
+
+    this.staffNotifications =
+      this.notificationConfiguration
+        .notificationSettings
+        .staffNotifications;
+
+    this.selectedVoice =
+      this.messageTemplates.voice || '';
+
+    this.mapMessageTemplateValues();
+  }
+
+  /* =====================================================
+     WAITLIST
+  ===================================================== */
+
+  getWaitlistSettings(): void {
+    this.waitlistError = '';
+
+    this.subscription.add(
+      this.settingApi
+        .waitlistSettings(this.restaurantId)
+        .subscribe({
+          next: response => {
+            if (response?.success && response?.data) {
+              this.waitlistRules = response.data;
+
+              this.savedWaitlistRules =
+                this.cloneData(response.data);
+            } else {
+              this.waitlistError =
+                response?.message ||
+                'Unable to load waitlist settings.';
+            }
+          },
+          error: error => {
+            console.error(
+              'Waitlist settings error:',
+              error
+            );
+
+            this.waitlistError =
+              'Unable to load waitlist settings.';
+          }
+        })
+    );
+  }
+
+  updateWaitlistSetting(): void {
+    if (
+      !this.waitlistRules ||
+      this.isSavingWaitlist
+    ) {
+      return;
+    }
+
+    const payload:
+      UpdateWaitlistSettingsRequest = {
+
+      acceptOnlineJoin:
+        Boolean(
+          this.waitlistRules.acceptOnlineJoin
+        ),
+
+      allowGoogleJoin:
+        Boolean(
+          this.waitlistRules.allowGoogleJoin
+        ),
+
+      maxPartySize:
+        Number(
+          this.waitlistRules.maxPartySize
+        ),
+
+      pauseNewJoinsAfterClosing:
+        Boolean(
+          this.waitlistRules
+            .pauseNewJoinsAfterClosing
+        ),
+
+      tableReadyResponseMinutes:
+        Number(
+          this.waitlistRules
+            .tableReadyResponseMinutes
+        ),
+
+      walkInsOnly:
+        Boolean(
+          this.waitlistRules.walkInsOnly
+        )
+    };
+
+    if (
+      payload.maxPartySize < 1 ||
+      payload.tableReadyResponseMinutes < 1
+    ) {
+      this.waitlistSaveMessage =
+        'Party size and response time must be greater than zero.';
+
+      this.restoreWaitlistValues();
+      return;
+    }
+
+    this.isSavingWaitlist = true;
+    this.waitlistSaveMessage = '';
+
+    this.settingApi
+      .updateWaitlistSettings(
+        this.restaurantId,
+        payload
+      )
+      .subscribe({
+        next: response => {
+          this.isSavingWaitlist = false;
+
+          if (response?.success) {
+            this.savedWaitlistRules =
+              this.cloneData(
+                this.waitlistRules
+              );
+
+            this.waitlistSaveMessage =
+              response.message ||
+              'Waitlist settings updated.';
+          } else {
+            this.restoreWaitlistValues();
+
+            this.waitlistSaveMessage =
+              response?.message ||
+              'Unable to update waitlist settings.';
+          }
+        },
+        error: error => {
+          console.error(
+            'Update waitlist settings error:',
+            error
+          );
+
+          this.isSavingWaitlist = false;
+
+          this.restoreWaitlistValues();
+
+          this.waitlistSaveMessage =
+            'Unable to update waitlist settings.';
+        }
+      });
+  }
+
+  private restoreWaitlistValues(): void {
+    if (!this.savedWaitlistRules) {
+      return;
+    }
+
+    this.waitlistRules =
+      this.cloneData(
+        this.savedWaitlistRules
+      );
+  }
+
+  /* =====================================================
+     HOLIDAY HOURS
+  ===================================================== */
+
+  getHolidaySettings(): void {
+    this.holidayError = '';
+
+    this.subscription.add(
+      this.settingApi
+        .settingsHolidaySchedule(this.restaurantId)
+        .subscribe({
+          next: response => {
+            if (
+              response?.success &&
+              Array.isArray(
+                response?.data?.holidayHours
+              )
+            ) {
+              this.holidayHours =
+                response.data.holidayHours;
+            } else {
+              this.holidayHours = [];
+
+              this.holidayError =
+                response?.message ||
+                'Unable to load holiday settings.';
+            }
+          },
+          error: error => {
+            console.error(
+              'Holiday settings error:',
+              error
+            );
+
+            this.holidayHours = [];
+
+            this.holidayError =
+              'Unable to load holiday settings.';
+          }
+        })
+    );
+  }
+
+  closeHolidayForm(): void {
+    if (this.isCreatingHoliday) {
+      return;
+    }
+
+    this.showHolidayForm = false;
+  }
+
+  saveHoliday(): void {
+    if (this.isCreatingHoliday) {
+      return;
+    }
+
+    const payload: CreateHolidayRequest = {
+      date: this.newHoliday.date,
+      title: this.newHoliday.title.trim(),
+
+      openTime:
+        this.newHoliday.closed
+          ? ''
+          : this.newHoliday.openTime,
+
+      closeTime:
+        this.newHoliday.closed
+          ? ''
+          : this.newHoliday.closeTime,
+
+      notes:
+        this.newHoliday.notes.trim(),
+
+      closed:
+        Boolean(this.newHoliday.closed)
+    };
+
+    if (!payload.title || !payload.date) {
+      this.holidaySaveMessage =
+        'Holiday title and date are required.';
+
+      return;
+    }
+
+    if (
+      !payload.closed &&
+      (
+        !payload.openTime ||
+        !payload.closeTime
+      )
+    ) {
+      this.holidaySaveMessage =
+        'Opening and closing times are required when the restaurant is open.';
+
+      return;
+    }
+
+    this.isCreatingHoliday = true;
+    this.holidaySaveMessage = '';
+
+    this.settingApi
+      .createHolidaySchedule(
+        this.restaurantId,
+        payload
+      )
+      .subscribe({
+        next: response => {
+          this.isCreatingHoliday = false;
+
+          if (response?.success) {
+            this.holidaySaveMessage =
+              response.message ||
+              'Holiday added successfully.';
+
+            this.showHolidayForm = false;
+
+            this.getHolidaySettings();
+          } else {
+            this.holidaySaveMessage =
+              response?.message ||
+              'Unable to add holiday.';
+          }
+        },
+        error: error => {
+          console.error(
+            'Create holiday error:',
+            error
+          );
+
+          this.isCreatingHoliday = false;
+
+          this.holidaySaveMessage =
+            'Unable to add holiday.';
+        }
+      });
+  }
+
+  /* =====================================================
+     ADVANCED
+  ===================================================== */
+
+  getAdvancedSettings(): void {
+    this.advancedError = '';
+
+    this.subscription.add(
+      this.settingApi
+        .advancedsettings(this.restaurantId)
+        .subscribe({
+          next: response => {
+            if (response?.success && response?.data) {
+              this.advancedSettings = response.data;
+
+              this.savedAdvancedSettings =
+                this.cloneData(response.data);
+
+              this.applyDarkMode(
+                response.data.darkMode
+              );
+            } else {
+              this.advancedError =
+                response?.message ||
+                'Unable to load advanced settings.';
+            }
+          },
+          error: error => {
+            console.error(
+              'Advanced settings error:',
+              error
+            );
+
+            this.advancedError =
+              'Unable to load advanced settings.';
+          }
+        })
+    );
+  }
+
+  updateAdvancedSetting(): void {
+    if (
+      !this.advancedSettings ||
+      this.isSavingAdvanced
+    ) {
+      return;
+    }
+
+    const payload:
+      UpdateAdvancedSettingsRequest = {
+
+      darkMode:
+        Boolean(
+          this.advancedSettings.darkMode
+        ),
+
+      desktopNotifications:
+        Boolean(
+          this.advancedSettings
+            .desktopNotifications
+        ),
+
+      keepSignedIn:
+        Boolean(
+          this.advancedSettings.keepSignedIn
+        ),
+
+      language:
+        this.advancedSettings.language || 'en',
+
+      timezone:
+        this.advancedSettings.timezone || ''
+    };
+
+    this.isSavingAdvanced = true;
+    this.advancedSaveMessage = '';
+
+    this.settingApi
+      .updateAdvancedSettings(
+        this.restaurantId,
+        payload
+      )
+      .subscribe({
+        next: response => {
+          this.isSavingAdvanced = false;
+
+          if (response?.success) {
+            this.savedAdvancedSettings =
+              this.cloneData(
+                this.advancedSettings
+              );
+
+            this.applyDarkMode(
+              this.advancedSettings.darkMode
+            );
+
+            localStorage.setItem(
+              'restaurant-dark-mode',
+              String(
+                this.advancedSettings.darkMode
+              )
+            );
+
+            this.advancedSaveMessage =
+              response.message ||
+              'Advanced settings updated.';
+          } else {
+            this.restoreAdvancedValues();
+
+            this.advancedSaveMessage =
+              response?.message ||
+              'Unable to update advanced settings.';
+          }
+        },
+        error: error => {
+          console.error(
+            'Update advanced settings error:',
+            error
+          );
+
+          this.isSavingAdvanced = false;
+
+          this.restoreAdvancedValues();
+
+          this.advancedSaveMessage =
+            'Unable to update advanced settings.';
+        }
+      });
+  }
+
+  private restoreAdvancedValues(): void {
+    if (!this.savedAdvancedSettings) {
+      return;
+    }
+
+    this.advancedSettings =
+      this.cloneData(
+        this.savedAdvancedSettings
+      );
+
+    this.applyDarkMode(
+      this.advancedSettings.darkMode
+    );
+  }
+
+
+
+  /* =====================================================
+     TAB VALIDATION
+  ===================================================== */
 
   private isValidTab(
     tab: SettingsTab | null
   ): tab is SettingsTab {
+
     return [
       'profile',
       'notification',
@@ -199,6 +1190,10 @@ export class WaitlistSettingsComponent
       'advanced'
     ].includes(tab as SettingsTab);
   }
+
+  /* =====================================================
+     DATE AND TIME
+  ===================================================== */
 
   private updateCurrentTime(): void {
     this.currentTimeOnly =
@@ -210,16 +1205,150 @@ export class WaitlistSettingsComponent
       });
   }
 
+  private getWinnipegYearAndMonth(): {
+    year: string;
+    month: string;
+  } {
+    const parts = new Intl.DateTimeFormat(
+      'en-CA',
+      {
+        timeZone: 'America/Winnipeg',
+        year: 'numeric',
+        month: '2-digit'
+      }
+    ).formatToParts(new Date());
+
+    const year =
+      parts.find(part => part.type === 'year')
+        ?.value || '';
+
+    const month =
+      parts.find(part => part.type === 'month')
+        ?.value || '';
+
+    return {
+      year,
+      month
+    };
+  }
+
+  formatApiDate(dateValue: string): string {
+    if (!dateValue) {
+      return '—';
+    }
+
+    const dateParts = dateValue.split('-');
+
+    if (dateParts.length !== 3) {
+      return dateValue;
+    }
+
+    const year = Number(dateParts[0]);
+    const month = Number(dateParts[1]);
+    const day = Number(dateParts[2]);
+
+    const localDate = new Date(
+      year,
+      month - 1,
+      day
+    );
+
+    return localDate.toLocaleDateString(
+      'en-CA',
+      {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric'
+      }
+    );
+  }
+
+  /* =====================================================
+     DISPLAY GETTERS
+  ===================================================== */
+
+  get restaurantHours(): string {
+    if (!this.restaurant?.hours) {
+      return '—';
+    }
+
+    const open =
+      this.restaurant.hours.open || '';
+
+    const close =
+      this.restaurant.hours.close || '';
+
+    if (!open && !close) {
+      return '—';
+    }
+
+    return `${open} – ${close}`;
+  }
+
+  get restaurantInitial(): string {
+    const name = this.restaurant?.name?.trim();
+
+    return name
+      ? name.charAt(0).toUpperCase()
+      : 'R';
+  }
+
+  get selectedSmsPreview(): string {
+    if (!this.messageTemplates) {
+      return '';
+    }
+
+    if (
+      this.textTemplate ===
+      this.messageTemplates.smsTemplateName
+    ) {
+      return this.messageTemplates
+        .smsTemplatePreview;
+    }
+
+    if (
+      this.textTemplate ===
+      this.messageTemplates
+        .approveSmsTemplateName
+    ) {
+      return this.messageTemplates
+        .approveSmsTemplatePreview;
+    }
+
+    return this.messageTemplates
+      .notifySmsTemplatePreview;
+  }
+
+  get selectedCallPreview(): string {
+    return this.messageTemplates
+      ?.voiceTemplatePreview || '';
+  }
+
+  get desktopNotificationStatus(): string {
+    if (!this.advancedSettings) {
+      return 'Unavailable';
+    }
+
+    return this.advancedSettings
+      .desktopNotifications
+      ? 'Enabled'
+      : 'Blocked';
+  }
+
+  get staffOnFile(): number {
+    return this.staffList.length;
+  }
+
+  /* =====================================================
+     ACTIONS
+  ===================================================== */
+
   approvePendingRequest(): void {
     this.showPendingRequest = false;
   }
 
   declinePendingRequest(): void {
     this.showPendingRequest = false;
-  }
-
-  editProfile(): void {
-    alert('Connect your edit profile modal here.');
   }
 
   updatePackage(): void {
@@ -243,11 +1372,14 @@ export class WaitlistSettingsComponent
   }
 
   editFloorPlan(): void {
-    this.router.navigate(['/restaurant/tables'], {
-      queryParams: {
-        mode: 'edit'
+    this.router.navigate(
+      ['/restaurant/tables'],
+      {
+        queryParams: {
+          mode: 'edit'
+        }
       }
-    });
+    );
   }
 
   addStaff(): void {
@@ -273,7 +1405,9 @@ export class WaitlistSettingsComponent
 
   removeStaff(id: number): void {
     this.staffList =
-      this.staffList.filter(staff => staff.id !== id);
+      this.staffList.filter(
+        staff => staff.id !== id
+      );
   }
 
   toggleFloor(staff: StaffMember): void {
@@ -281,7 +1415,9 @@ export class WaitlistSettingsComponent
   }
 
   getInitial(name: string): string {
-    return name.charAt(0).toUpperCase();
+    return name
+      ? name.charAt(0).toUpperCase()
+      : '';
   }
 
   addHoliday(): void {
@@ -289,7 +1425,7 @@ export class WaitlistSettingsComponent
   }
 
   editHoliday(holiday: HolidayHour): void {
-    alert(`Edit ${holiday.name}`);
+    alert(`Edit ${holiday.title}`);
   }
 
   updateTimeZone(): void {
@@ -297,6 +1433,10 @@ export class WaitlistSettingsComponent
   }
 
   async copyLink(): Promise<void> {
+    if (!this.guestJoinLink) {
+      return;
+    }
+
     try {
       await navigator.clipboard.writeText(
         this.guestJoinLink
@@ -309,7 +1449,8 @@ export class WaitlistSettingsComponent
   }
 
   private fallbackCopyLink(): void {
-    const textArea = document.createElement('textarea');
+    const textArea =
+      document.createElement('textarea');
 
     textArea.value = this.guestJoinLink;
     textArea.style.position = 'fixed';
@@ -326,75 +1467,70 @@ export class WaitlistSettingsComponent
   }
 
   downloadQrCode(): void {
+    if (!this.guestJoinLink) {
+      return;
+    }
+
     const qrUrl =
       'https://api.qrserver.com/v1/create-qr-code/' +
       `?size=300x300&data=${encodeURIComponent(
         this.guestJoinLink
       )}`;
 
-    const anchor = document.createElement('a');
+    const anchor =
+      document.createElement('a');
 
     anchor.href = qrUrl;
-    anchor.download = 'dinerly-guest-join-qr.png';
+    anchor.download =
+      'dinerly-guest-join-qr.png';
+
     anchor.target = '_blank';
+    anchor.rel = 'noopener noreferrer';
 
     anchor.click();
   }
 
   toggleDarkMode(): void {
-    document.body.classList.toggle(
-      'restaurant-dark-mode',
+    if (!this.advancedSettings) {
+      return;
+    }
+
+    this.applyDarkMode(
       this.advancedSettings.darkMode
     );
 
     localStorage.setItem(
       'restaurant-dark-mode',
-      String(this.advancedSettings.darkMode)
-    );
-  }
-
-  get staffOnFile(): number {
-    return this.staffList.length;
-  }
-
-  get notificationPercentage(): number {
-    return Math.min(
-      100,
-      Math.round(
-        (
-          this.currentPlan.notificationUsed /
-          this.currentPlan.notificationLimit
-        ) * 100
+      String(
+        this.advancedSettings.darkMode
       )
     );
   }
 
-  get marketingPercentage(): number {
-    return Math.min(
-      100,
-      Math.round(
-        (
-          this.currentPlan.marketingUsed /
-          this.currentPlan.marketingLimit
-        ) * 100
-      )
+  private applyDarkMode(
+    enabled: boolean
+  ): void {
+    document.body.classList.toggle(
+      'restaurant-dark-mode',
+      enabled
     );
   }
 
-  get notificationRemaining(): number {
-    return Math.max(
-      0,
-      this.currentPlan.notificationLimit -
-      this.currentPlan.notificationUsed
-    );
-  }
+  private createGuestJoinLink(): void {
+    if (!this.restaurant) {
+      this.guestJoinLink = '';
+      return;
+    }
 
-  get marketingRemaining(): number {
-    return Math.max(
-      0,
-      this.currentPlan.marketingLimit -
-      this.currentPlan.marketingUsed
-    );
+    const slug =
+      this.restaurant.name
+        .trim()
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/^-+|-+$/g, '');
+
+    this.guestJoinLink =
+      `${window.location.origin}/join/${slug}`;
   }
 
   ngOnDestroy(): void {
