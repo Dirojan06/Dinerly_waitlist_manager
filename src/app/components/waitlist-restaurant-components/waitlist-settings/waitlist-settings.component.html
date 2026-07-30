@@ -1224,24 +1224,35 @@
 
       <!-- Guest join link -->
 
+      <!-- Guest join link -->
+
       <section class="settings-section guest-link-section" *ngIf="guestJoinLink">
 
-        <h2>Guest join link & barcode</h2>
+        <h2>
+          Guest join link & barcode
+        </h2>
 
         <p class="section-description">
-          Guests scan this QR code to join the waitlist
-          from their phone.
+          Guests scan this QR code to join the
+          waitlist from their phone.
+        </p>
+
+        <p class="settings-error" *ngIf="qrCodeError">
+          {{ qrCodeError }}
         </p>
 
         <div class="qr-content">
 
           <div class="qr-code">
 
-            <img [src]="
-                'https://api.qrserver.com/v1/create-qr-code/' +
-                '?size=180x180&data=' +
-                encodeURIComponent(guestJoinLink)
-              " alt="Dinerly guest join QR code">
+            <div class="qr-loader" *ngIf="isQrLoading">
+              Loading QR code...
+            </div>
+
+            <img *ngIf="
+          !isQrLoading &&
+          qrCodeImageUrl
+        " [src]="qrCodeImageUrl" alt="Dinerly guest join QR code">
 
           </div>
 
@@ -1249,7 +1260,9 @@
 
             <div class="guest-link-row">
 
-              <strong>Link</strong>
+              <strong>
+                Link
+              </strong>
 
               <span>
                 {{ guestJoinLink }}
@@ -1263,7 +1276,7 @@
                 Copy link
               </button>
 
-              <button type="button" class="outline-btn" (click)="downloadQrCode()">
+              <button type="button" class="outline-btn" [disabled]="isQrLoading" (click)="downloadQrCode()">
                 Download QR code
               </button>
 

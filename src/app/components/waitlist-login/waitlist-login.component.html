@@ -123,6 +123,12 @@
   *ngIf="showModal"
   [type]="modalType"
   [restaurants]="restaurants"
+  [initialRestaurantId]="scannedRestaurantId"
+  [lockRestaurantSelection]="
+    isQrJoinRoute &&
+    scannedRestaurantId !== null
+  "
   (closeModal)="closeModal()"
-  (joinedWaitlist)="onJoinedWaitlist($event)">
+  (joinedWaitlist)="onJoinedWaitlist($event)"
+>
 </app-waitlist-modal>

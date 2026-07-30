@@ -132,6 +132,26 @@ export class SettingService {
 
   }
 
+  restaurantQrCode(
+
+    restaurantId: string
+
+  ): Observable<Blob> {
+
+    return this.http.get(
+
+      `${this.baseUrl}/settings/${restaurantId}/qr-code`,
+
+      {
+
+        responseType: 'blob',headers:this.getHeaders()
+
+      }
+
+    );
+
+  }
+
   /* =====================================================
    UPDATE PROFILE
 ===================================================== */

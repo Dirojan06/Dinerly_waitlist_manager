@@ -105,6 +105,12 @@ export class WaitlistSettingsComponent
   advancedError = '';
   showHolidayForm = false;
 
+  qrCodeImageUrl = '';
+
+  isQrLoading = false;
+
+  qrCodeError = '';
+
   newHoliday: CreateHolidayRequest = {
     date: '',
     title: '',
@@ -243,6 +249,7 @@ export class WaitlistSettingsComponent
     );
 
     this.loadAllSettings();
+    this.loadQrCode();
   }
 
   /* =====================================================
@@ -1432,63 +1439,6 @@ export class WaitlistSettingsComponent
     alert('Open time zone selection modal here.');
   }
 
-  async copyLink(): Promise<void> {
-    if (!this.guestJoinLink) {
-      return;
-    }
-
-    try {
-      await navigator.clipboard.writeText(
-        this.guestJoinLink
-      );
-
-      alert('Guest join link copied.');
-    } catch {
-      this.fallbackCopyLink();
-    }
-  }
-
-  private fallbackCopyLink(): void {
-    const textArea =
-      document.createElement('textarea');
-
-    textArea.value = this.guestJoinLink;
-    textArea.style.position = 'fixed';
-    textArea.style.opacity = '0';
-
-    document.body.appendChild(textArea);
-
-    textArea.select();
-    document.execCommand('copy');
-
-    document.body.removeChild(textArea);
-
-    alert('Guest join link copied.');
-  }
-
-  downloadQrCode(): void {
-    if (!this.guestJoinLink) {
-      return;
-    }
-
-    const qrUrl =
-      'https://api.qrserver.com/v1/create-qr-code/' +
-      `?size=300x300&data=${encodeURIComponent(
-        this.guestJoinLink
-      )}`;
-
-    const anchor =
-      document.createElement('a');
-
-    anchor.href = qrUrl;
-    anchor.download =
-      'dinerly-guest-join-qr.png';
-
-    anchor.target = '_blank';
-    anchor.rel = 'noopener noreferrer';
-
-    anchor.click();
-  }
 
   toggleDarkMode(): void {
     if (!this.advancedSettings) {
@@ -1517,20 +1467,289 @@ export class WaitlistSettingsComponent
   }
 
   private createGuestJoinLink(): void {
-    if (!this.restaurant) {
-      this.guestJoinLink = '';
-      return;
-    }
-
-    const slug =
-      this.restaurant.name
-        .trim()
-        .toLowerCase()
-        .replace(/[^a-z0-9]+/g, '-')
-        .replace(/^-+|-+$/g, '');
 
     this.guestJoinLink =
-      `${window.location.origin}/join/${slug}`;
+
+      `${window.location.origin}/join/${this.restaurantId}`;
+
+  }
+
+  loadQrCode(): void {
+
+    if (!this.restaurantId) {
+
+      this.qrCodeError =
+
+        'Restaurant ID is not available.';
+
+      return;
+
+    }
+
+    this.isQrLoading = true;
+
+    this.qrCodeError = '';
+
+    this.settingApi
+
+      .restaurantQrCode(
+
+        this.restaurantId
+
+      )
+
+      .subscribe({
+
+        next: (qrCodeBlob: Blob) => {
+
+          this.isQrLoading = false;
+
+          this.revokeQrObjectUrl();
+
+          this.qrCodeImageUrl =
+
+            URL.createObjectURL(
+
+              qrCodeBlob
+
+            );
+
+        },
+
+        error: (error) => {
+
+          this.isQrLoading = false;
+
+          this.qrCodeError =
+
+            'Unable to load QR code.';
+
+          console.error(
+
+            'QR code API error:',
+
+            error
+
+          );
+
+        }
+
+      });
+
+  }
+
+  async copyLink(): Promise<void> {
+
+    if (!this.guestJoinLink) {
+
+      return;
+
+    }
+
+    try {
+
+      await navigator.clipboard.writeText(
+
+        this.guestJoinLink
+
+      );
+
+      alert(
+
+        'Guest join link copied.'
+
+      );
+
+    } catch {
+
+      this.fallbackCopyLink();
+
+    }
+
+  }
+
+  private fallbackCopyLink(): void {
+
+    if (!this.guestJoinLink) {
+
+      return;
+
+    }
+
+    const textArea =
+
+      document.createElement(
+
+        'textarea'
+
+      );
+
+    textArea.value =
+
+      this.guestJoinLink;
+
+    textArea.style.position =
+
+      'fixed';
+
+    textArea.style.opacity =
+
+      '0';
+
+    document.body.appendChild(
+
+      textArea
+
+    );
+
+    textArea.focus();
+
+    textArea.select();
+
+    try {
+
+      document.execCommand(
+
+        'copy'
+
+      );
+
+      alert(
+
+        'Guest join link copied.'
+
+      );
+
+    } catch {
+
+      alert(
+
+        'Unable to copy link.'
+
+      );
+
+    } finally {
+
+      document.body.removeChild(
+
+        textArea
+
+      );
+
+    }
+
+  }
+
+  downloadQrCode(): void {
+
+    if (!this.restaurantId) {
+
+      return;
+
+    }
+
+    this.settingApi
+
+      .restaurantQrCode(
+
+        this.restaurantId
+
+      )
+
+      .subscribe({
+
+        next: (qrCodeBlob: Blob) => {
+
+          const downloadUrl =
+
+            URL.createObjectURL(
+
+              qrCodeBlob
+
+            );
+
+          const anchor =
+
+            document.createElement(
+
+              'a'
+
+            );
+
+          anchor.href =
+
+            downloadUrl;
+
+          anchor.download =
+
+            `dinerly-restaurant-${this.restaurantId}-qr-code.png`;
+
+          document.body.appendChild(
+
+            anchor
+
+          );
+
+          anchor.click();
+
+          document.body.removeChild(
+
+            anchor
+
+          );
+
+          URL.revokeObjectURL(
+
+            downloadUrl
+
+          );
+
+        },
+
+        error: (error) => {
+
+          console.error(
+
+            'QR download error:',
+
+            error
+
+          );
+
+          alert(
+
+            'Unable to download QR code.'
+
+          );
+
+        }
+
+      });
+
+  }
+
+  private revokeQrObjectUrl(): void {
+
+    if (
+
+      this.qrCodeImageUrl &&
+
+      this.qrCodeImageUrl.startsWith(
+
+        'blob:'
+
+      )
+
+    ) {
+
+      URL.revokeObjectURL(
+
+        this.qrCodeImageUrl
+
+      );
+
+    }
+
   }
 
   ngOnDestroy(): void {

@@ -19,9 +19,7 @@ import {
   finalize
 } from 'rxjs/operators';
 
-import {
-  GuestAccount
-} from '../waitlist-user-component.component';
+
 
 import {
   WaitlistAuthService
@@ -31,6 +29,7 @@ import {
   AuthUser,
   RegisterRequest
 } from 'src/app/models/waitlist-auth.model';
+import { GuestAccount } from 'src/app/models/guest-portal.model';
 
 
 type AccountMode =

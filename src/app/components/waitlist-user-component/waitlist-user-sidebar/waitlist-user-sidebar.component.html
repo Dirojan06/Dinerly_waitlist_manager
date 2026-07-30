@@ -1,23 +1,44 @@
 <aside class="customer-sidebar">
 
+  <!-- BRAND -->
+
   <div class="brand">
+
     <div class="brand-icon">
-      <img src="../../../../assets/logo.png" style="width: 30px;height: 20px;" alt="Dinerly Logo">
+
+      <img
+        src="../../../../assets/logo.png"
+        style="width: 30px; height: 20px;"
+        alt="Dinerly Logo">
+
     </div>
 
     <div>
+
       <h2>Dinerly</h2>
+
       <p>Guest Portal</p>
+
     </div>
+
   </div>
 
-  <p class="section-label">YOUR VISIT</p>
+
+  <p class="section-label">
+    YOUR VISIT
+  </p>
+
 
   <nav class="side-nav">
 
-    <!-- HOME: PUBLIC -->
+    <!-- HOME -->
 
-    <button type="button" [class.active]="activeTab === 'HOME'" (click)="selectTab('HOME')">
+    <button
+      type="button"
+      [class.active]="
+        activeTab === 'HOME'
+      "
+      (click)="selectTab('HOME')">
 
       <i class="fa-solid fa-house"></i>
 
@@ -25,89 +46,122 @@
 
     </button>
 
-    <!-- WAITLIST: PHONE ACCESS -->
 
-    <button type="button" [class.active]="
+    <!-- WAITLIST -->
 
+    <button
+      type="button"
+      [class.active]="
         activeTab === 'WAITLIST'
-
-      " [class.locked]="
-
+      "
+      [class.locked]="
         !hasWaitlistAccess
-
-      " (click)="selectTab('WAITLIST')">
+      "
+      (click)="selectTab('WAITLIST')">
 
       <i class="fa-regular fa-clock"></i>
 
       <span>Waitlist</span>
 
-      <i class="fa-solid fa-lock nav-lock" *ngIf="!hasWaitlistAccess"></i>
+      <i
+        class="fa-solid fa-lock nav-lock"
+        *ngIf="!hasWaitlistAccess">
+      </i>
 
     </button>
 
-    <!-- OFFERS: EMAIL LOGIN -->
 
-    <button type="button" [class.active]="
+    <!-- OFFERS -->
 
+    <button
+      type="button"
+      [class.active]="
         activeTab === 'OFFERS'
-
-      " [class.locked]="
-
-        !hasAccountAccess
-
-      " (click)="selectTab('OFFERS')">
+      "
+      [class.locked]="
+        !canAccessAccountFeatures
+      "
+      (click)="selectTab('OFFERS')">
 
       <i class="fa-solid fa-tag"></i>
 
       <span>Offers</span>
 
-      <i class="fa-solid fa-lock nav-lock" *ngIf="!hasAccountAccess"></i>
+      <i
+        class="fa-solid fa-lock nav-lock"
+        *ngIf="
+          !canAccessAccountFeatures
+        ">
+      </i>
 
     </button>
 
-    <!-- MENU: EMAIL LOGIN -->
 
-    <button type="button" [class.active]="activeTab === 'MENU'" [class.locked]="
+    <!-- MENU -->
 
-        !hasAccountAccess
+    <button
+      type="button"
+      [class.active]="
+        activeTab === 'MENU'
+      "
+      [class.locked]="
+        !canAccessAccountFeatures
+      "
+      (click)="selectTab('MENU')">
 
-      " (click)="selectTab('MENU')">
-
-      <i class="fa-solid fa-utensils"></i>
+      <i
+        class="fa-solid
+               fa-utensils">
+      </i>
 
       <span>Food</span>
 
-      <i class="fa-solid fa-lock nav-lock" *ngIf="!hasAccountAccess"></i>
+      <i
+        class="fa-solid fa-lock nav-lock"
+        *ngIf="
+          !canAccessAccountFeatures
+        ">
+      </i>
 
     </button>
 
-    <!-- REWARDS: EMAIL LOGIN -->
 
-    <button type="button" [class.active]="
+    <!-- REWARDS -->
 
+    <button
+      type="button"
+      [class.active]="
         activeTab === 'REWARDS'
-
-      " [class.locked]="
-
-        !hasAccountAccess
-
-      " (click)="selectTab('REWARDS')">
+      "
+      [class.locked]="
+        !canAccessAccountFeatures
+      "
+      (click)="selectTab('REWARDS')">
 
       <i class="fa-solid fa-gift"></i>
 
       <span>Rewards</span>
 
-      <i class="fa-solid fa-lock nav-lock" *ngIf="!hasAccountAccess"></i>
+      <i
+        class="fa-solid fa-lock nav-lock"
+        *ngIf="
+          !canAccessAccountFeatures
+        ">
+      </i>
 
     </button>
 
   </nav>
 
+
   <div class="sidebar-spacer"></div>
 
-  <!-- NOT LOGGED IN WITH EMAIL -->
 
-  <div class="sidebar-login-card" *ngIf="!hasAccountAccess">
+  <!-- NOT LOGGED IN -->
+
+  <div
+    class="sidebar-login-card"
+    *ngIf="!hasAccountAccess">
 
     <div class="login-card-icon">
 
@@ -117,19 +171,20 @@
 
     <div>
 
-      <strong>Unlock rewards</strong>
+      <strong>
+        Unlock rewards
+      </strong>
 
       <p>
-
-        Login with email for offers,
-
-        rewards and food.
-
+        Join a waitlist and login with
+        email for offers, rewards and food.
       </p>
 
     </div>
 
-    <button type="button" (click)="loginWithEmail()">
+    <button
+      type="button"
+      (click)="loginWithEmail()">
 
       Login
 
@@ -137,12 +192,14 @@
 
   </div>
 
-  <div class="sidebar-profile" *ngIf="
 
+  <!-- LOGGED-IN PROFILE -->
+
+  <div
+    class="sidebar-profile"
+    *ngIf="
       hasAccountAccess &&
-
       customerAccount
-
     ">
 
     <div class="profile-avatar">
@@ -154,42 +211,67 @@
     <div class="profile-info">
 
       <strong>
-
         {{ customerAccount.name }}
-
       </strong>
 
       <p>
-
         {{ customerAccount.email }}
-
       </p>
 
     </div>
 
-    <button type="button" class="profile-logout" title="Logout" (click)="logoutAccount()">
+    <button
+      type="button"
+      class="profile-logout"
+      title="Logout"
+      (click)="logoutAccount()">
 
-      <i class="fa-solid fa-arrow-right-from-bracket"></i>
+      <i
+        class="fa-solid
+               fa-arrow-right-from-bracket">
+      </i>
 
     </button>
 
   </div>
 
-  <div class="sidebar-footer" *ngIf="restaurant">
+
+  <!-- RESTAURANT DETAILS -->
+
+  <div
+    class="sidebar-footer"
+    *ngIf="restaurant">
+
     <p>
-      <i class="fa-solid fa-location-dot"></i>
+
+      <i
+        class="fa-solid
+               fa-location-dot">
+      </i>
+
       {{ restaurant.address }}
+
     </p>
 
     <p>
+
       <i class="fa-solid fa-phone"></i>
+
       {{ restaurant.phone }}
+
     </p>
 
     <p>
-      <i class="fa-solid fa-envelope"></i>
+
+      <i
+        class="fa-solid
+               fa-envelope">
+      </i>
+
       {{ restaurant.email }}
+
     </p>
+
   </div>
 
 </aside>

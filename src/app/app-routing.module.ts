@@ -22,6 +22,13 @@ const routes: Routes = [
   { path: 'login', component: WaitlistLoginComponent },
   { path: 'login/:role', component: WaitlistLoginComponent },
   {
+
+    path: 'join/:restaurantId',
+
+    component: WaitlistLoginComponent
+
+  },
+  {
     path: 'user',
     component: WaitlistUserComponentComponent
   },
