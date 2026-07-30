@@ -19,13 +19,12 @@
       </button> -->
 
       <button class="walkin-btn" type="button" (click)="modalService.open()">
-        <i class="fa-solid fa-plus"></i>
-        Add Walk-in
+        Add Guest
       </button>
 
       <button class="restaurant-btn" type="button">
         <span>B</span>
-        The Commons
+        Brothers Cafe
         <i class="fa-solid fa-chevron-down"></i>
       </button>
 
@@ -165,19 +164,53 @@
 
           <p>{{ guest.notes }} . {{ guest.guestPhone }}</p>
 
-          <div class="reply-preview" *ngIf="
+          <ng-container *ngIf="
     guest.status === 'NOTIFIED' &&
     hasCustomerReply(guest)
-  " [ngClass]="getCustomerReplyClass(guest)">
-            <i [ngClass]="
-      getCustomerReplyPreviewIcon(guest)
-    "></i>
+  ">
+            <ng-container *ngIf="
+      getVisibleReply(guest)
+        as visibleReply
+    ">
+              <div class="reply-preview" [ngClass]="
+        getReplyViewClass(visibleReply)
+      ">
+                <div class="reply-slide-content" [attr.data-rotation]="
+          replyRotationIndex
+        ">
+                  <div class="reply-source-icon">
+                    <i *ngIf="
+              visibleReply.source === 'SMS'
+            " class="fa-solid fa-comment-sms"></i>
 
+                    <i *ngIf="
+              visibleReply.source === 'VOICE'
+            " class="fa-solid fa-phone-volume"></i>
+                  </div>
 
-            <strong>
-              {{ getCustomerReplyText(guest) }}
-            </strong>
-          </div>
+                  <div class="reply-preview-text">
+                    <span class="reply-source-label">
+                      {{
+                      visibleReply.source === 'VOICE'
+                      ? 'Call response'
+                      : 'SMS response'
+                      }}
+                    </span>
+
+                    <strong>
+                      {{ visibleReply.text }}
+                    </strong>
+                  </div>
+
+                  <div class="reply-rotation-icon" *ngIf="
+            getGuestReplies(guest).length > 1
+          " title="SMS and call responses">
+                    <i class="fa-solid fa-arrows-rotate"></i>
+                  </div>
+                </div>
+              </div>
+            </ng-container>
+          </ng-container>
         </div>
       </div>
 
@@ -562,26 +595,38 @@
 
 </div>
 
+
 <!-- Calling Popup -->
 <div class="calling-popup-backdrop" *ngIf="showCallingPopup" (click)="closeCallingPopup()">
-
   <div class="calling-popup" (click)="$event.stopPropagation()">
-
     <button type="button" class="close-calling-popup" (click)="closeCallingPopup()" aria-label="Close calling popup">
-
       <i class="fa-solid fa-xmark"></i>
     </button>
 
-    <div class="calling-icon">
+    <div class="calling-icon" [class.calling-icon-waiting]="
+        callRequestStarted
+      ">
       <i class="fa-solid fa-phone-volume"></i>
     </div>
 
-    <p class="calling-label">Calling</p>
+    <p class="calling-label">
+      {{
+      callRequestStarted
+      ? 'Waiting for customer response'
+      : 'Connecting call'
+      }}
+    </p>
 
-    <h3>{{ callingGuest?.guestName || callingGuest?.name }}</h3>
+    <h3>
+      {{
+      callingGuest?.guestName
+      }}
+    </h3>
 
     <p class="calling-phone">
-      {{ callingGuest?.guestPhone || callingGuest?.phone }}
+      {{
+      callingGuest?.guestPhone
+      }}
     </p>
 
     <div class="calling-animation">
@@ -590,14 +635,24 @@
       <span></span>
     </div>
 
+    <p class="calling-status-text">
+      {{
+      callRequestStarted
+      ? 'The popup will close automatically when the call finishes.'
+      : 'Starting the call...'
+      }}
+    </p>
+
     <button type="button" class="cancel-call-btn" (click)="closeCallingPopup()">
-
       <i class="fa-solid fa-phone-slash"></i>
-      Cancel call
+
+      {{
+      callRequestStarted
+      ? 'Close call window'
+      : 'Cancel call'
+      }}
     </button>
-
   </div>
-
 </div>
 
 <!-- shpw customer reply modal -->

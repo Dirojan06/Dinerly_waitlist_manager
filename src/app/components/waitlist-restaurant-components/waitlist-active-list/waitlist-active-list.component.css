@@ -1470,66 +1470,160 @@
 
 .reply-preview {
   display: inline-flex;
-  align-items: center;
-  gap: 7px;
-
-  width: fit-content;
+  width: min(100%, 270px);
+  min-height: 54px;
   margin-top: 8px;
-  padding: 8px 12px;
 
   border: 1px solid;
-  border-radius: 10px;
+  border-radius: 12px;
 
-  font-size: 13px;
-  font-weight: 500;
+  overflow: hidden;
 
   transition:
     background-color 0.2s ease,
-    border-color 0.2s ease;
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
 }
 
-.reply-preview i {
-  font-size: 14px;
+.reply-slide-content {
+  position: relative;
+
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  width: 100%;
+  min-width: 0;
+  padding: 9px 38px 9px 10px;
+  box-sizing: border-box;
 }
 
-.reply-preview span {
-  font-weight: 500;
+/*
+ * Different animation names restart the
+ * animation when replyRotationIndex changes.
+ */
+.reply-slide-content[data-rotation='0'] {
+  animation:
+    reply-roll-from-bottom
+    0.45s ease;
 }
 
-.reply-preview strong {
-  font-weight: 500;
+.reply-slide-content[data-rotation='1'] {
+  animation:
+    reply-roll-from-top
+    0.45s ease;
 }
 
-/* Option 1: On my way */
+.reply-source-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 34px;
+  height: 34px;
+  flex: 0 0 34px;
+
+  border-radius: 50%;
+
+  background:
+    rgba(255, 255, 255, 0.72);
+
+  font-size: 13px;
+}
+
+.reply-preview-text {
+  display: flex;
+  flex: 1;
+  min-width: 0;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.reply-source-label {
+  color: inherit;
+
+  font-size: 9px;
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: 0.7px;
+  text-transform: uppercase;
+
+  opacity: 0.68;
+}
+
+.reply-preview-text strong {
+  display: block;
+
+  overflow: hidden;
+
+  color: inherit;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.3;
+
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.reply-rotation-icon {
+  position: absolute;
+  top: 50%;
+  right: 11px;
+
+  transform: translateY(-50%);
+
+  font-size: 10px;
+  opacity: 0.55;
+}
+
+.reply-rotation-icon i {
+  animation:
+    reply-rotation-icon
+    4s linear infinite;
+}
+
+/* Positive response */
 
 .reply-preview.reply-coming {
   color: #6546c4;
   border-color: #d7c8ff;
   background: #f5f1ff;
+
+  box-shadow:
+    0 4px 14px
+    rgba(101, 70, 196, 0.08);
 }
 
 .reply-preview.reply-coming i {
   color: #7351d2;
 }
 
-/* Option 2: Arriving in 5 minutes */
+/* Arriving in five minutes */
 
 .reply-preview.reply-delayed {
   color: #8b5a16;
   border-color: #f0d09e;
   background: #fff8eb;
+
+  box-shadow:
+    0 4px 14px
+    rgba(139, 90, 22, 0.08);
 }
 
 .reply-preview.reply-delayed i {
   color: #d48b25;
 }
 
-/* Option 3: Unable to make it */
+/* Unable to attend */
 
 .reply-preview.reply-unavailable {
   color: #c52f2f;
   border-color: #f2bcbc;
   background: #fff1f1;
+
+  box-shadow:
+    0 4px 14px
+    rgba(197, 47, 47, 0.08);
 }
 
 .reply-preview.reply-unavailable i,
@@ -1537,284 +1631,94 @@
   color: #d62828;
 }
 
-/* Popup */
-
-.customer-reply-backdrop {
-  position: fixed;
-  z-index: 3000;
-  inset: 0;
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  padding: 20px;
-
-  background: rgba(18, 13, 31, 0.6);
-  backdrop-filter: blur(5px);
-}
-
-.customer-reply-popup {
-  position: relative;
-
-  width: min(100%, 430px);
-  padding: 32px;
-
-  border: 1px solid rgba(145, 111, 231, 0.25);
-  border-radius: 24px;
-
-  background: #ffffff;
-
-  text-align: center;
-
-  box-shadow:
-    0 28px 80px rgba(28, 19, 54, 0.32);
-
-  animation: customer-reply-popup-in 0.25s ease;
-}
-
-@keyframes customer-reply-popup-in {
+@keyframes reply-roll-from-bottom {
   from {
     opacity: 0;
-    transform: translateY(16px) scale(0.96);
+    transform:
+      translateY(16px)
+      rotateX(-25deg);
   }
 
   to {
     opacity: 1;
-    transform: translateY(0) scale(1);
+    transform:
+      translateY(0)
+      rotateX(0);
   }
 }
 
-.close-reply-popup {
-  position: absolute;
-  top: 16px;
-  right: 16px;
+@keyframes reply-roll-from-top {
+  from {
+    opacity: 0;
+    transform:
+      translateY(-16px)
+      rotateX(25deg);
+  }
 
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  width: 36px;
-  height: 36px;
-
-  border: 0;
-  border-radius: 50%;
-
-  color: #716a7e;
-  background: #f2eff7;
-
-  cursor: pointer;
+  to {
+    opacity: 1;
+    transform:
+      translateY(0)
+      rotateX(0);
+  }
 }
 
-.close-reply-popup:hover {
-  color: #ffffff;
-  background: #e55353;
+@keyframes reply-rotation-icon {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
 }
 
-.reply-popup-icon {
-  display: flex;
-  align-items: center;
-  justify-content: center;
+.calling-status-text {
+  max-width: 270px;
+  margin: 0 auto 20px;
 
-  width: 82px;
-  height: 82px;
-  margin: 4px auto 18px;
-
-  border-radius: 50%;
-
-  font-size: 31px;
-}
-
-.reply-popup-icon.reply-coming {
-  color: #ffffff;
-  background: linear-gradient(135deg,
-      #46b978,
-      #278e59);
-}
-
-.reply-popup-icon.reply-delayed {
-  color: #ffffff;
-  background: linear-gradient(135deg,
-      #9b7bf0,
-      #6844ca);
-}
-
-.reply-popup-icon.reply-unavailable {
-  color: #ffffff;
-  background: linear-gradient(135deg,
-      #ef6b6b,
-      #cb3d3d);
-}
-
-.reply-popup-icon.reply-custom {
-  color: #ffffff;
-  background: linear-gradient(135deg,
-      #9c7df1,
-      #6c4bc9);
-}
-
-.reply-popup-label {
-  margin: 0 0 7px;
-
-  color: #857e91;
-
-  font-size: 13px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.7px;
-}
-
-.customer-reply-popup h2 {
-  margin: 0 0 5px;
-
-  color: #282331;
-  font-size: 24px;
-}
-
-.reply-popup-phone {
-  margin: 0 0 22px;
-
-  color: #7d7688;
-  font-size: 14px;
-}
-
-.reply-message-box {
-  display: flex;
-  flex-direction: column;
-  gap: 7px;
-
-  padding: 18px;
-
-  border: 1px solid transparent;
-  border-radius: 14px;
-
-  text-align: left;
-}
-
-.reply-message-box span {
-  color: #81798d;
+  color: #817a8e;
   font-size: 12px;
-  font-weight: 600;
-}
-
-.reply-message-box strong {
-  font-size: 18px;
-}
-
-.reply-message-box.reply-coming {
-  color: #26784b;
-  border-color: #bfe9cf;
-  background: #effbf4;
-}
-
-.reply-message-box.reply-delayed {
-  color: #6240bb;
-  border-color: #d8ccfa;
-  background: #f6f2ff;
-}
-
-.reply-message-box.reply-unavailable {
-  color: #ba3c3c;
-  border-color: #f3cccc;
-  background: #fff2f2;
-}
-
-.reply-message-box.reply-custom {
-  color: #6240bb;
-  border-color: #d8ccfa;
-  background: #f6f2ff;
-}
-
-.reply-details {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 9px;
-
-  margin-top: 14px;
-}
-
-.reply-details>div {
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
-
-  padding: 11px 8px;
-
-  border: 1px solid #ece8f2;
-  border-radius: 10px;
-
-  background: #faf9fc;
-}
-
-.reply-details span {
-  color: #8a8394;
-  font-size: 11px;
-}
-
-.reply-details strong {
-  color: #342e3c;
-  font-size: 13px;
-}
-
-.custom-reply-content {
-  margin-top: 14px;
-  padding: 14px;
-
-  border: 1px solid #e7e1f4;
-  border-radius: 12px;
-
-  text-align: left;
-  background: #fbf9ff;
-}
-
-.custom-reply-content span {
-  color: #81798c;
-  font-size: 12px;
-  font-weight: 600;
-}
-
-.custom-reply-content p {
-  margin: 7px 0 0;
-
-  color: #393241;
   line-height: 1.5;
+  text-align: center;
 }
 
-.reply-popup-done {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-
-  width: 100%;
-  margin-top: 20px;
-  padding: 12px 18px;
-
-  border: 0;
-  border-radius: 12px;
-
-  color: #ffffff;
-  background: #7653d7;
-
-  font-size: 14px;
-  font-weight: 700;
-
-  cursor: pointer;
+.calling-icon-waiting {
+  animation:
+    call-pulse 1.5s infinite,
+    calling-phone-ring 1.8s ease-in-out
+    infinite;
 }
 
-.reply-popup-done:hover {
-  background: #6342c2;
-}
-
-@media (max-width: 600px) {
-  .customer-reply-popup {
-    padding: 28px 20px 22px;
+@keyframes calling-phone-ring {
+  0%,
+  100% {
+    transform: rotate(0deg);
   }
 
-  .reply-details {
-    grid-template-columns: 1fr;
+  10% {
+    transform: rotate(-6deg);
+  }
+
+  20% {
+    transform: rotate(6deg);
+  }
+
+  30% {
+    transform: rotate(-5deg);
+  }
+
+  40% {
+    transform: rotate(5deg);
+  }
+
+  50% {
+    transform: rotate(0deg);
   }
 }
+
+
+
 
 .edit-seated-modal {
   width: min(100%, 600px);

@@ -59,6 +59,18 @@ interface DashboardLiveGuest {
   tableName?: string;
 }
 
+type GuestReplySource =
+  | 'SMS'
+  | 'VOICE';
+
+interface GuestReplyView {
+  source: GuestReplySource;
+  text: string;
+  option: CustomerReplyType;
+  negative: boolean;
+  receivedAt?: string;
+}
+
 type WaitlistTab =
   | 'WAITING'
   | 'NOTIFIED'
@@ -168,8 +180,28 @@ export class WaitlistActiveListComponent
     number | string | null = null;
 
   showCallingPopup = false;
-  callingGuest: any = null;
+  callingGuest: DashboardLiveGuest | null =
+    null;
+
   isSendingSms = false;
+
+  callRequestStarted = false;
+
+  private activeCallGuestId:
+    number | null = null;
+
+  private callPopupTimeout:
+    ReturnType<typeof setTimeout> | null =
+    null;
+
+  private readonly callPopupTimeoutMs =
+    90_000;
+
+  replyRotationIndex = 0;
+
+  private replyRotationInterval:
+    ReturnType<typeof setInterval> | null =
+    null;
 
   /*
    * Customer reply detection.
@@ -231,6 +263,8 @@ export class WaitlistActiveListComponent
     this.refreshInterval = setInterval(() => {
       this.loadDashboardAllData(false);
     }, 5000);
+
+    this.replyRotationInterval = setInterval(() => { this.replyRotationIndex = this.replyRotationIndex === 0 ? 1 : 0; }, 4000);
   }
 
   loadDashboardAllData(
@@ -328,6 +362,8 @@ export class WaitlistActiveListComponent
         this.detectNewCustomerReplies(
           this.allDashboardGuests
         );
+
+        this.handleActiveCallStatus();
       },
 
       error: () => {
@@ -516,7 +552,7 @@ export class WaitlistActiveListComponent
     this.showRejectReason = true;
   }
 
-  removequeue(guest: PendingGuest){
+  removequeue(guest: PendingGuest) {
     this.selectedGuest = guest;
     this.rejectSelectedGuest()
   }
@@ -1074,45 +1110,84 @@ export class WaitlistActiveListComponent
   }
 
   openCallingPopup(
-    guest: any
+    guest: DashboardLiveGuest
   ): void {
 
-    this.selectedContactGuestId = null;
-    this.callingGuest = guest;
-    this.showCallingPopup = true;
+    const guestId =
+      Number(guest?.id);
 
     const phoneNumber =
-      guest?.guestPhone ||
-      guest?.phone;
+      guest?.guestPhone;
+
+    if (!guestId) {
+      alert(
+        'Guest details are not available'
+      );
+
+      return;
+    }
 
     if (!phoneNumber) {
       alert(
         'Guest phone number is not available'
       );
 
-      this.closeCallingPopup();
       return;
     }
 
+    /*
+     * Clear an earlier call if one exists.
+     */
+    this.clearCallPopupTimeout();
+
+    this.selectedContactGuestId = null;
+
+    this.callingGuest = {
+      ...guest
+    };
+
+    this.activeCallGuestId = guestId;
+    this.callRequestStarted = false;
+    this.showCallingPopup = true;
 
     this.waitlistApi
       .makecallToGuest(
         this.restaurantId,
-        guest.id,
+        guestId,
         {
           message:
-            this.specificMessage
+            this.specificMessage || ''
         }
       )
       .subscribe({
         next: () => {
+          /*
+           * The call request was accepted.
+           * Keep the popup open until the refreshed
+           * notified API returns a final status.
+           */
+          this.callRequestStarted = true;
+
+          /*
+           * Immediately refresh once instead of
+           * waiting for the next five-second interval.
+           */
+          this.loadDashboardAllData(false);
+
+          /*
+           * Safety timeout. If the backend never
+           * returns a terminal call status, close
+           * the popup after 90 seconds.
+           */
+          this.startCallPopupTimeout();
         },
 
-        error: () => {
-          this.isLoading = false;
-          this.showCallingPopup = false;
+        error: (error: any) => {
+          this.closeCallingPopup();
 
           alert(
+            error?.error?.message ||
+            error?.message ||
             'Unable to make call'
           );
         }
@@ -1125,8 +1200,164 @@ export class WaitlistActiveListComponent
   }
 
   closeCallingPopup(): void {
+    this.clearCallPopupTimeout();
+
     this.showCallingPopup = false;
     this.callingGuest = null;
+
+    this.activeCallGuestId = null;
+    this.callRequestStarted = false;
+  }
+
+  private handleActiveCallStatus(): void {
+    if (
+      !this.showCallingPopup ||
+      !this.activeCallGuestId
+    ) {
+      return;
+    }
+
+    const updatedGuest =
+      this.allDashboardGuests.find(
+        guest =>
+          Number(guest.id) ===
+          Number(this.activeCallGuestId)
+      );
+
+    if (!updatedGuest) {
+      return;
+    }
+
+    /*
+     * Keep the popup guest synchronized with
+     * the latest notified guest response.
+     */
+    this.callingGuest = {
+      ...updatedGuest
+    };
+
+    /*
+     * Positive or negative customer response.
+     *
+     * Examples:
+     * voiceReplyDigits = "1"
+     * latestVoiceReply = "Confirmed attending"
+     *
+     * voiceReplyDigits = "2"
+     * latestVoiceReply = "Cannot attend"
+     */
+    if (
+      this.hasCompletedVoiceResponse(
+        updatedGuest
+      )
+    ) {
+      this.closeCallingPopup();
+      return;
+    }
+
+    /*
+     * No answer, rejected, busy, failed,
+     * cancelled or other completed status.
+     */
+    if (
+      this.isTerminalCallStatus(
+        updatedGuest.callStatus
+      )
+    ) {
+      this.closeCallingPopup();
+    }
+  }
+
+  private hasCompletedVoiceResponse(
+    guest: DashboardLiveGuest
+  ): boolean {
+
+    const status =
+      String(
+        guest.callStatus || ''
+      )
+        .trim()
+        .toUpperCase();
+
+    return (
+      status ===
+      'CALL_RESPONSE_RECEIVED' ||
+      this.hasReplyValue(
+        guest.voiceReplyDigits
+      ) ||
+      this.hasReplyValue(
+        guest.latestVoiceReply
+      ) ||
+      this.hasReplyValue(
+        guest.callResponse
+      ) ||
+      this.hasReplyValue(
+        guest.voiceReplyReceivedAt
+      )
+    );
+  }
+
+  private isTerminalCallStatus(
+    status?: string
+  ): boolean {
+
+    const normalizedStatus =
+      String(status || '')
+        .trim()
+        .toUpperCase();
+
+    const terminalStatuses = [
+      'NO_ANSWER',
+      'CALL_NO_ANSWER',
+      'NO_RESPONSE',
+      'CALL_NO_RESPONSE',
+
+      'BUSY',
+      'CALL_BUSY',
+
+      'FAILED',
+      'CALL_FAILED',
+
+      'REJECTED',
+      'CALL_REJECTED',
+
+      'CANCELLED',
+      'CALL_CANCELLED',
+
+      'COMPLETED',
+      'CALL_COMPLETED',
+
+      'COMPLETED_WITHOUT_RESPONSE',
+      'CALL_COMPLETED_WITHOUT_RESPONSE'
+    ];
+
+    return terminalStatuses.includes(
+      normalizedStatus
+    );
+  }
+
+  private startCallPopupTimeout(): void {
+    this.clearCallPopupTimeout();
+
+    this.callPopupTimeout =
+      setTimeout(() => {
+        /*
+         * Refresh once more before closing.
+         */
+        this.loadDashboardAllData(false);
+
+        this.closeCallingPopup();
+      }, this.callPopupTimeoutMs);
+  }
+
+  private clearCallPopupTimeout(): void {
+    if (this.callPopupTimeout) {
+      clearTimeout(
+        this.callPopupTimeout
+      );
+
+      this.callPopupTimeout = null;
+    }
   }
 
   sendSmsToGuest(
@@ -1247,15 +1478,411 @@ export class WaitlistActiveListComponent
    * Customer reply functions.
    */
 
+  /*
+ * Customer reply functions.
+ */
+
   hasCustomerReply(
     guest: DashboardLiveGuest | null
   ): boolean {
 
+    if (!guest) {
+      return false;
+    }
+
     return (
-      this.getCustomerReplyValue(
+      this.getGuestReplies(
         guest
-      ) !== ''
+      ).length > 0
     );
+  }
+
+  getGuestReplies(
+    guest: DashboardLiveGuest | null
+  ): GuestReplyView[] {
+
+    if (!guest) {
+      return [];
+    }
+
+    const replies:
+      GuestReplyView[] = [];
+
+    const smsReply =
+      this.getSmsReplyView(
+        guest
+      );
+
+    const voiceReply =
+      this.getVoiceReplyView(
+        guest
+      );
+
+    if (smsReply) {
+      replies.push(smsReply);
+    }
+
+    if (voiceReply) {
+      replies.push(voiceReply);
+    }
+
+    /*
+     * Latest response should appear first.
+     *
+     * In your example the voice response is
+     * newer than the SMS response, so voice
+     * will display first.
+     */
+    return replies.sort(
+      (
+        firstReply,
+        secondReply
+      ) => {
+
+        const firstTime =
+          this.getReplyTimestamp(
+            firstReply.receivedAt
+          );
+
+        const secondTime =
+          this.getReplyTimestamp(
+            secondReply.receivedAt
+          );
+
+        return secondTime - firstTime;
+      }
+    );
+  }
+
+  getVisibleReply(
+    guest: DashboardLiveGuest | null
+  ): GuestReplyView | null {
+
+    const replies =
+      this.getGuestReplies(
+        guest
+      );
+
+    if (!replies.length) {
+      return null;
+    }
+
+    if (replies.length === 1) {
+      return replies[0];
+    }
+
+    const visibleIndex =
+      this.replyRotationIndex %
+      replies.length;
+
+    return replies[visibleIndex];
+  }
+
+  getReplyViewClass(
+    reply: GuestReplyView | null
+  ): string {
+
+    if (!reply) {
+      return '';
+    }
+
+    if (reply.negative) {
+      return 'reply-unavailable';
+    }
+
+    if (reply.option === '2') {
+      return 'reply-delayed';
+    }
+
+    return 'reply-coming';
+  }
+
+  private getSmsReplyView(
+    guest: DashboardLiveGuest
+  ): GuestReplyView | null {
+
+    const rawSmsReply =
+      guest.latestCustomerReply ||
+      guest.customerReplyDescription;
+
+    if (
+      !this.hasReplyValue(
+        rawSmsReply
+      )
+    ) {
+      return null;
+    }
+
+    const normalizedReply =
+      this.normalizeCustomerReply(
+        rawSmsReply
+      );
+
+    const option =
+      this.convertSmsReplyToOption(
+        normalizedReply
+      );
+
+    let text =
+      String(
+        guest.customerReplyDescription ||
+        guest.latestCustomerReply ||
+        ''
+      ).trim();
+
+    if (option === '1') {
+      text = 'On my way';
+    }
+
+    if (option === '2') {
+      text = 'Arriving in 5 minutes';
+    }
+
+    if (option === '3') {
+      text = 'Unable to join';
+    }
+
+    if (!text) {
+      return null;
+    }
+
+    return {
+      source: 'SMS',
+      text,
+      option,
+      negative:
+        option === '3' ||
+        this.isNegativeReplyText(text),
+
+      receivedAt:
+        guest.customerReplyReceivedAt
+    };
+  }
+
+  private getVoiceReplyView(
+    guest: DashboardLiveGuest
+  ): GuestReplyView | null {
+
+    const rawVoiceReply =
+      guest.latestVoiceReply ||
+      guest.callResponse ||
+      guest.voiceReplyDigits;
+
+    if (
+      !this.hasReplyValue(
+        rawVoiceReply
+      )
+    ) {
+      return null;
+    }
+
+    const voiceDigit =
+      this.normalizeCustomerReply(
+        guest.voiceReplyDigits
+      );
+
+    let option:
+      CustomerReplyType = '';
+
+    let text =
+      String(
+        guest.latestVoiceReply ||
+        guest.callResponse ||
+        ''
+      ).trim();
+
+    /*
+     * Your voice API currently uses:
+     *
+     * 1 = Confirmed attending
+     * 2 = Cannot attend
+     */
+    if (
+      voiceDigit === '1'
+    ) {
+      option = '1';
+
+      if (!text) {
+        text =
+          'Confirmed attending';
+      }
+    }
+
+    if (
+      voiceDigit === '2'
+    ) {
+      option = '3';
+
+      if (!text) {
+        text = 'Cannot attend';
+      }
+    }
+
+    /*
+     * Also map textual responses.
+     */
+    const normalizedText =
+      this.normalizeCustomerReply(
+        text
+      );
+
+    if (
+      normalizedText ===
+      'confirmed attending' ||
+      normalizedText ===
+      'will attend' ||
+      normalizedText ===
+      'attending'
+    ) {
+      option = '1';
+      text = 'Confirmed attending';
+    }
+
+    if (
+      normalizedText ===
+      'cannot attend' ||
+      normalizedText ===
+      'unable to attend' ||
+      normalizedText ===
+      'not attending'
+    ) {
+      option = '3';
+      text = 'Cannot attend';
+    }
+
+    if (!text) {
+      text = 'Call response received';
+    }
+
+    return {
+      source: 'VOICE',
+      text,
+      option,
+      negative:
+        option === '3' ||
+        this.isNegativeReplyText(text),
+
+      receivedAt:
+        guest.voiceReplyReceivedAt
+    };
+  }
+
+  private hasReplyValue(
+    value: unknown
+  ): boolean {
+
+    return (
+      value !== null &&
+      value !== undefined &&
+      String(value).trim() !== ''
+    );
+  }
+
+  private normalizeCustomerReply(
+    value: unknown
+  ): string {
+
+    return String(value ?? '')
+      .replace(/[️⃣️]/g, '')
+      .trim()
+      .toLowerCase();
+  }
+
+  private convertSmsReplyToOption(
+    value: string
+  ): CustomerReplyType {
+
+    switch (value) {
+      case '1':
+      case 'on my way':
+        return '1';
+
+      case '2':
+      case 'arriving in 5 minutes':
+        return '2';
+
+      case '3':
+      case 'unable to join':
+      case 'unable to make it':
+      case 'cannot attend':
+        return '3';
+
+      default:
+        return '';
+    }
+  }
+
+  private isNegativeReplyText(
+    text: string
+  ): boolean {
+
+    const normalizedText =
+      String(text || '')
+        .trim()
+        .toLowerCase();
+
+    const negativeTexts = [
+      'cannot attend',
+      'unable to attend',
+      'unable to join',
+      'unable to make it',
+      'will not join',
+      'not attending',
+      'cancelled',
+      'canceled',
+      'declined'
+    ];
+
+    return negativeTexts.some(
+      negativeText =>
+        normalizedText.includes(
+          negativeText
+        )
+    );
+  }
+
+  private getReplyTimestamp(
+    receivedAt?: string
+  ): number {
+
+    if (!receivedAt) {
+      return 0;
+    }
+
+    const timestamp =
+      new Date(
+        receivedAt
+      ).getTime();
+
+    return Number.isNaN(timestamp)
+      ? 0
+      : timestamp;
+  }
+
+  private getCustomerReplySignature(
+    guest: DashboardLiveGuest
+  ): string {
+
+    const replies =
+      this.getGuestReplies(
+        guest
+      );
+
+    if (!replies.length) {
+      return '';
+    }
+
+    return replies
+      .map(reply =>
+        [
+          guest.id,
+          reply.source,
+          reply.text,
+          reply.option,
+          reply.receivedAt || ''
+        ].join('|')
+      )
+      .join('::');
   }
 
   getCustomerReplyText(
@@ -1389,15 +2016,15 @@ export class WaitlistActiveListComponent
     return '';
   }
 
-  private normalizeCustomerReply(
-    value: unknown
-  ): string {
+  // private normalizeCustomerReply(
+  //   value: unknown
+  // ): string {
 
-    return String(value ?? '')
-      .replace(/[️⃣️]/g, '')
-      .trim()
-      .toLowerCase();
-  }
+  //   return String(value ?? '')
+  //     .replace(/[️⃣️]/g, '')
+  //     .trim()
+  //     .toLowerCase();
+  // }
 
   private convertReplyToOption(
     value: string
@@ -1421,26 +2048,26 @@ export class WaitlistActiveListComponent
     }
   }
 
-  private getCustomerReplySignature(
-    guest: DashboardLiveGuest
-  ): string {
+  // private getCustomerReplySignature(
+  //   guest: DashboardLiveGuest
+  // ): string {
 
-    const replyValue =
-      this.getCustomerReplyValue(
-        guest
-      );
+  //   const replyValue =
+  //     this.getCustomerReplyValue(
+  //       guest
+  //     );
 
-    if (!replyValue) {
-      return '';
-    }
+  //   if (!replyValue) {
+  //     return '';
+  //   }
 
-    return [
-      guest.id,
-      replyValue,
-      guest.customerReplyReceivedAt ??
-      ''
-    ].join('|');
-  }
+  //   return [
+  //     guest.id,
+  //     replyValue,
+  //     guest.customerReplyReceivedAt ??
+  //     ''
+  //   ].join('|');
+  // }
 
   private detectNewCustomerReplies(
     guests: DashboardLiveGuest[]
@@ -1451,11 +2078,6 @@ export class WaitlistActiveListComponent
         guest:
           DashboardLiveGuest
       ) => {
-
-        const replyValue =
-          this.getCustomerReplyValue(
-            guest
-          );
 
         const currentSignature =
           this.getCustomerReplySignature(
@@ -1468,17 +2090,15 @@ export class WaitlistActiveListComponent
           );
 
         /*
-         * On initial page load, remember replies
-         * that already exist without shaking.
+         * Initial page loading:
+         * remember existing SMS and voice
+         * responses without shaking the row.
          */
         if (
           !this
             .customerReplyInitialLoadCompleted
         ) {
-          if (
-            replyValue &&
-            currentSignature
-          ) {
+          if (currentSignature) {
             this.previousCustomerReplies.set(
               guest.id,
               currentSignature
@@ -1489,11 +2109,13 @@ export class WaitlistActiveListComponent
         }
 
         /*
-         * Shake only when a new valid reply
-         * appears or the reply changes.
+         * Trigger animation when:
+         *
+         * 1. A new SMS response arrives.
+         * 2. A voice response arrives.
+         * 3. An existing reply changes.
          */
         if (
-          replyValue &&
           currentSignature &&
           currentSignature !==
           previousSignature
