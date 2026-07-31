@@ -51,12 +51,12 @@
 
 .brand p {
   margin: 0;
-  color: rgba(255,255,255,.72);
+  color: rgba(255, 255, 255, .72);
   font-size: 13px;
 }
 
 .section-label {
-  color: rgba(255,255,255,.62);
+  color: rgba(255, 255, 255, .62);
   font-size: 12px;
   font-weight: 900;
   letter-spacing: .8px;
@@ -72,7 +72,7 @@
   height: 38px;
   border: none;
   background: transparent;
-  color: rgba(255,255,255,.78);
+  color: rgba(255, 255, 255, .78);
   border-radius: 10px;
   padding: 0 14px;
   display: flex;
@@ -103,9 +103,101 @@
 .sidebar-footer p {
   margin: 11px 0;
   font-size: 13px;
-  color: rgba(255,255,255,.72);
+  color: rgba(255, 255, 255, .72);
 }
 
 .sidebar-footer i {
   width: 18px;
+}
+
+.sidebar-profile {
+  position: relative;
+  z-index: 20;
+
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  width: 100%;
+  overflow: visible;
+}
+
+.profile-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.profile-logout {
+  position: relative;
+  z-index: 9999;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 42px;
+  height: 42px;
+  min-width: 42px;
+  min-height: 42px;
+
+  padding: 0;
+  border: 0;
+  border-radius: 10px;
+
+  cursor: pointer;
+  pointer-events: auto;
+
+  background: #f1f3f5;
+}
+
+.profile-logout i {
+  pointer-events: none;
+}
+
+.profile-logout:hover {
+  background: #e5e7eb;
+}
+
+.sidebar-login-card {
+  position: relative;
+  z-index: 20;
+
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+
+  pointer-events: auto;
+}
+
+.login-card-content {
+  position: relative;
+  z-index: 1;
+}
+
+.sidebar-login-button {
+  position: relative;
+  z-index: 100;
+
+  width: 100%;
+  min-height: 42px;
+
+  border: none;
+  border-radius: 10px;
+
+  cursor: pointer;
+  pointer-events: auto;
+}
+
+.sidebar-login-button * {
+  pointer-events: none;
+}
+
+.sidebar-spacer {
+  flex: 1;
+  pointer-events: none;
+}
+
+.sidebar-footer {
+  position: relative;
+  z-index: 1;
 }

@@ -70,6 +70,10 @@ export class GuestAccountLoginComponent {
 
   successMessage = '';
 
+  registrationCompleted = false;
+
+registrationEmail = '';
+
 
   /* =====================================================
      LOGIN FORM
@@ -255,24 +259,30 @@ export class GuestAccountLoginComponent {
      SWITCH TO REGISTER
   ====================================================== */
 
-  showRegister(): void {
+ showRegister(): void {
 
-    if (this.isSubmitting) {
-      return;
-    }
-
-    this.mode = 'register';
-
-    this.errorMessage = '';
-
-    this.successMessage = '';
-
-    this.showPassword = false;
-
-    this.showConfirmPassword = false;
-
-    this.loginForm.reset();
+  if (this.isSubmitting) {
+    return;
   }
+
+  this.mode = 'register';
+
+  this.registrationCompleted = false;
+
+  this.registrationEmail = '';
+
+  this.errorMessage = '';
+
+  this.successMessage = '';
+
+  this.showPassword = false;
+
+  this.showConfirmPassword = false;
+
+  this.loginForm.reset();
+
+  this.registerForm.reset();
+}
 
 
   /* =====================================================
@@ -349,91 +359,91 @@ export class GuestAccountLoginComponent {
 
   submitRegister(): void {
 
-    this.errorMessage = '';
+  this.errorMessage = '';
+  this.successMessage = '';
 
-    this.successMessage = '';
-
-    if (this.registerForm.invalid) {
-
-      this.registerForm.markAllAsTouched();
-
-      return;
-    }
-
-    if (this.isSubmitting) {
-      return;
-    }
-
-    const formValue =
-      this.registerForm.getRawValue();
-
-    if (
-      formValue.password !==
-      formValue.confirmPassword
-    ) {
-
-      this.confirmPasswordControl
-        .setErrors({
-          passwordMismatch: true
-        });
-
-      this.confirmPasswordControl
-        .markAsTouched();
-
-      return;
-    }
-
-    const payload: RegisterRequest = {
-
-      name:
-        formValue.name.trim(),
-
-      email:
-        formValue.email
-          .trim()
-          .toLowerCase(),
-
-      phone:
-        formValue.phone.trim(),
-
-      password:
-        formValue.password
-    };
-
-    this.isSubmitting = true;
-
-    this.authService
-      .register(payload)
-      .pipe(
-        finalize(() => {
-          this.isSubmitting = false;
-        })
-      )
-      .subscribe({
-        next: user => {
-
-          this.successMessage =
-            'Account created successfully.';
-
-          this.handleAuthenticationSuccess(
-            user
-          );
-        },
-
-        error: error => {
-
-          console.error(
-            'Guest registration error:',
-            error
-          );
-
-          this.errorMessage =
-            error?.error?.message ||
-            error?.message ||
-            'Unable to create your account.';
-        }
-      });
+  if (this.registerForm.invalid) {
+    this.registerForm.markAllAsTouched();
+    return;
   }
+
+  if (this.isSubmitting) {
+    return;
+  }
+
+  const formValue =
+    this.registerForm.getRawValue();
+
+  if (
+    formValue.password !==
+    formValue.confirmPassword
+  ) {
+    this.confirmPasswordControl.setErrors({
+      passwordMismatch: true
+    });
+
+    this.confirmPasswordControl.markAsTouched();
+
+    return;
+  }
+
+  const payload: RegisterRequest = {
+    name: formValue.name.trim(),
+
+    email: formValue.email
+      .trim()
+      .toLowerCase(),
+
+    phone: formValue.phone.trim(),
+
+    password: formValue.password
+  };
+
+  this.isSubmitting = true;
+
+  this.authService
+    .register(payload)
+    .pipe(
+      finalize(() => {
+        this.isSubmitting = false;
+      })
+    )
+    .subscribe({
+      next: response => {
+
+        console.log(
+          'Guest registration response:',
+          response
+        );
+
+        this.registrationEmail =
+          payload.email;
+
+        this.successMessage =
+          response?.message ||
+          'Registration successful. Please verify your email.';
+          this.registrationCompleted = true;
+
+        this.registerForm.reset();
+
+        this.showPassword = false;
+        this.showConfirmPassword = false;
+      },
+
+      error: error => {
+
+        console.error(
+          'Guest registration error:',
+          error
+        );
+
+        this.errorMessage =
+          error?.error?.message ||
+          error?.message ||
+          'Unable to create your account.';
+      }
+    });
+}
 
 
   /* =====================================================

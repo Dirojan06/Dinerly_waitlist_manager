@@ -38,6 +38,7 @@ import { CustomerAuthInterceptor } from './interceptor/customer-auth.interceptor
 import { WaitlistUserHomeComponent } from './components/waitlist-user-component/waitlist-user-home/waitlist-user-home.component';
 import { WaitlistUserDiscountsComponent } from './components/waitlist-user-component/waitlist-user-discounts/waitlist-user-discounts.component';
 import { WaitlistUserRewardsComponent } from './components/waitlist-user-component/waitlist-user-offers/waitlist-user-rewards.component';
+import { WaitlistUserEmailVerifyComponent } from './components/waitlist-user-component/waitlist-user-email-verify/waitlist-user-email-verify.component';
 
 @NgModule({
   declarations: [
@@ -68,7 +69,8 @@ import { WaitlistUserRewardsComponent } from './components/waitlist-user-compone
     GuestAccountLoginComponent,
     WaitlistUserHomeComponent,
     WaitlistUserDiscountsComponent,
-    WaitlistUserRewardsComponent
+    WaitlistUserRewardsComponent,
+    WaitlistUserEmailVerifyComponent
   ],
   imports: [
     BrowserModule,

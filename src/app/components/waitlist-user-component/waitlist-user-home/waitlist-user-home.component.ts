@@ -2,6 +2,7 @@ import {
   Component,
   EventEmitter,
   Input,
+  OnInit,
   Output
 } from '@angular/core';
 
@@ -11,13 +12,14 @@ import {
   PortalOffer,
   PortalRestaurant
 } from 'src/app/models/guest-portal.model';
+import { MenuService } from 'src/app/services/menu.service';
 
 @Component({
   selector: 'app-waitlist-user-home',
   templateUrl: './waitlist-user-home.component.html',
   styleUrls: ['./waitlist-user-home.component.css']
 })
-export class WaitlistUserHomeComponent {
+export class WaitlistUserHomeComponent implements OnInit{
 
   @Input()
   waitlistGuest: any = null;
@@ -171,6 +173,14 @@ export class WaitlistUserHomeComponent {
       imageClass: 'offer-purple'
     }
   ];
+
+  constructor(private menuService: MenuService){
+
+  }
+
+  ngOnInit(): void {
+    
+  }
 
   openTab(tab: GuestPortalTab): void {
     this.tabChange.emit(tab);

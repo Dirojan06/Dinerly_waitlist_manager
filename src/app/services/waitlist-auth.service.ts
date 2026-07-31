@@ -3,7 +3,8 @@ import {
 } from '@angular/core';
 
 import {
-  HttpClient
+  HttpClient,
+  HttpParams
 } from '@angular/common/http';
 
 import {
@@ -20,7 +21,9 @@ import {
 import type {
   AuthUser,
   LoginResponse,
-  RegisterRequest
+  RegisterRequest,
+  RegisterResponse,
+  VerifyEmailResponse
 } from '../models/waitlist-auth.model';
 
 import {
@@ -99,41 +102,44 @@ export class WaitlistAuthService {
   ====================================================== */
 
   register(
-    payload: RegisterRequest
-  ): Observable<AuthUser> {
+  payload: RegisterRequest
+): Observable<RegisterResponse> {
 
-    const requestBody: RegisterRequest = {
-      name: payload.name.trim(),
+  const requestBody: RegisterRequest = {
+    name: payload.name.trim(),
 
-      email:
-        payload.email
-          .trim()
-          .toLowerCase(),
+    email:
+      payload.email
+        .trim()
+        .toLowerCase(),
 
-      phone:
-        payload.phone.trim(),
+    phone:
+      payload.phone.trim(),
 
-      password:
-        payload.password
-    };
+    password:
+      payload.password
+  };
 
-    return this.http
-      .post<LoginResponse>(
-        `${this.baseUrl}/auth/register`,
-        requestBody
-      )
-      .pipe(
-        tap(response => {
-          this.storeAuthenticationResponse(
-            response
-          );
-        }),
+  return this.http.post<RegisterResponse>(
+    `${this.baseUrl}/auth/register`,
+    requestBody
+  );
+}
 
-        map(response => {
-          return response.data.user;
-        })
-      );
-  }
+  verifyEmail(
+  token: string
+): Observable<VerifyEmailResponse> {
+
+  const params = new HttpParams()
+    .set('token', token);
+
+  return this.http.get<VerifyEmailResponse>(
+    `${this.baseUrl}/auth/verify-email`,
+    {
+      params
+    }
+  );
+}
 
 
   /* =====================================================

@@ -135,6 +135,15 @@
   cursor: pointer;
 }
 
+.food-img {
+    width: 90px;
+    height: 93px;
+    object-fit: cover;
+    border-radius: 50%;
+    border: 2px solid rgb(127 0 255 / 65%);
+    box-shadow: 0 10px 24px rgb(204 136 255 / 35%), 0 0 0 8px rgba(253, 151, 2, 0.06);
+}
+
 .menu-purple {
   background: linear-gradient(135deg, #8a61e5, #51249b);
 }

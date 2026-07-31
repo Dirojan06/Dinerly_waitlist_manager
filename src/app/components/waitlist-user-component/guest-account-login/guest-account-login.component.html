@@ -1,18 +1,5 @@
 <div class="login-panel">
 
-  <!-- =====================================================
-       CLOSE BUTTON
-  ====================================================== -->
-
-  <button
-    type="button"
-    class="login-close-btn"
-    [disabled]="isSubmitting"
-    (click)="close()">
-
-    <i class="fa-solid fa-xmark"></i>
-
-  </button>
 
 
   <!-- =====================================================
@@ -44,9 +31,7 @@
     </p>
 
 
-    <form
-      [formGroup]="loginForm"
-      (ngSubmit)="submitLogin()">
+    <form [formGroup]="loginForm" (ngSubmit)="submitLogin()">
 
 
       <!-- Email -->
@@ -61,18 +46,12 @@
 
           <i class="fa-regular fa-envelope"></i>
 
-          <input
-            id="customerEmail"
-            type="email"
-            formControlName="email"
-            placeholder="you@example.com"
+          <input id="customerEmail" type="email" formControlName="email" placeholder="you@example.com"
             autocomplete="email">
 
         </div>
 
-        <small
-          class="field-error"
-          *ngIf="
+        <small class="field-error" *ngIf="
             emailControl.touched &&
             emailControl.hasError('required')
           ">
@@ -81,9 +60,7 @@
 
         </small>
 
-        <small
-          class="field-error"
-          *ngIf="
+        <small class="field-error" *ngIf="
             emailControl.touched &&
             !emailControl.hasError('required') &&
             emailControl.hasError('email')
@@ -108,28 +85,17 @@
 
           <i class="fa-solid fa-lock"></i>
 
-          <input
-            id="customerPassword"
-            [type]="
+          <input id="customerPassword" [type]="
               showPassword
                 ? 'text'
                 : 'password'
-            "
-            formControlName="password"
-            placeholder="Enter your password"
-            autocomplete="current-password">
+            " formControlName="password" placeholder="Enter your password" autocomplete="current-password">
 
-          <button
-            type="button"
-            class="password-toggle"
-            aria-label="Show or hide password"
-            (click)="
+          <button type="button" class="password-toggle" aria-label="Show or hide password" (click)="
               showPassword = !showPassword
             ">
 
-            <i
-              class="fa-regular"
-              [ngClass]="
+            <i class="fa-regular" [ngClass]="
                 showPassword
                   ? 'fa-eye-slash'
                   : 'fa-eye'
@@ -140,9 +106,7 @@
 
         </div>
 
-        <small
-          class="field-error"
-          *ngIf="
+        <small class="field-error" *ngIf="
             passwordControl.touched &&
             passwordControl.hasError('required')
           ">
@@ -151,9 +115,7 @@
 
         </small>
 
-        <small
-          class="field-error"
-          *ngIf="
+        <small class="field-error" *ngIf="
             passwordControl.touched &&
             !passwordControl.hasError('required') &&
             passwordControl.hasError('minlength')
@@ -169,12 +131,9 @@
 
       <!-- Error -->
 
-      <div
-        class="login-error"
-        *ngIf="errorMessage">
+      <div class="login-error" *ngIf="errorMessage">
 
-        <i
-          class="fa-solid
+        <i class="fa-solid
                  fa-circle-exclamation">
         </i>
 
@@ -185,9 +144,7 @@
 
       <!-- Success -->
 
-      <div
-        class="login-success"
-        *ngIf="successMessage">
+      <div class="login-success" *ngIf="successMessage">
 
         <i class="fa-solid fa-circle-check"></i>
 
@@ -198,14 +155,9 @@
 
       <!-- Login button -->
 
-      <button
-        type="submit"
-        class="login-submit-btn"
-        [disabled]="isSubmitting">
+      <button type="submit" class="login-submit-btn" [disabled]="isSubmitting">
 
-        <i
-          class="fa-solid"
-          [ngClass]="
+        <i class="fa-solid" [ngClass]="
             isSubmitting
               ? 'fa-spinner fa-spin'
               : 'fa-arrow-right-to-bracket'
@@ -213,9 +165,9 @@
         </i>
 
         {{
-          isSubmitting
-            ? 'Logging in...'
-            : 'Login with email'
+        isSubmitting
+        ? 'Logging in...'
+        : 'Login with email'
         }}
 
       </button>
@@ -234,11 +186,7 @@
     </div>
 
 
-    <button
-      type="button"
-      class="create-account-btn"
-      [disabled]="isSubmitting"
-      (click)="showRegister()">
+    <button type="button" class="create-account-btn" [disabled]="isSubmitting" (click)="showRegister()">
 
       Create an account
 
@@ -263,17 +211,30 @@
       CREATE DINERLY ACCOUNT
     </p>
 
-    <h2>Create your account</h2>
+    <h2>
 
-    <p class="login-description">
+      {{
+
+      registrationCompleted
+
+      ? 'Check your email'
+
+      : 'Create your account'
+
+      }}
+
+    </h2>
+
+    <p class="login-description" *ngIf="!registrationCompleted">
+
       Register to access food, offers,
+
       rewards and your account history.
+
     </p>
 
 
-    <form
-      [formGroup]="registerForm"
-      (ngSubmit)="submitRegister()">
+    <form *ngIf="!successMessage" [formGroup]="registerForm" (ngSubmit)="submitRegister()">
 
 
       <!-- Name -->
@@ -288,18 +249,12 @@
 
           <i class="fa-regular fa-user"></i>
 
-          <input
-            id="registerName"
-            type="text"
-            formControlName="name"
-            placeholder="Enter your full name"
+          <input id="registerName" type="text" formControlName="name" placeholder="Enter your full name"
             autocomplete="name">
 
         </div>
 
-        <small
-          class="field-error"
-          *ngIf="
+        <small class="field-error" *ngIf="
             registerNameControl.touched &&
             registerNameControl.hasError(
               'required'
@@ -310,9 +265,7 @@
 
         </small>
 
-        <small
-          class="field-error"
-          *ngIf="
+        <small class="field-error" *ngIf="
             registerNameControl.touched &&
             !registerNameControl.hasError(
               'required'
@@ -342,18 +295,12 @@
 
           <i class="fa-regular fa-envelope"></i>
 
-          <input
-            id="registerEmail"
-            type="email"
-            formControlName="email"
-            placeholder="you@example.com"
+          <input id="registerEmail" type="email" formControlName="email" placeholder="you@example.com"
             autocomplete="email">
 
         </div>
 
-        <small
-          class="field-error"
-          *ngIf="
+        <small class="field-error" *ngIf="
             registerEmailControl.touched &&
             registerEmailControl.hasError(
               'required'
@@ -364,9 +311,7 @@
 
         </small>
 
-        <small
-          class="field-error"
-          *ngIf="
+        <small class="field-error" *ngIf="
             registerEmailControl.touched &&
             !registerEmailControl.hasError(
               'required'
@@ -395,18 +340,11 @@
 
           <i class="fa-solid fa-phone"></i>
 
-          <input
-            id="registerPhone"
-            type="tel"
-            formControlName="phone"
-            placeholder="+14165551234"
-            autocomplete="tel">
+          <input id="registerPhone" type="tel" formControlName="phone" placeholder="+14165551234" autocomplete="tel">
 
         </div>
 
-        <small
-          class="field-error"
-          *ngIf="
+        <small class="field-error" *ngIf="
             registerPhoneControl.touched &&
             registerPhoneControl.hasError(
               'required'
@@ -417,9 +355,7 @@
 
         </small>
 
-        <small
-          class="field-error"
-          *ngIf="
+        <small class="field-error" *ngIf="
             registerPhoneControl.touched &&
             !registerPhoneControl.hasError(
               'required'
@@ -449,28 +385,17 @@
 
           <i class="fa-solid fa-lock"></i>
 
-          <input
-            id="registerPassword"
-            [type]="
+          <input id="registerPassword" [type]="
               showPassword
                 ? 'text'
                 : 'password'
-            "
-            formControlName="password"
-            placeholder="Create a password"
-            autocomplete="new-password">
+            " formControlName="password" placeholder="Create a password" autocomplete="new-password">
 
-          <button
-            type="button"
-            class="password-toggle"
-            aria-label="Show or hide password"
-            (click)="
+          <button type="button" class="password-toggle" aria-label="Show or hide password" (click)="
               showPassword = !showPassword
             ">
 
-            <i
-              class="fa-regular"
-              [ngClass]="
+            <i class="fa-regular" [ngClass]="
                 showPassword
                   ? 'fa-eye-slash'
                   : 'fa-eye'
@@ -481,9 +406,7 @@
 
         </div>
 
-        <small
-          class="field-error"
-          *ngIf="
+        <small class="field-error" *ngIf="
             registerPasswordControl.touched &&
             registerPasswordControl.hasError(
               'required'
@@ -494,9 +417,7 @@
 
         </small>
 
-        <small
-          class="field-error"
-          *ngIf="
+        <small class="field-error" *ngIf="
             registerPasswordControl.touched &&
             !registerPasswordControl.hasError(
               'required'
@@ -526,29 +447,18 @@
 
           <i class="fa-solid fa-lock"></i>
 
-          <input
-            id="confirmPassword"
-            [type]="
+          <input id="confirmPassword" [type]="
               showConfirmPassword
                 ? 'text'
                 : 'password'
-            "
-            formControlName="confirmPassword"
-            placeholder="Confirm your password"
-            autocomplete="new-password">
+            " formControlName="confirmPassword" placeholder="Confirm your password" autocomplete="new-password">
 
-          <button
-            type="button"
-            class="password-toggle"
-            aria-label="Show or hide password"
-            (click)="
+          <button type="button" class="password-toggle" aria-label="Show or hide password" (click)="
               showConfirmPassword =
                 !showConfirmPassword
             ">
 
-            <i
-              class="fa-regular"
-              [ngClass]="
+            <i class="fa-regular" [ngClass]="
                 showConfirmPassword
                   ? 'fa-eye-slash'
                   : 'fa-eye'
@@ -559,9 +469,7 @@
 
         </div>
 
-        <small
-          class="field-error"
-          *ngIf="
+        <small class="field-error" *ngIf="
             confirmPasswordControl.touched &&
             confirmPasswordControl.hasError(
               'required'
@@ -572,9 +480,7 @@
 
         </small>
 
-        <small
-          class="field-error"
-          *ngIf="
+        <small class="field-error" *ngIf="
             confirmPasswordControl.touched &&
             confirmPasswordControl.hasError(
               'passwordMismatch'
@@ -591,12 +497,9 @@
 
       <!-- Error -->
 
-      <div
-        class="login-error"
-        *ngIf="errorMessage">
+      <div class="login-error" *ngIf="errorMessage">
 
-        <i
-          class="fa-solid
+        <i class="fa-solid
                  fa-circle-exclamation">
         </i>
 
@@ -605,29 +508,14 @@
       </div>
 
 
-      <!-- Success -->
 
-      <div
-        class="login-success"
-        *ngIf="successMessage">
-
-        <i class="fa-solid fa-circle-check"></i>
-
-        {{ successMessage }}
-
-      </div>
 
 
       <!-- Register button -->
 
-      <button
-        type="submit"
-        class="login-submit-btn"
-        [disabled]="isSubmitting">
+      <button type="submit" class="login-submit-btn" [disabled]="isSubmitting">
 
-        <i
-          class="fa-solid"
-          [ngClass]="
+        <i class="fa-solid" [ngClass]="
             isSubmitting
               ? 'fa-spinner fa-spin'
               : 'fa-user-plus'
@@ -635,36 +523,68 @@
         </i>
 
         {{
-          isSubmitting
-            ? 'Creating account...'
-            : 'Create account'
+        isSubmitting
+        ? 'Creating account...'
+        : 'Create account'
         }}
 
       </button>
 
     </form>
+    <!-- Success -->
 
+    <div class="verification-message" *ngIf="registrationCompleted">
 
-    <div class="login-separator">
+      <div class="verification-icon">
 
-      <span></span>
+        <i class="fa-regular fa-envelope"></i>
 
-      <p>Already have an account?</p>
+      </div>
 
-      <span></span>
+      <div class="verification-content">
+
+        <strong>
+          Please verify your email
+        </strong>
+
+        <p>
+          We sent a verification link to:
+        </p>
+
+        <p class="verification-email">
+          {{ registrationEmail }}
+        </p>
+
+        <p>
+          Open your email and click the
+          verification link to activate your
+          Dinerly account.
+        </p>
+
+      </div>
 
     </div>
 
 
-    <button
-      type="button"
-      class="create-account-btn"
-      [disabled]="isSubmitting"
-      (click)="showLogin()">
+    <ng-container *ngIf="!registrationCompleted">
 
-      Back to login
+      <div class="login-separator">
 
-    </button>
+        <span></span>
+
+        <p>Already have an account?</p>
+
+        <span></span>
+
+      </div>
+
+      <button type="button" class="create-account-btn" [disabled]="isSubmitting" (click)="showLogin()">
+
+        Back to login
+
+      </button>
+
+    </ng-container>
 
   </ng-container>
 

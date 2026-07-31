@@ -2,6 +2,7 @@ import {
   Component,
   OnInit
 } from '@angular/core';
+import { ActivatedRoute, Router } from '@angular/router';
 
 import {
   GuestAccount,
@@ -42,11 +43,64 @@ export class WaitlistUserComponentComponent
   private requestedAccountTab:
     GuestPortalTab | null = null;
 
+    accountSuccessMessage='';
 
+
+    constructor(
+  private route: ActivatedRoute,
+  private router: Router
+) {}
   ngOnInit(): void {
     this.loadTheme();
     this.loadWaitlistGuest();
     this.loadCustomerAccount();
+    this.route.queryParamMap
+
+    .subscribe(params => {
+
+      const shouldOpenLogin =
+
+        params.get('accountLogin') ===
+
+        'true';
+
+      const emailVerified =
+
+        params.get('emailVerified') ===
+
+        'true';
+
+      if (shouldOpenLogin) {
+
+        this.openAccountLoginPopup();
+
+        if (emailVerified) {
+
+          this.accountSuccessMessage =
+
+            'Your email has been verified successfully. Please login.';
+
+        }
+
+        this.router.navigate(
+
+          [],
+
+          {
+
+            relativeTo: this.route,
+
+            queryParams: {},
+
+            replaceUrl: true
+
+          }
+
+        );
+
+      }
+
+    });
   }
 
 

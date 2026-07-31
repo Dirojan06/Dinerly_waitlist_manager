@@ -5,6 +5,7 @@ import {
   OnInit,
   SimpleChanges
 } from '@angular/core';
+import { Category, Dish } from 'src/app/models/waitlist-menu.model';
 
 import {
   MenuService
@@ -47,6 +48,13 @@ export class WaitlistUserMenuComponent
   menuErrorMessage = '';
 
   private menuLoaded = false;
+
+  categories: Category[] = [];
+  selectedCategoryId?: any;
+  selectedCategoryName = '';
+  isDirectMenuRoute = false;
+
+  dishes: Dish[] = [];
 
 
   cuisines = [
@@ -116,6 +124,7 @@ export class WaitlistUserMenuComponent
     );
 
     this.loadMenuWhenActive();
+
   }
 
 
@@ -205,10 +214,13 @@ export class WaitlistUserMenuComponent
             'Menu response:',
             response
           );
-
+          this.categories = response;
           this.menuLoaded = true;
 
           this.isLoadingMenu = false;
+          if (response.length > 0) {
+          this.onCategorySelect(response[0].id, response[0].name);
+        }
 
           /*
            * Map the API response here when
@@ -233,6 +245,24 @@ export class WaitlistUserMenuComponent
             'Unable to load menu.';
         }
       });
+  }
+
+  onCategorySelect(categoryId: number, categoryName: string): void {
+    this.selectedCategoryId = categoryId;
+    this.selectedCategoryName = categoryName;
+
+      this.menuService.getDishesByCategory(categoryName).subscribe(res => {
+        this.dishes = res;
+
+        this.dishes = res.filter(dish => dish.status?.toLowerCase() === 'active');
+      });
+    
+
+  }
+  onImageLoad(event: Event) {
+    const img = event.target as HTMLImageElement;
+    img.classList.remove('loading');
+    img.classList.add('loaded');
   }
 
 

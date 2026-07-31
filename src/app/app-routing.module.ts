@@ -13,6 +13,7 @@ import { AdminHistoryComponent } from './components/waitlist-admin/admin-history
 import { AdminSettingsComponent } from './components/waitlist-admin/admin-settings/admin-settings.component';
 import { WaitlistSettingsComponent } from './components/waitlist-restaurant-components/waitlist-settings/waitlist-settings.component';
 import { WaitlistRestaurantHistoryComponent } from './components/waitlist-restaurant-components/waitlist-restaurant-history/waitlist-restaurant-history.component';
+import { WaitlistUserEmailVerifyComponent } from './components/waitlist-user-component/waitlist-user-email-verify/waitlist-user-email-verify.component';
 
 
 
@@ -31,6 +32,13 @@ const routes: Routes = [
   {
     path: 'user',
     component: WaitlistUserComponentComponent
+  },
+  {
+
+    path: 'verify-email',
+
+    component: WaitlistUserEmailVerifyComponent
+
   },
   // {
   //   path: 'user/waiting',

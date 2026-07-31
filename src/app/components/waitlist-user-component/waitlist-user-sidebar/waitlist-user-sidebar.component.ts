@@ -75,7 +75,7 @@ export class WaitlistUserSidebarComponent
   constructor(
     private waitlistApi:
       WaitlistApiRestaurantService
-  ) {}
+  ) { }
 
 
   ngOnInit(): void {
@@ -99,15 +99,33 @@ export class WaitlistUserSidebarComponent
   }
 
 
-  loginWithEmail(): void {
+  loginWithEmail(
+  event: MouseEvent
+): void {
 
-    this.accountLogin.emit();
-  }
+  event.preventDefault();
+  event.stopPropagation();
+
+  console.log(
+    'Sidebar login clicked'
+  );
+
+  this.accountLogin.emit();
+}
 
 
-  logoutAccount(): void {
+  logoutAccount(event: MouseEvent): void {
+
+    event.preventDefault();
+
+    event.stopPropagation();
+
+    alert('Logout button clicked');
+
+    console.log('Logout button clicked');
 
     this.accountLogout.emit();
+
   }
 
 

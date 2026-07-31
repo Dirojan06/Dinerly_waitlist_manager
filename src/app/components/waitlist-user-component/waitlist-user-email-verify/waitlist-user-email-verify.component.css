@@ -1,0 +1,250 @@
+.verify-email-page {
+  min-height: 100vh;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 24px;
+
+  background:
+    linear-gradient(
+      135deg,
+      #f7f9fc,
+      #eef3f8
+    );
+}
+
+.verify-card {
+  width: 100%;
+  max-width: 470px;
+
+  padding: 40px 32px;
+
+  border-radius: 20px;
+
+  background: #ffffff;
+
+  box-shadow:
+    0 20px 55px
+    rgba(31, 45, 61, 0.12);
+
+  text-align: center;
+}
+
+.verify-logo {
+  margin-bottom: 24px;
+}
+
+.verify-logo img {
+  width: 60px;
+  height: auto;
+}
+
+.loading-spinner {
+  margin-bottom: 20px;
+
+  color: #e76f51;
+  font-size: 48px;
+}
+
+.status-icon {
+  width: 78px;
+  height: 78px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  margin: 0 auto 22px;
+
+  border-radius: 50%;
+
+  font-size: 34px;
+}
+
+.status-icon.success {
+  color: #198754;
+  background: #d8f3dc;
+}
+
+.status-icon.error {
+  color: #dc3545;
+  background: #fde2e4;
+}
+
+.verify-card h1 {
+  margin: 0 0 12px;
+
+  color: #222831;
+  font-size: 28px;
+}
+
+.verify-card p {
+  margin: 0;
+
+  color: #68707c;
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+.redirect-message {
+  margin-top: 12px !important;
+
+  color: #198754 !important;
+  font-weight: 600;
+}
+
+.login-button {
+  margin-top: 24px;
+  padding: 13px 24px;
+
+  border: none;
+  border-radius: 10px;
+
+  background: #e76f51;
+  color: #ffffff;
+
+  font-size: 14px;
+  font-weight: 600;
+
+  cursor: pointer;
+}
+
+.verification-popup-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 20px;
+
+  background:
+    rgba(17, 24, 39, 0.55);
+}
+
+.verification-popup {
+  position: relative;
+
+  width: 100%;
+  max-width: 420px;
+
+  padding: 34px 28px;
+
+  border-radius: 18px;
+
+  background: #ffffff;
+
+  text-align: center;
+
+  box-shadow:
+    0 25px 65px
+    rgba(0, 0, 0, 0.2);
+
+  animation:
+    popupAppear 0.25s ease-out;
+}
+
+.popup-close {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+
+  width: 34px;
+  height: 34px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border: none;
+  border-radius: 50%;
+
+  background: #f1f3f5;
+  color: #495057;
+
+  cursor: pointer;
+}
+
+.popup-icon {
+  margin-bottom: 18px;
+
+  color: #198754;
+  font-size: 58px;
+}
+
+.error-popup .popup-icon {
+  color: #dc3545;
+}
+
+.verification-popup h2 {
+  margin: 0 0 10px;
+
+  color: #212529;
+  font-size: 23px;
+}
+
+.verification-popup p {
+  margin: 0;
+
+  color: #6c757d;
+  font-size: 14px;
+  line-height: 1.55;
+}
+
+.popup-timer {
+  margin-top: 12px !important;
+
+  color: #198754 !important;
+  font-weight: 600;
+}
+
+.popup-login-button {
+  width: 100%;
+
+  margin-top: 22px;
+  padding: 13px 18px;
+
+  border: none;
+  border-radius: 10px;
+
+  background: #198754;
+  color: #ffffff;
+
+  font-size: 14px;
+  font-weight: 600;
+
+  cursor: pointer;
+}
+
+@keyframes popupAppear {
+
+  from {
+    opacity: 0;
+    transform: scale(0.92);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@media (max-width: 600px) {
+
+  .verify-card {
+    padding: 32px 20px;
+  }
+
+  .verify-card h1 {
+    font-size: 23px;
+  }
+
+  .verification-popup {
+    padding:
+      30px 20px 24px;
+  }
+}

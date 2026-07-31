@@ -20,13 +20,14 @@
   <div class="food-categories">
     <button
       type="button"
-      *ngFor="let cuisine of cuisines"
+      *ngFor="let 
+        category of categories"
       [class.active]="
-        selectedCuisine === cuisine
+        category.id === selectedCategoryId
       "
-      (click)="selectedCuisine = cuisine"
+      (click)="onCategorySelect(category.id, category.name)"
     >
-      {{ cuisine }}
+      {{ category.name }}
     </button>
   </div>
 
@@ -34,48 +35,38 @@
 
     <article
       class="food-card"
-      *ngFor="
-        let restaurant of
-        filteredRestaurants
-      "
+      *ngFor="let item of dishes; let i = index"
     >
 
       <div
-        class="food-image"
-        [ngClass]="restaurant.imageClass"
-      >
-        <div class="food-plate"></div>
+        class="food-image">
+        <div class="food-plate">
+          <img [src]="item.imageUrl " [alt]="item.name" class="food-img loading" loading="lazy"
+                    decoding="async" (load)="onImageLoad($event)">
+        </div>
       </div>
 
       <div class="food-body">
 
         <h3>
-          {{ restaurant.name }}
+          {{ item.name }}
         </h3>
 
         <p>
-          {{ restaurant.cuisine }}
+          CAD{{ item.price }}$
           ·
-          {{ restaurant.distance }}
+          {{ item.calories }} Calories
         </p>
 
         <div class="food-meta">
           <span>
-            ★ {{ restaurant.rating }}
+            ★ {{ item.category }}
           </span>
 
-          <span>
-            {{ restaurant.deliveryTime }}
-          </span>
 
-          <span>
-            {{ restaurant.priceLevel }}
-          </span>
         </div>
 
-        <button type="button">
-          View menu
-        </button>
+       
 
       </div>
 
