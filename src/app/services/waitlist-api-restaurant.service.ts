@@ -14,6 +14,24 @@ export class WaitlistApiRestaurantService {
   private readonly baseUrl = environment.apiUrl;
   constructor(private http: HttpClient, private auth: WaitlistAuthService) { }
 
+  private getRestaurantHeaders():
+    HttpHeaders {
+
+    const token =
+      this.auth.getRestaurantToken();
+
+    if (!token) {
+      console.warn(
+        'Restaurant token is missing'
+      );
+    }
+
+    return new HttpHeaders({
+      Authorization:
+        `Bearer ${token || ''}`
+    });
+  }
+
   // ************************************************************************************ GUEST API STARTS ******************************************************************************* //
 
   // this is for user or guest api to join the waitlist
@@ -63,42 +81,43 @@ export class WaitlistApiRestaurantService {
 
   // get dashboard data api
   getDashboardData(restaurantId: number): Observable<DashboardResponse> {
-    const token = this.auth.getToken();
+    const token =
+      this.auth.getRestaurantToken();
 
-    const headers = new HttpHeaders({
-      Authorization: `Bearer ${token}`
-    });
+    const headers =
+      this.getRestaurantHeaders();
+
     return this.http.get<DashboardResponse>(`${this.baseUrl}/restaurants/${restaurantId}/dashboard`, { headers });
 
   }
 
   getDashboardStatus(restaurantId: number): Observable<DashboardWaitlistResponse> {
-    const token = this.auth.getToken();
+    const token =
+      this.auth.getRestaurantToken();
 
-    const headers = new HttpHeaders({
-      Authorization: `Bearer ${token}`
-    });
+    const headers =
+      this.getRestaurantHeaders();
     return this.http.get<DashboardWaitlistResponse>(`${this.baseUrl}/restaurants/${restaurantId}/waitlist`, { headers });
 
   }
 
   addGuestInWaitlist(restaurantId: number, payload: addGuestToWaitlistRequest): Observable<any> {
-    const token = this.auth.getToken();
+    const token =
+      this.auth.getRestaurantToken();
 
-    const headers = new HttpHeaders({
-      Authorization: `Bearer ${token}`
-    });
+    const headers =
+      this.getRestaurantHeaders();
 
     return this.http.post(`${this.baseUrl}/restaurants/${restaurantId}/waitlist`, payload, { headers });
   }
 
   // Get guests based on restaurantId and optional filters api
   getGuestsStatus(restaurantId: number, status?: string, date?: string): Observable<PendingGuestResponse> {
-    const token = this.auth.getToken();
+    const token =
+      this.auth.getRestaurantToken();
 
-    const headers = new HttpHeaders({
-      Authorization: `Bearer ${token}`
-    });
+    const headers =
+      this.getRestaurantHeaders();
     let params = new HttpParams();
 
     if (status) {
@@ -113,11 +132,11 @@ export class WaitlistApiRestaurantService {
 
   // Get waiting guests based on restaurantId and optional filters
   getWaitingGuests(restaurantId: number, status?: string, date?: string): Observable<WaitingGuestResponse> {
-    const token = this.auth.getToken();
+    const token =
+      this.auth.getRestaurantToken();
 
-    const headers = new HttpHeaders({
-      Authorization: `Bearer ${token}`
-    });
+    const headers =
+      this.getRestaurantHeaders();
     let params = new HttpParams();
 
     if (status) {
@@ -132,11 +151,11 @@ export class WaitlistApiRestaurantService {
 
   // Get notified guests based on restaurantId and optional filters api
   getNotifiedGuests(restaurantId: number, status?: string, date?: string): Observable<NotifiedGuestResponse> {
-    const token = this.auth.getToken();
+    const token =
+      this.auth.getRestaurantToken();
 
-    const headers = new HttpHeaders({
-      Authorization: `Bearer ${token}`
-    });
+    const headers =
+      this.getRestaurantHeaders();
     let params = new HttpParams();
 
     if (status) {
@@ -151,11 +170,11 @@ export class WaitlistApiRestaurantService {
 
   // Get seated guests based on restaurantId and optional filters api
   getSeatedGuests(restaurantId: number, status?: string, date?: string): Observable<SeatedGuestResponse> {
-    const token = this.auth.getToken();
+    const token =
+      this.auth.getRestaurantToken();
 
-    const headers = new HttpHeaders({
-      Authorization: `Bearer ${token}`
-    });
+    const headers =
+      this.getRestaurantHeaders();
     let params = new HttpParams();
 
     if (status) {
@@ -170,11 +189,11 @@ export class WaitlistApiRestaurantService {
 
   // Get cancelled guests based on restaurantId and optional filters api
   getCancelledGuests(restaurantId: number, status?: string, date?: string): Observable<CancelledGuestResponse> {
-    const token = this.auth.getToken();
+    const token =
+      this.auth.getRestaurantToken();
 
-    const headers = new HttpHeaders({
-      Authorization: `Bearer ${token}`
-    });
+    const headers =
+      this.getRestaurantHeaders();
     let params = new HttpParams();
 
     if (status) {
@@ -189,33 +208,33 @@ export class WaitlistApiRestaurantService {
 
   // approve guest in pending list api
   approveGuest(restaurantId: number, waitlistId: number, payload: ApproveWaitlistRequest): Observable<any> {
-    const token = this.auth.getToken();
+    const token =
+      this.auth.getRestaurantToken();
 
-    const headers = new HttpHeaders({
-      Authorization: `Bearer ${token}`
-    });
+    const headers =
+      this.getRestaurantHeaders();
 
     return this.http.post(`${this.baseUrl}/restaurants/${restaurantId}/waitlist/${waitlistId}/approve`, payload, { headers });
   }
 
   // reject guest in the pending list api
   rejectGuest(restaurantId: number, waitlistId: number): Observable<any> {
-    const token = this.auth.getToken();
+    const token =
+      this.auth.getRestaurantToken();
 
-    const headers = new HttpHeaders({
-      Authorization: `Bearer ${token}`
-    });
+    const headers =
+      this.getRestaurantHeaders();
 
     return this.http.delete(`${this.baseUrl}/restaurants/${restaurantId}/waitlist/${waitlistId}`, { headers });
   }
 
   // notify guest api
   notifyToGuest(restaurantId: number, waitlistId: number, payload: notifiyguestcallRequest): Observable<any> {
-    const token = this.auth.getToken();
+    const token =
+      this.auth.getRestaurantToken();
 
-    const headers = new HttpHeaders({
-      Authorization: `Bearer ${token}`
-    });
+    const headers =
+      this.getRestaurantHeaders();
 
     return this.http.post(`${this.baseUrl}/restaurants/${restaurantId}/waitlist/${waitlistId}/notify`, payload, { headers });
   }
@@ -223,11 +242,11 @@ export class WaitlistApiRestaurantService {
   //seated guest api
   seatedGuest(restaurantId: number, waitlistId: number, payload?: seatedGuestcallRequest): Observable<any> {
 
-    const token = this.auth.getToken();
+    const token =
+      this.auth.getRestaurantToken();
 
-    const headers = new HttpHeaders({
-      Authorization: `Bearer ${token}`
-    });
+    const headers =
+      this.getRestaurantHeaders();
 
     return this.http.post(`${this.baseUrl}/restaurants/${restaurantId}/waitlist/${waitlistId}/seat`, payload, { headers });
   }
@@ -235,11 +254,11 @@ export class WaitlistApiRestaurantService {
   //get restaurant tables list api
   getRestaurantTableslist(restaurantId: number): Observable<any> {
 
-    const token = this.auth.getToken();
+    const token =
+      this.auth.getRestaurantToken();
 
-    const headers = new HttpHeaders({
-      Authorization: `Bearer ${token}`
-    });
+    const headers =
+      this.getRestaurantHeaders();
 
     return this.http.get<TablelistResponse>(`${this.baseUrl}/restaurants/${restaurantId}/tables`, { headers });
   }
@@ -247,11 +266,11 @@ export class WaitlistApiRestaurantService {
   //update restaurant table status api
 
   updateTableStatus(restaurantId: number, tableId: number, status: string): Observable<any> {
-    const token = this.auth.getToken();
+    const token =
+      this.auth.getRestaurantToken();
 
-    const headers = new HttpHeaders({
-      Authorization: `Bearer ${token}`
-    });
+    const headers =
+      this.getRestaurantHeaders();
 
     let params = new HttpParams();
 
@@ -263,43 +282,43 @@ export class WaitlistApiRestaurantService {
 
   // add table to restaurant api
   addTabletoRestaurant(restaurantId: number, payload: addTabletoRestaurantRequest): Observable<any> {
-    const token = this.auth.getToken();
+    const token =
+      this.auth.getRestaurantToken();
 
-    const headers = new HttpHeaders({
-      Authorization: `Bearer ${token}`
-    });
+    const headers =
+      this.getRestaurantHeaders();
     return this.http.post(`${this.baseUrl}/restaurants/${restaurantId}/tables`, payload, { headers });
   }
 
   // send custom notification to guest api
 
   sendNoficationToGuest(restaurantId: number, waitlistId: number, payload: sendNotificationRequest): Observable<any> {
-    const token = this.auth.getToken();
+    const token =
+      this.auth.getRestaurantToken();
 
-    const headers = new HttpHeaders({
-      Authorization: `Bearer ${token}`
-    });
+    const headers =
+      this.getRestaurantHeaders();
     return this.http.post(`${this.baseUrl}/restaurants/${restaurantId}/notifications/${waitlistId}/send-sms`, payload, { headers });
   }
 
   // make call api
 
   makecallToGuest(restaurantId: number, waitlistId: number, payload: sendNotificationRequest): Observable<any> {
-    const token = this.auth.getToken();
+    const token =
+      this.auth.getRestaurantToken();
 
-    const headers = new HttpHeaders({
-      Authorization: `Bearer ${token}`
-    });
+    const headers =
+      this.getRestaurantHeaders();
     return this.http.post(`${this.baseUrl}/restaurants/${restaurantId}/notifications/${waitlistId}/make-call`, payload, { headers });
   }
 
   // rejoin API
   rejoinGuestApi(restaurantId: number, waitlistId: number): Observable<any> {
-    const token = this.auth.getToken();
+    const token =
+      this.auth.getRestaurantToken();
 
-    const headers = new HttpHeaders({
-      Authorization: `Bearer ${token}`
-    });
+    const headers =
+      this.getRestaurantHeaders();
     return this.http.post(`${this.baseUrl}/restaurants/${restaurantId}/waitlist/rejoin/${waitlistId}`, { headers });
   }
 
@@ -307,11 +326,11 @@ export class WaitlistApiRestaurantService {
 
   // delete guest from waitlist api
   deleteGuestFromWaitlist(restaurantId: number, waitlistId: number): Observable<any> {
-    const token = this.auth.getToken();
+    const token =
+      this.auth.getRestaurantToken();
 
-    const headers = new HttpHeaders({
-      Authorization: `Bearer ${token}`
-    });
+    const headers =
+      this.getRestaurantHeaders();
 
     return this.http.delete(`${this.baseUrl}/restaurants/${restaurantId}/waitlist/${waitlistId}`, { headers });
   }
@@ -342,11 +361,11 @@ export class WaitlistApiRestaurantService {
     }
   ): Observable<any> {
 
-    const token = this.auth.getToken();
+    const token =
+      this.auth.getRestaurantToken();
 
-    const headers = new HttpHeaders({
-      Authorization: `Bearer ${token}`
-    });
+    const headers =
+      this.getRestaurantHeaders();
 
     return this.http.post(
       `/api/restaurants/${restaurantId}/waitlist/${waitlistId}/move-to-waiting`,
@@ -363,11 +382,11 @@ export class WaitlistApiRestaurantService {
 
   getRestaurantGuestHistory(restaurantId: number, page: number, size: number, status: string, date: string): Observable<any> {
 
-    const token = this.auth.getToken();
+    const token =
+      this.auth.getRestaurantToken();
 
-    const headers = new HttpHeaders({
-      Authorization: `Bearer ${token}`
-    });
+    const headers =
+      this.getRestaurantHeaders();
     let params = new HttpParams();
 
     if (status) {
@@ -388,11 +407,11 @@ export class WaitlistApiRestaurantService {
   // download guest history as csv api 
 
   exportGuestHistoryCsv(restaurantId: number, status: string, date: string): Observable<any> {
-    const token = this.auth.getToken();
+    const token =
+      this.auth.getRestaurantToken();
 
-    const headers = new HttpHeaders({
-      Authorization: `Bearer ${token}`
-    });
+    const headers =
+      this.getRestaurantHeaders();
     let params = new HttpParams();
 
     if (status) {

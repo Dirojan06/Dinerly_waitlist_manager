@@ -16,7 +16,7 @@ export class WaitListAdminService {
 
   getRestaurantGuestHistory(restaurantId: number, page: number, size: number, status: string, date: string): Observable<any> {
 
-    const token = this.auth.getToken();
+    const token = this.auth.getAdminToken();
 
     const headers = new HttpHeaders({
       Authorization: `Bearer ${token}`
@@ -41,7 +41,7 @@ export class WaitListAdminService {
   // download guest history as csv api 
 
   exportGuestHistoryCsv(restaurantId: number, status: string, date: string): Observable<any> {
-    const token = this.auth.getToken();
+    const token = this.auth.getAdminToken();
 
     const headers = new HttpHeaders({
       Authorization: `Bearer ${token}`
@@ -63,7 +63,7 @@ export class WaitListAdminService {
 
   getRestaurantReports(restaurantId: number, fromDate?: string, toDate?: string): Observable<any> {
 
-    const token = this.auth.getToken();
+    const token = this.auth.getAdminToken();
 
     const headers = new HttpHeaders({
       Authorization: `Bearer ${token}`

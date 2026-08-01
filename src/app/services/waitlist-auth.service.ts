@@ -31,6 +31,18 @@ import {
 } from 'src/environments/environment.prod';
 
 
+export type AuthScope =
+  | 'guest'
+  | 'restaurant'
+  | 'admin';
+
+
+interface AuthStorageKeys {
+  token: string;
+  user: string;
+}
+
+
 @Injectable({
   providedIn: 'root'
 })
@@ -39,19 +51,59 @@ export class WaitlistAuthService {
   private readonly baseUrl =
     environment.apiUrl;
 
-  private readonly TOKEN_KEY =
-    'waitlist_token';
 
-  private readonly USER_KEY =
-    'waitlist_user';
+  /* =====================================================
+     STORAGE KEYS
+  ====================================================== */
 
-  private currentUserSubject =
+  private readonly STORAGE_KEYS:
+    Record<AuthScope, AuthStorageKeys> = {
+
+      guest: {
+        token: 'waitlist_guest_token',
+        user: 'waitlist_guest_user'
+      },
+
+      restaurant: {
+        token: 'waitlist_restaurant_token',
+        user: 'waitlist_restaurant_user'
+      },
+
+      admin: {
+        token: 'waitlist_admin_token',
+        user: 'waitlist_admin_user'
+      }
+    };
+
+
+  /* =====================================================
+     CURRENT USERS
+  ====================================================== */
+
+  private readonly guestUserSubject =
     new BehaviorSubject<AuthUser | null>(
-      this.getStoredUser()
+      this.getStoredUser('guest')
     );
 
-  currentUser$ =
-    this.currentUserSubject.asObservable();
+  private readonly restaurantUserSubject =
+    new BehaviorSubject<AuthUser | null>(
+      this.getStoredUser('restaurant')
+    );
+
+  private readonly adminUserSubject =
+    new BehaviorSubject<AuthUser | null>(
+      this.getStoredUser('admin')
+    );
+
+
+  guestUser$ =
+    this.guestUserSubject.asObservable();
+
+  restaurantUser$ =
+    this.restaurantUserSubject.asObservable();
+
+  adminUser$ =
+    this.adminUserSubject.asObservable();
 
 
   constructor(
@@ -62,19 +114,20 @@ export class WaitlistAuthService {
 
   /* =====================================================
      LOGIN
-
-     This method remains exactly compatible with:
-
-     this.auth.login(email, password)
   ====================================================== */
 
   login(
     email: string,
-    password: string
+    password: string,
+    scope: AuthScope
   ): Observable<AuthUser> {
 
     const payload = {
-      email: email.trim().toLowerCase(),
+      email:
+        email
+          .trim()
+          .toLowerCase(),
+
       password
     };
 
@@ -85,8 +138,35 @@ export class WaitlistAuthService {
       )
       .pipe(
         tap(response => {
+
+          const user =
+            response?.data?.user;
+
+          if (!user) {
+            throw new Error(
+              response?.message ||
+              'Invalid authentication response'
+            );
+          }
+
+          /*
+           * Validate that the logged-in account
+           * belongs to the requested login page.
+           */
+          if (
+            !this.isUserAllowedForScope(
+              user,
+              scope
+            )
+          ) {
+            throw new Error(
+              this.getInvalidRoleMessage(scope)
+            );
+          }
+
           this.storeAuthenticationResponse(
-            response
+            response,
+            scope
           );
         }),
 
@@ -98,56 +178,118 @@ export class WaitlistAuthService {
 
 
   /* =====================================================
+     GUEST LOGIN
+  ====================================================== */
+
+  loginGuest(
+    email: string,
+    password: string
+  ): Observable<AuthUser> {
+
+    return this.login(
+      email,
+      password,
+      'guest'
+    );
+  }
+
+
+  /* =====================================================
+     RESTAURANT LOGIN
+  ====================================================== */
+
+  loginRestaurant(
+    email: string,
+    password: string
+  ): Observable<AuthUser> {
+
+    return this.login(
+      email,
+      password,
+      'restaurant'
+    );
+  }
+
+
+  /* =====================================================
+     ADMIN LOGIN
+  ====================================================== */
+
+  loginAdmin(
+    email: string,
+    password: string
+  ): Observable<AuthUser> {
+
+    return this.login(
+      email,
+      password,
+      'admin'
+    );
+  }
+
+
+  /* =====================================================
      REGISTER GUEST ACCOUNT
   ====================================================== */
 
   register(
-  payload: RegisterRequest
-): Observable<RegisterResponse> {
+    payload: RegisterRequest
+  ): Observable<RegisterResponse> {
 
-  const requestBody: RegisterRequest = {
-    name: payload.name.trim(),
+    const requestBody:
+      RegisterRequest = {
 
-    email:
-      payload.email
-        .trim()
-        .toLowerCase(),
+      name:
+        payload.name.trim(),
 
-    phone:
-      payload.phone.trim(),
+      email:
+        payload.email
+          .trim()
+          .toLowerCase(),
 
-    password:
-      payload.password
-  };
+      phone:
+        payload.phone.trim(),
 
-  return this.http.post<RegisterResponse>(
-    `${this.baseUrl}/auth/register`,
-    requestBody
-  );
-}
+      password:
+        payload.password
+    };
+
+    return this.http
+      .post<RegisterResponse>(
+        `${this.baseUrl}/auth/register`,
+        requestBody
+      );
+  }
+
 
   verifyEmail(
-  token: string
-): Observable<VerifyEmailResponse> {
+    token: string
+  ): Observable<VerifyEmailResponse> {
 
-  const params = new HttpParams()
-    .set('token', token);
+    const params =
+      new HttpParams()
+        .set(
+          'token',
+          token
+        );
 
-  return this.http.get<VerifyEmailResponse>(
-    `${this.baseUrl}/auth/verify-email`,
-    {
-      params
-    }
-  );
-}
+    return this.http
+      .get<VerifyEmailResponse>(
+        `${this.baseUrl}/auth/verify-email`,
+        {
+          params
+        }
+      );
+  }
 
 
   /* =====================================================
-     STORE TOKEN AND USER
+     STORE AUTHENTICATION
   ====================================================== */
 
   private storeAuthenticationResponse(
-    response: LoginResponse
+    response: LoginResponse,
+    scope: AuthScope
   ): void {
 
     const token =
@@ -163,82 +305,163 @@ export class WaitlistAuthService {
       );
     }
 
+    const keys =
+      this.STORAGE_KEYS[scope];
+
     localStorage.setItem(
-      this.TOKEN_KEY,
+      keys.token,
       token
     );
 
     localStorage.setItem(
-      this.USER_KEY,
+      keys.user,
       JSON.stringify(user)
     );
 
-    this.currentUserSubject.next(user);
+    this.getUserSubject(scope)
+      .next(user);
   }
 
 
   /* =====================================================
-     TOKEN
+     GET TOKEN
   ====================================================== */
 
-  getToken(): string | null {
+  getToken(
+    scope: AuthScope
+  ): string | null {
+
+    const keys =
+      this.STORAGE_KEYS[scope];
 
     return localStorage.getItem(
-      this.TOKEN_KEY
+      keys.token
+    );
+  }
+
+
+  getGuestToken(): string | null {
+
+    return this.getToken(
+      'guest'
+    );
+  }
+
+
+  getRestaurantToken(): string | null {
+
+    return this.getToken(
+      'restaurant'
+    );
+  }
+
+
+  getAdminToken(): string | null {
+
+    return this.getToken(
+      'admin'
     );
   }
 
 
   /* =====================================================
-     CURRENT USER
+     GET CURRENT USER
   ====================================================== */
 
-  getCurrentUser(): AuthUser | null {
+  getCurrentUser(
+    scope: AuthScope
+  ): AuthUser | null {
 
-    return this.currentUserSubject.value;
+    return this.getUserSubject(
+      scope
+    ).value;
   }
 
 
-  /* =====================================================
-     CHECK LOGGED-IN STATUS
-  ====================================================== */
+  getGuestUser(): AuthUser | null {
 
-  isLoggedIn(): boolean {
+    return this.getCurrentUser(
+      'guest'
+    );
+  }
 
-    return (
-      !!this.getToken() &&
-      !!this.getCurrentUser()
+
+  getRestaurantUser(): AuthUser | null {
+
+    return this.getCurrentUser(
+      'restaurant'
+    );
+  }
+
+
+  getAdminUser(): AuthUser | null {
+
+    return this.getCurrentUser(
+      'admin'
     );
   }
 
 
   /* =====================================================
-     CHECK USER ROLE
+     CHECK LOGIN STATUS
+  ====================================================== */
+
+  isLoggedIn(
+    scope: AuthScope
+  ): boolean {
+
+    return Boolean(
+      this.getToken(scope) &&
+      this.getCurrentUser(scope)
+    );
+  }
+
+
+  isGuestLoggedIn(): boolean {
+
+    return this.isLoggedIn(
+      'guest'
+    );
+  }
+
+
+  isRestaurantLoggedIn(): boolean {
+
+    return this.isLoggedIn(
+      'restaurant'
+    );
+  }
+
+
+  isAdminLoggedIn(): boolean {
+
+    return this.isLoggedIn(
+      'admin'
+    );
+  }
+
+
+  /* =====================================================
+     ROLE CHECKS
   ====================================================== */
 
   hasRole(
-    requiredRole: string
+    requiredRole: string,
+    scope: AuthScope
   ): boolean {
 
     const user =
-      this.getCurrentUser();
+      this.getCurrentUser(scope);
 
     if (!user) {
       return false;
     }
 
-    const currentRole =
-      (
-        user.role ||
-        user.username ||
-        ''
-      )
-        .trim()
-        .toLowerCase();
-
     return (
-      currentRole ===
-      requiredRole.trim().toLowerCase()
+      this.getNormalizedRole(user) ===
+      requiredRole
+        .trim()
+        .toLowerCase()
     );
   }
 
@@ -248,25 +471,13 @@ export class WaitlistAuthService {
   ): boolean {
 
     const currentUser =
-      user || this.getCurrentUser();
-
-    if (!currentUser) {
-      return false;
-    }
-
-    const username =
-      currentUser.username
-        ?.trim()
-        .toLowerCase();
-
-    const role =
-      currentUser.role
-        ?.trim()
-        .toLowerCase();
+      user ||
+      this.getGuestUser();
 
     return (
-      username === 'guest' ||
-      role === 'guest'
+      this.getNormalizedRole(
+        currentUser
+      ) === 'guest'
     );
   }
 
@@ -276,25 +487,13 @@ export class WaitlistAuthService {
   ): boolean {
 
     const currentUser =
-      user || this.getCurrentUser();
-
-    if (!currentUser) {
-      return false;
-    }
-
-    const username =
-      currentUser.username
-        ?.trim()
-        .toLowerCase();
-
-    const role =
-      currentUser.role
-        ?.trim()
-        .toLowerCase();
+      user ||
+      this.getRestaurantUser();
 
     return (
-      username === 'restaurant' ||
-      role === 'restaurant'
+      this.getNormalizedRole(
+        currentUser
+      ) === 'restaurant'
     );
   }
 
@@ -304,46 +503,198 @@ export class WaitlistAuthService {
   ): boolean {
 
     const currentUser =
-      user || this.getCurrentUser();
-
-    if (!currentUser) {
-      return false;
-    }
-
-    const username =
-      currentUser.username
-        ?.trim()
-        .toLowerCase();
-
-    const role =
-      currentUser.role
-        ?.trim()
-        .toLowerCase();
+      user ||
+      this.getAdminUser();
 
     return (
-      username === 'admin' ||
-      role === 'admin'
+      this.getNormalizedRole(
+        currentUser
+      ) === 'admin'
+    );
+  }
+
+
+  private getNormalizedRole(
+    user:
+      AuthUser |
+      null |
+      undefined
+  ): string {
+
+    if (!user) {
+      return '';
+    }
+
+    return String(
+      user.role ||
+      user.username ||
+      ''
+    )
+      .trim()
+      .toLowerCase();
+  }
+
+
+  private isUserAllowedForScope(
+    user: AuthUser,
+    scope: AuthScope
+  ): boolean {
+
+    const role =
+      this.getNormalizedRole(user);
+
+    return role === scope;
+  }
+
+
+  private getInvalidRoleMessage(
+    scope: AuthScope
+  ): string {
+
+    if (scope === 'guest') {
+      return (
+        'This account is not a guest account. ' +
+        'Please use the correct login page.'
+      );
+    }
+
+    if (scope === 'restaurant') {
+      return (
+        'This account is not a restaurant account. ' +
+        'Please use the correct login page.'
+      );
+    }
+
+    return (
+      'This account is not an administrator account. ' +
+      'Please use the correct login page.'
     );
   }
 
 
   /* =====================================================
-     SIGN OUT
+     LOGOUT
   ====================================================== */
 
-  signOut(): void {
+  signOut(
+    scope: AuthScope,
+    navigate = true
+  ): void {
+
+    const keys =
+      this.STORAGE_KEYS[scope];
 
     localStorage.removeItem(
-      this.TOKEN_KEY
+      keys.token
     );
 
     localStorage.removeItem(
-      this.USER_KEY
+      keys.user
     );
 
-    this.currentUserSubject.next(null);
+    this.getUserSubject(scope)
+      .next(null);
 
-    this.router.navigate(['/login']);
+    if (!navigate) {
+      return;
+    }
+
+    if (scope === 'guest') {
+      this.router.navigate(
+        ['/user']
+      );
+
+      return;
+    }
+
+    if (scope === 'admin') {
+      this.router.navigate(
+        ['/login/admin']
+      );
+
+      return;
+    }
+
+    this.router.navigate(
+      ['/login/restaurant']
+    );
+  }
+
+
+  signOutGuest(
+    navigate = true
+  ): void {
+
+    this.signOut(
+      'guest',
+      navigate
+    );
+  }
+
+
+  signOutRestaurant(
+    navigate = true
+  ): void {
+
+    this.signOut(
+      'restaurant',
+      navigate
+    );
+  }
+
+
+  signOutAdmin(
+    navigate = true
+  ): void {
+
+    this.signOut(
+      'admin',
+      navigate
+    );
+  }
+
+
+  /* =====================================================
+     CLEAR ALL AUTHENTICATION
+  ====================================================== */
+
+  signOutAll(): void {
+
+    this.clearAuthentication(
+      'guest'
+    );
+
+    this.clearAuthentication(
+      'restaurant'
+    );
+
+    this.clearAuthentication(
+      'admin'
+    );
+
+    this.router.navigate(
+      ['/login/restaurant']
+    );
+  }
+
+
+  private clearAuthentication(
+    scope: AuthScope
+  ): void {
+
+    const keys =
+      this.STORAGE_KEYS[scope];
+
+    localStorage.removeItem(
+      keys.token
+    );
+
+    localStorage.removeItem(
+      keys.user
+    );
+
+    this.getUserSubject(scope)
+      .next(null);
   }
 
 
@@ -351,12 +702,16 @@ export class WaitlistAuthService {
      READ STORED USER
   ====================================================== */
 
-  private getStoredUser():
-    AuthUser | null {
+  private getStoredUser(
+    scope: AuthScope
+  ): AuthUser | null {
+
+    const keys =
+      this.STORAGE_KEYS[scope];
 
     const data =
       localStorage.getItem(
-        this.USER_KEY
+        keys.user
       );
 
     if (!data) {
@@ -364,15 +719,43 @@ export class WaitlistAuthService {
     }
 
     try {
-      return JSON.parse(data) as AuthUser;
+
+      return JSON.parse(
+        data
+      ) as AuthUser;
 
     } catch {
 
       localStorage.removeItem(
-        this.USER_KEY
+        keys.user
+      );
+
+      localStorage.removeItem(
+        keys.token
       );
 
       return null;
     }
   }
+
+
+  /* =====================================================
+     GET CORRECT SUBJECT
+  ====================================================== */
+
+  private getUserSubject(
+    scope: AuthScope
+  ): BehaviorSubject<AuthUser | null> {
+
+    if (scope === 'guest') {
+      return this.guestUserSubject;
+    }
+
+    if (scope === 'admin') {
+      return this.adminUserSubject;
+    }
+
+    return this.restaurantUserSubject;
+  }
+
 }

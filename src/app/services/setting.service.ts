@@ -244,7 +244,7 @@ createHolidaySchedule(
 
   private getHeaders(): HttpHeaders {
 
-    const token = this.auth.getToken();
+    const token = this.auth.getRestaurantToken();
 
     return new HttpHeaders({
 

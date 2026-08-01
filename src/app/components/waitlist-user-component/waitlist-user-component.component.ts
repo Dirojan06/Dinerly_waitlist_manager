@@ -8,6 +8,7 @@ import {
   GuestAccount,
   GuestPortalTab
 } from 'src/app/models/guest-portal.model';
+import { WaitlistAuthService } from 'src/app/services/waitlist-auth.service';
 
 
 @Component({
@@ -43,66 +44,66 @@ export class WaitlistUserComponentComponent
   private requestedAccountTab:
     GuestPortalTab | null = null;
 
-    accountSuccessMessage='';
+  accountSuccessMessage = '';
 
-    restaurant: any = null;
+  restaurant: any = null;
 
 
-    constructor(
-  private route: ActivatedRoute,
-  private router: Router
-) {}
+  constructor(
+    private route: ActivatedRoute,
+    private router: Router, private auth: WaitlistAuthService
+  ) { }
   ngOnInit(): void {
     this.loadTheme();
     this.loadWaitlistGuest();
     this.loadCustomerAccount();
     this.route.queryParamMap
 
-    .subscribe(params => {
+      .subscribe(params => {
 
-      const shouldOpenLogin =
+        const shouldOpenLogin =
 
-        params.get('accountLogin') ===
+          params.get('accountLogin') ===
 
-        'true';
+          'true';
 
-      const emailVerified =
+        const emailVerified =
 
-        params.get('emailVerified') ===
+          params.get('emailVerified') ===
 
-        'true';
+          'true';
 
-      if (shouldOpenLogin) {
+        if (shouldOpenLogin) {
 
-        this.openAccountLoginPopup();
+          this.openAccountLoginPopup();
 
-        if (emailVerified) {
+          if (emailVerified) {
 
-          this.accountSuccessMessage =
+            this.accountSuccessMessage =
 
-            'Your email has been verified successfully. Please login.';
-
-        }
-
-        this.router.navigate(
-
-          [],
-
-          {
-
-            relativeTo: this.route,
-
-            queryParams: {},
-
-            replaceUrl: true
+              'Your email has been verified successfully. Please login.';
 
           }
 
-        );
+          this.router.navigate(
 
-      }
+            [],
 
-    });
+            {
+
+              relativeTo: this.route,
+
+              queryParams: {},
+
+              replaceUrl: true
+
+            }
+
+          );
+
+        }
+
+      });
   }
 
 
@@ -217,9 +218,9 @@ export class WaitlistUserComponentComponent
 
       if (
         parsedGuest?.status ===
-          'CANCELLED' ||
+        'CANCELLED' ||
         parsedGuest?.status ===
-          'RESTORE_REQUESTED'
+        'RESTORE_REQUESTED'
       ) {
 
         this.waitlistGuest = null;
@@ -373,17 +374,17 @@ export class WaitlistUserComponentComponent
 
     if (
 
-    tab === 'PROFILE' &&
+      tab === 'PROFILE' &&
 
-    !this.hasAccountAccess
+      !this.hasAccountAccess
 
-  ) {
+    ) {
 
-    this.openAccountLoginPopup();
+      this.openAccountLoginPopup();
 
-    return;
+      return;
 
-  }
+    }
 
 
     /* MENU / OFFERS / REWARDS */
@@ -462,7 +463,7 @@ export class WaitlistUserComponentComponent
     if (
       guest.status === 'CANCELLED' ||
       guest.status ===
-        'RESTORE_REQUESTED'
+      'RESTORE_REQUESTED'
     ) {
 
       this.waitlistGuest = null;
@@ -585,6 +586,11 @@ export class WaitlistUserComponentComponent
   ====================================================== */
 
   logoutCustomerAccount(): void {
+    this.auth.signOutGuest(
+
+      false
+
+    );
 
     this.clearCustomerAccountStorage();
 
@@ -756,25 +762,25 @@ export class WaitlistUserComponentComponent
 
   getCustomerInitial(): string {
 
-  const name =
-    this.customerAccount?.name?.trim();
+    const name =
+      this.customerAccount?.name?.trim();
 
-  if (!name) {
-    return 'U';
+    if (!name) {
+      return 'U';
+    }
+
+    return name.charAt(0).toUpperCase();
   }
 
-  return name.charAt(0).toUpperCase();
-}
 
+  editCustomerProfile(): void {
 
-editCustomerProfile(): void {
-
-  // Open your edit profile popup here.
-  console.log(
-    'Edit customer profile',
-    this.customerAccount
-  );
-}
+    // Open your edit profile popup here.
+    console.log(
+      'Edit customer profile',
+      this.customerAccount
+    );
+  }
 
 
 }

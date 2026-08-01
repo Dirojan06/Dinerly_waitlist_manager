@@ -1,4 +1,7 @@
-import { Injectable } from '@angular/core';
+import {
+  Injectable
+} from '@angular/core';
+
 import {
   HttpErrorResponse,
   HttpEvent,
@@ -6,65 +9,153 @@ import {
   HttpInterceptor,
   HttpRequest
 } from '@angular/common/http';
+
 import {
   Observable,
   catchError,
   throwError
 } from 'rxjs';
-import { WaitlistAuthService } from '../services/waitlist-auth.service';
 
-
+import {
+  WaitlistAuthService
+} from '../services/waitlist-auth.service';
 
 @Injectable()
-export class AuthInterceptor implements HttpInterceptor {
+export class AuthInterceptor
+  implements HttpInterceptor {
 
-  private readonly publicApiUrls: string[] = [
+  private readonly publicApiUrls = [
+
     'https://dinerly-menu-api.onrender.com'
+
   ];
 
   constructor(
     private auth: WaitlistAuthService
-  ) {}
+  ) { }
 
   intercept(
     req: HttpRequest<any>,
     next: HttpHandler
   ): Observable<HttpEvent<any>> {
 
-    const token = this.auth.getToken();
-
     const isPublicApi =
       this.publicApiUrls.some(
-        publicUrl =>
-          req.url.startsWith(publicUrl)
+        url =>
+          req.url.startsWith(url)
       );
 
-    let requestToSend = req;
-
-    if (token && !isPublicApi) {
-      requestToSend = req.clone({
-        setHeaders: {
-          Authorization: `Bearer ${token}`
-        }
-      });
+    if (isPublicApi) {
+      return next.handle(req);
     }
 
-    return next.handle(requestToSend).pipe(
-      catchError(
-        (error: HttpErrorResponse) => {
+    let token: string | null = null;
 
-          if (
-            error.status === 401 &&
-            !isPublicApi
-          ) {
-            this.auth.signOut();
+    /*
+     * Decide which token should be attached
+     * based on the request URL.
+     */
+
+    if (
+      req.url.includes('/restaurants/')
+    ) {
+
+      token =
+        this.auth.getRestaurantToken()
+        ||
+        this.auth.getAdminToken();
+
+    } else if (
+
+      req.url.includes('/waitlist') ||
+
+      req.url.includes('/feedback') ||
+
+      req.url.includes('/auth')
+
+    ) {
+
+      token =
+        this.auth.getGuestToken();
+
+    }
+
+    let request = req;
+
+    if (token) {
+
+      request = req.clone({
+
+        setHeaders: {
+
+          Authorization:
+            `Bearer ${token}`
+
+        }
+
+      });
+
+    }
+
+    return next
+      .handle(request)
+      .pipe(
+
+        catchError(
+          (
+            error:
+              HttpErrorResponse
+          ) => {
+
+            if (
+              error.status === 401
+            ) {
+
+              /*
+               * Guest request
+               */
+
+              if (
+                req.url.includes('/waitlist') ||
+                req.url.includes('/feedback')
+              ) {
+
+                this.auth.signOutGuest(
+                  false
+                );
+
+              }
+
+              /*
+               * Restaurant/Admin request
+               */
+
+              if (
+                req.url.includes('/restaurants/')
+              ) {
+
+                this.auth.signOutRestaurant(
+                  false
+                );
+
+                this.auth.signOutAdmin(
+                  false
+                );
+
+              }
+
+            }
+
+            return throwError(
+              () => error
+            );
+
           }
 
-          return throwError(
-            () => error
-          );
-        }
-      )
-    );
+        )
+
+      );
+
   }
+
 }

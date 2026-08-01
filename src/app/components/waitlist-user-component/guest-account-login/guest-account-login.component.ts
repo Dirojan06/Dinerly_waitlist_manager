@@ -320,10 +320,10 @@ registrationEmail = '';
     this.isSubmitting = true;
 
     this.authService
-      .login(
-        email,
-        password
-      )
+  .loginGuest(
+    email,
+    password
+  )
       .pipe(
         finalize(() => {
           this.isSubmitting = false;
@@ -470,7 +470,7 @@ registrationEmail = '';
         user.phone,
 
       token:
-        this.authService.getToken() || ''
+  this.authService.getGuestToken() || ''
     };
 
     this.loginSuccess.emit(account);

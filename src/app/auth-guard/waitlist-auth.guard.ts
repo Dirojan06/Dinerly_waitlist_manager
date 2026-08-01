@@ -5,8 +5,8 @@ import {
   Router,
   UrlTree
 } from '@angular/router';
+
 import { WaitlistAuthService } from '../services/waitlist-auth.service';
-import { UserRole } from '../models/waitlist-auth.model';
 
 @Injectable({
   providedIn: 'root'
@@ -16,17 +16,61 @@ export class WaitlistAuthGuard implements CanActivate {
   constructor(
     private auth: WaitlistAuthService,
     private router: Router
-  ) {}
+  ) { }
 
-  canActivate(): boolean | UrlTree {
+  canActivate(
+    route: ActivatedRouteSnapshot
+  ): boolean | UrlTree {
 
-    if (!this.auth.isLoggedIn()) {
+    const scope =
+      route.data['scope'];
 
-      return this.router.createUrlTree(['/login']);
+    switch (scope) {
+
+      case 'restaurant':
+
+        if (
+          this.auth.isRestaurantLoggedIn()
+        ) {
+          return true;
+        }
+
+        return this.router.createUrlTree([
+          '/login/restaurant'
+        ]);
+
+      case 'admin':
+
+        if (
+          this.auth.isAdminLoggedIn()
+        ) {
+          return true;
+        }
+
+        return this.router.createUrlTree([
+          '/login/admin'
+        ]);
+
+      case 'guest':
+
+        if (
+          this.auth.isGuestLoggedIn()
+        ) {
+          return true;
+        }
+
+        return this.router.createUrlTree([
+          '/user'
+        ]);
+
+      default:
+
+        return this.router.createUrlTree([
+          '/login'
+        ]);
 
     }
 
-    return true;
-
   }
+
 }

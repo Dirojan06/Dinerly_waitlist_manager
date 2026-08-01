@@ -21,9 +21,13 @@ export class WaitlistNavbarComponent implements OnInit {
 
 
   ngOnInit(): void {
-    this.auth.currentUser$.subscribe(user => {
-      this.user = user;
-    });
+    this.auth.guestUser$
+
+  .subscribe(user => {
+
+    this.user = user;
+
+  });
   }
 
   toggleMobileMenu(): void {
@@ -52,7 +56,7 @@ export class WaitlistNavbarComponent implements OnInit {
 
   signOut(): void {
     this.showMobileMenu = false;
-    this.auth.signOut();
+    this.auth.signOutGuest();
   }
 
 }

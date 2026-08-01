@@ -47,6 +47,11 @@ const routes: Routes = [
   {
     path: 'restaurant',
     component: WaitlistRestaurantComponentComponent,
+    data: {
+
+      scope: 'restaurant'
+
+    },
     canActivate: [WaitlistAuthGuard],
     children: [
       { path: '', redirectTo: 'waitlist', pathMatch: 'full' },
@@ -60,6 +65,11 @@ const routes: Routes = [
     path: 'admin',
     component: WaitlistAdminComponent,
     canActivate: [WaitlistAuthGuard],
+    data: {
+
+      scope: 'admin'
+
+    },
     children: [
       { path: '', redirectTo: 'reports', pathMatch: 'full' },
       { path: 'history', component: AdminHistoryComponent },

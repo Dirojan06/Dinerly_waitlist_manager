@@ -15,7 +15,7 @@ export class ApiWaitlistNotificationService {
 
 
   getNotificationsSummary(restaurantId: string | number): Observable<any> {
-    const token = this.auth.getToken();
+    const token = this.auth.getRestaurantToken();
 
     const headers = new HttpHeaders({
       Authorization: `Bearer ${token}`
@@ -27,7 +27,7 @@ export class ApiWaitlistNotificationService {
 
   getNotifications(
     restaurantId: string | number, page: number, size: number, search: string, status: string,date:string): Observable<any> {
-    const token = this.auth.getToken();
+    const token = this.auth.getRestaurantToken();
 
     const headers = new HttpHeaders({
       Authorization: `Bearer ${token}`
@@ -38,7 +38,7 @@ export class ApiWaitlistNotificationService {
   }
 
   sendNoficationToGuest(restaurantId: number, waitlistId: number, payload: sendNotificationRequest): Observable<any> {
-    const token = this.auth.getToken();
+    const token = this.auth.getRestaurantToken();
 
     const headers = new HttpHeaders({
       Authorization: `Bearer ${token}`

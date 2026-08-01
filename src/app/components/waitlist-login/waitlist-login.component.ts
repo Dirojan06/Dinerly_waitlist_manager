@@ -488,9 +488,18 @@ export class WaitlistLoginComponent
       password
     } = this.loginForm.getRawValue();
 
-    this.auth
-      .login(email, password)
-      .pipe(
+    const loginRequest =
+  this.selectedRole === 'admin'
+    ? this.auth.loginAdmin(
+        email,
+        password
+      )
+    : this.auth.loginRestaurant(
+        email,
+        password
+      ); 
+
+      loginRequest.pipe(
         takeUntil(this.destroy$)
       )
       .subscribe({
