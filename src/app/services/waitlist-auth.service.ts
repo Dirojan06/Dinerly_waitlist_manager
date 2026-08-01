@@ -295,8 +295,15 @@ export class WaitlistAuthService {
     const token =
       response?.data?.token;
 
-    const user =
-      response?.data?.user;
+    const user = {
+
+    ...response.data.user,
+
+    restaurantName:
+
+      response.data.restaurantName
+
+  };
 
     if (!token || !user) {
       throw new Error(
@@ -320,7 +327,26 @@ export class WaitlistAuthService {
 
     this.getUserSubject(scope)
       .next(user);
+
   }
+
+  getRestaurantId(): number {
+
+  const user =
+    this.getCurrentUser('restaurant');
+
+  return user?.restaurantId ?? 0;
+
+}
+
+getRestaurantName(): string {
+
+  const user =
+    this.getCurrentUser('restaurant');
+
+  return user?.restaurantName ?? '';
+
+}
 
 
   /* =====================================================
@@ -527,7 +553,7 @@ export class WaitlistAuthService {
 
     return String(
       user.role ||
-      user.username ||
+      user.name ||
       ''
     )
       .trim()

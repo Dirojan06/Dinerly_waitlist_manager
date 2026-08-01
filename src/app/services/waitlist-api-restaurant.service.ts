@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { JoinWaitlistRequest, ApproveWaitlistRequest, getGuestWaitingStatus, PendingGuestResponse, WaitingGuestResponse, NotifiedGuestResponse, SeatedGuestResponse, DashboardWaitlistResponse, notifiyguestcallRequest, TablelistResponse, addGuestToWaitlistRequest, seatedGuestcallRequest, CancelledGuestResponse, DashboardResponse, addTabletoRestaurantRequest, GuestHistoryResponse, RestaurantResponse } from '../models/waitlist-api-guest-to-restaurant.model';
+import { JoinWaitlistRequest, ApproveWaitlistRequest, getGuestWaitingStatus, PendingGuestResponse, WaitingGuestResponse, NotifiedGuestResponse, SeatedGuestResponse, DashboardWaitlistResponse, notifiyguestcallRequest, TablelistResponse, addGuestToWaitlistRequest, seatedGuestcallRequest, CancelledGuestResponse, DashboardResponse, addTabletoRestaurantRequest, GuestHistoryResponse, RestaurantResponse, mergerTableRequest, unMergerTableRequest, updateSeatedGuestcallRequest } from '../models/waitlist-api-guest-to-restaurant.model';
 import { environment } from 'src/environments/environment.prod';
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
@@ -189,8 +189,7 @@ export class WaitlistApiRestaurantService {
 
   // Get cancelled guests based on restaurantId and optional filters api
   getCancelledGuests(restaurantId: number, status?: string, date?: string): Observable<CancelledGuestResponse> {
-    const token =
-      this.auth.getRestaurantToken();
+
 
     const headers =
       this.getRestaurantHeaders();
@@ -266,8 +265,7 @@ export class WaitlistApiRestaurantService {
   //update restaurant table status api
 
   updateTableStatus(restaurantId: number, tableId: number, status: string): Observable<any> {
-    const token =
-      this.auth.getRestaurantToken();
+
 
     const headers =
       this.getRestaurantHeaders();
@@ -278,6 +276,20 @@ export class WaitlistApiRestaurantService {
       params = params.set('status', status);
     }
     return this.http.post(`${this.baseUrl}/restaurants/${restaurantId}/tables/${tableId}/status`, null, { headers, params });
+  }
+
+  mergeTables(restaurantId: number, payload:mergerTableRequest): Observable<any> {
+    const headers =
+      this.getRestaurantHeaders();
+
+    return this.http.post(`${this.baseUrl}/restaurants/${restaurantId}/tables/merge`, payload,{ headers });
+  }
+
+  unmergeTables(restaurantId: number, payload:unMergerTableRequest): Observable<any> {
+    const headers =
+      this.getRestaurantHeaders();
+
+    return this.http.post(`${this.baseUrl}/restaurants/${restaurantId}/tables/unmerge`, payload,{ headers });
   }
 
   // add table to restaurant api
@@ -335,40 +347,33 @@ export class WaitlistApiRestaurantService {
     return this.http.delete(`${this.baseUrl}/restaurants/${restaurantId}/waitlist/${waitlistId}`, { headers });
   }
 
+
+
   //update seated guest 
 
-  updateSeatedGuest(
-    restaurantId: number,
-    waitlistId: number,
-    payload: {
-      partySize: number;
-      tableName: string;
-    }
-  ): Observable<any> {
+  updateSeatedGuest(restaurantId: number, waitlistId: number, payload?: updateSeatedGuestcallRequest): Observable<any> {
 
-    return this.http.put(
-      `/api/restaurants/${restaurantId}/waitlist/${waitlistId}/seated`,
-      payload
-    );
+    const headers =
+      this.getRestaurantHeaders();
+
+    return this.http.post(`${this.baseUrl}/restaurants/${restaurantId}/waitlist/${waitlistId}/update-seated`, payload, { headers });
   }
 
   moveSeatedGuestToWaiting(
     restaurantId: number,
     waitlistId: number,
     payload: {
+      status: string
       partySize: number;
       estimatedWaitTime: number;
     }
   ): Observable<any> {
 
-    const token =
-      this.auth.getRestaurantToken();
 
     const headers =
       this.getRestaurantHeaders();
 
-    return this.http.post(
-      `/api/restaurants/${restaurantId}/waitlist/${waitlistId}/move-to-waiting`,
+    return this.http.post(`${this.baseUrl}/restaurants/${restaurantId}/waitlist/${waitlistId}/move-to-waiting`,
       payload, { headers }
     );
 

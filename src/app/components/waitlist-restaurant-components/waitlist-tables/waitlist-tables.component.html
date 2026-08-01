@@ -1,190 +1,976 @@
-<app-dinerly-loader *ngIf="isLoading"></app-dinerly-loader>
-<div *ngIf="!isLoading" class="tables-page">
+<app-dinerly-loader
+  *ngIf="isLoading">
+</app-dinerly-loader>
 
-  <!-- TOP BAR -->
-  <div class="topbar">
+
+<div
+  class="tables-page"
+  *ngIf="!isLoading"
+>
+
+  <!-- =====================================================
+       TOP BAR
+  ====================================================== -->
+
+  <header class="topbar">
+
     <div class="title-wrap">
-      <h1>Tables</h1>
-      <span class="time-pill">● 12:13 AM</span>
-    </div>
 
-    <div class="top-actions">
-      <button class="restaurant-pill">B Brothers Café⌄</button>
-    </div>
-  </div>
+      <div>
 
+        <h1>Tables</h1>
 
-  <!-- SECTIONS + MODE BUTTONS -->
-  <div class="section-row">
-    <div class="section-tabs">
-      <button class="section-tab active">Main</button>
-      <!-- <button class="section-tab add" *ngIf="activeMode === 'EDIT'">
-        + Add Table
-      </button> -->
-    </div>
+        <p>
+          Manage the restaurant floor plan,
+          table status and merged tables.
+        </p>
 
-    <div class="mode-actions">
-      <button class="mode-btn" [disabled]="activeMode === 'EDIT'" [class.active]="activeMode === 'ASSIGN'"
-        (click)="setMode('ASSIGN')">
-        ♙ Assign Server
-      </button>
-
-      <!-- <button class="mode-btn" [disabled]="activeMode === 'EDIT'" [class.active]="activeMode === 'MERGE'"
-        (click)="setMode('MERGE')">
-        🔗 Merge Tables
-      </button> -->
-
-      <button class="mode-btn edit" [class.active]="activeMode === 'EDIT'" (click)="toggleEditMode()">
-        {{ activeMode === 'EDIT' ? '✓ Done Editing' : '✎ Edit Floor Plan' }}
-      </button>
-    </div>
-  </div>
-
-  <!-- EDIT TOOLBAR -->
-  <div class="edit-toolbar" *ngIf="activeMode === 'EDIT'">
-    <button (click)="addTable(2)">□ + 2-Seat Table</button>
-    <button (click)="addTable(4)">□ + 4-Seat Table</button>
-    <button (click)="addTable(6)">□ + 6-Seat Table</button>
-    <button (click)="addTable(8)">□ + 8-Seat Table</button>
-    <button (click)="addFixture('WALL')">— + Wall</button>
-    <button (click)="addFixture('BAR')">▯ + Bar</button>
-    <button (click)="addFixture('HOST')">□ + Host Stand</button>
-  </div>
-
-  <p class="edit-help" *ngIf="activeMode === 'EDIT'">
-    Drag any table or fixture to reposition it. Use capacity buttons to change seat count.
-    Occupied tables are locked.
-  </p>
-
-  <!-- MERGE TOOLBAR -->
-  <!-- <div class="action-toolbar merge" *ngIf="activeMode === 'MERGE'">
-    <span>Tap 2+ open nearby tables to merge them</span>
-
-    <div>
-      <button class="btn-light" (click)="cancelMode()">Cancel</button>
-      <button class="btn-primary" [disabled]="selectedTableIds.length < 2" (click)="confirmMerge()">
-        Merge
-      </button>
-    </div>
-  </div> -->
-
-  <!-- ASSIGN SERVER TOOLBAR -->
-  <div class="action-toolbar assign" *ngIf="activeMode === 'ASSIGN'">
-    <span>Tap nearby tables to group them</span>
-
-    <div class="assign-controls">
-      <select [(ngModel)]="selectedServer">
-        <option value="">Unassigned</option>
-        <option *ngFor="let server of servers" [value]="server">
-          {{ server }}
-        </option>
-      </select>
-
-      <button class="btn-light" (click)="cancelMode()">Cancel</button>
-      <button class="btn-primary" [disabled]="!selectedTableIds.length" (click)="assignServer()">
-        Assign
-      </button>
-    </div>
-  </div>
-
-  <!-- FLOOR CANVAS -->
-  <div class="floor-canvas" [class.editing]="activeMode === 'EDIT'">
-
-    <!-- MERGE LINES -->
-    <svg class="merge-lines" *ngIf="mergedGroups.length">
-      <line *ngFor="let line of mergeLines" [attr.x1]="line.x1" [attr.y1]="line.y1" [attr.x2]="line.x2"
-        [attr.y2]="line.y2" />
-    </svg>
-
-    <!-- TABLES -->
-    <div class="table-tile" *ngFor="let table of tables; trackBy: trackById" cdkDrag
-      [cdkDragDisabled]="activeMode !== 'EDIT'" [cdkDragFreeDragPosition]="{ x: table.x || 0, y: table.y || 0 }"
-      (cdkDragEnded)="onDragEnd($event, table)" [ngClass]="[
-        table.status,
-        'seat-' + table.capacity,
-        isSelected(table.id) ? 'selected' : '',
-        isMerged(table.id) ? 'merged' : '',
-        activeMode === 'EDIT' ? 'edit-mode' : ''
-      ]" (click)="onTableClick(table)">
-
-      <button class="rotate-lock" *ngIf="activeMode === 'EDIT'" (click)="rotateTable(table, $event)">
-        ⟳
-      </button>
-
-      <ng-container *ngFor="let chair of getChairs(table.capacity)">
-        <div class="chair" [ngClass]="chair.position" [style.--chair-index]="chair.index"
-          [style.--chair-total]="chair.total">
-        </div>
-      </ng-container>
-
-      <strong>{{ table.customName || table.tableNumber }}</strong>
-
-      <div class="table-status-popup" *ngIf="selectedTable?.id === table.id && activeMode === 'LIVE'"
-        (click)="$event.stopPropagation()">
-
-        <div class="popup-title">
-          {{ table.customName || 'Table ' + table.tableNumber }}
-        </div>
-
-        <div class="popup-status">
-          Current Status: <b>{{ table.status }}</b>
-        </div>
-
-        <button type="button" class="popup-status-btn" *ngFor="let option of getStatusOptions(table)"
-          (click)="changeTableStatus(table, option.value)">
-          {{ option.label }}
-        </button>
       </div>
 
-      <span class="merge-badge" *ngIf="isMerged(table.id)">🔗</span>
 
-      <!-- <div class="capacity-controls" *ngIf="activeMode === 'EDIT' && table.status !== 'OCCUPIED'">
-        <button (click)="changeCapacity(table, 2, $event)">2</button>
-        <button (click)="changeCapacity(table, 4, $event)">4</button>
-        <button (click)="changeCapacity(table, 6, $event)">6</button>
-        <button (click)="changeCapacity(table, 8, $event)">8</button>
-        
-      </div> -->
+      <span class="time-pill">
+
+        <span class="online-dot"></span>
+
+        {{ currentTimeOnly }}
+
+      </span>
+
     </div>
 
-    <!-- FIXTURES -->
-    <div class="fixture" *ngFor="let fixture of fixtures" cdkDrag [cdkDragDisabled]="activeMode !== 'EDIT'"
-      [cdkDragFreeDragPosition]="{ x: fixture.x, y: fixture.y }" (cdkDragEnded)="onFixtureDragEnd($event, fixture)"
-      [ngClass]="fixture.type">
 
-      <button class="fixture-rotate" *ngIf="activeMode === 'EDIT'" (click)="rotateFixture(fixture, $event)">
-        ⟳
+    <div class="top-actions">
+
+      <button
+        type="button"
+        class="restaurant-pill"
+      >
+
+        <span class="restaurant-initial">
+          {{ restaurantInitial }}
+        </span>
+
+        <span class="restaurant-name">
+          {{
+            restaurantName ||
+            'Restaurant'
+          }}
+        </span>
+
+        <i class="fa-solid fa-chevron-down"></i>
+
+      </button>
+
+    </div>
+
+  </header>
+
+
+  <!-- =====================================================
+       SUMMARY
+  ====================================================== -->
+
+  <section class="table-summary">
+
+    <article class="summary-card">
+
+      <span class="summary-icon open-icon">
+        <i class="fa-solid fa-door-open"></i>
+      </span>
+
+      <div>
+        <strong>{{ openCount }}</strong>
+        <span>Open tables</span>
+      </div>
+
+    </article>
+
+
+    <article class="summary-card">
+
+      <span class="summary-icon occupied-icon">
+        <i class="fa-solid fa-user-group"></i>
+      </span>
+
+      <div>
+        <strong>{{ seatedCount }}</strong>
+        <span>Occupied tables</span>
+      </div>
+
+    </article>
+
+
+    <article class="summary-card">
+
+      <span class="summary-icon reserved-icon">
+        <i class="fa-regular fa-calendar-check"></i>
+      </span>
+
+      <div>
+        <strong>{{ reservedCount }}</strong>
+        <span>Reserved tables</span>
+      </div>
+
+    </article>
+
+
+    <article class="summary-card">
+
+      <span class="summary-icon dirty-icon">
+        <i class="fa-solid fa-spray-can-sparkles"></i>
+      </span>
+
+      <div>
+        <strong>{{ dirtyCount }}</strong>
+        <span>Need cleaning</span>
+      </div>
+
+    </article>
+
+  </section>
+
+
+  <!-- =====================================================
+       SECTION AND MODES
+  ====================================================== -->
+
+  <section class="section-row">
+
+    <div class="section-tabs">
+
+      <button
+        type="button"
+        class="section-tab active"
+      >
+        Main Floor
+      </button>
+
+    </div>
+
+
+    <div class="mode-actions">
+
+      <button
+        type="button"
+        class="mode-btn"
+        [disabled]="
+          activeMode === 'EDIT' ||
+          isMerging ||
+          isUnmerging
+        "
+        [class.active]="
+          activeMode === 'ASSIGN'
+        "
+        (click)="setMode('ASSIGN')"
+      >
+
+        <i class="fa-solid fa-user-tag"></i>
+
+        Assign Server
+
+      </button>
+
+
+      <button
+        type="button"
+        class="mode-btn"
+        [disabled]="
+          activeMode === 'EDIT' ||
+          isMerging ||
+          isUnmerging
+        "
+        [class.active]="
+          activeMode === 'MERGE'
+        "
+        (click)="setMode('MERGE')"
+      >
+
+        <i class="fa-solid fa-link"></i>
+
+        Merge Tables
+
+      </button>
+
+
+      <button
+        type="button"
+        class="mode-btn"
+        [disabled]="
+          activeMode === 'EDIT' ||
+          isMerging ||
+          isUnmerging
+        "
+        [class.active]="
+          activeMode === 'UNMERGE'
+        "
+        (click)="setMode('UNMERGE')"
+      >
+
+        <i class="fa-solid fa-link-slash"></i>
+
+        Unmerge Tables
+
+      </button>
+
+
+      <button
+        type="button"
+        class="mode-btn edit"
+        [class.active]="
+          activeMode === 'EDIT'
+        "
+        [disabled]="
+          isMerging ||
+          isUnmerging
+        "
+        (click)="toggleEditMode()"
+      >
+
+        <i
+          class="fa-solid"
+          [ngClass]="
+            activeMode === 'EDIT'
+              ? 'fa-check'
+              : 'fa-pen-to-square'
+          "
+        ></i>
+
+        {{
+          activeMode === 'EDIT'
+            ? 'Done Editing'
+            : 'Edit Floor Plan'
+        }}
+
+      </button>
+
+    </div>
+
+  </section>
+
+
+  <!-- =====================================================
+       EDIT TOOLBAR
+  ====================================================== -->
+
+  <section
+    class="edit-toolbar"
+    *ngIf="activeMode === 'EDIT'"
+  >
+
+    <button
+      type="button"
+      (click)="addTable(2)"
+    >
+      <i class="fa-solid fa-plus"></i>
+      2-seat table
+    </button>
+
+
+    <button
+      type="button"
+      (click)="addTable(4)"
+    >
+      <i class="fa-solid fa-plus"></i>
+      4-seat table
+    </button>
+
+
+    <button
+      type="button"
+      (click)="addTable(6)"
+    >
+      <i class="fa-solid fa-plus"></i>
+      6-seat table
+    </button>
+
+
+    <button
+      type="button"
+      (click)="addTable(8)"
+    >
+      <i class="fa-solid fa-plus"></i>
+      8-seat table
+    </button>
+
+
+    <button
+      type="button"
+      (click)="addFixture('WALL')"
+    >
+      <i class="fa-solid fa-grip-lines-vertical"></i>
+      Wall
+    </button>
+
+
+    <button
+      type="button"
+      (click)="addFixture('BAR')"
+    >
+      <i class="fa-solid fa-martini-glass"></i>
+      Bar
+    </button>
+
+
+    <button
+      type="button"
+      (click)="addFixture('HOST')"
+    >
+      <i class="fa-solid fa-bell-concierge"></i>
+      Host stand
+    </button>
+
+  </section>
+
+
+  <p
+    class="edit-help"
+    *ngIf="activeMode === 'EDIT'"
+  >
+    Drag open, reserved or cleaning tables to
+    reposition them. Occupied tables are locked.
+  </p>
+
+
+  <!-- =====================================================
+       MERGE TOOLBAR
+  ====================================================== -->
+
+  <section
+    class="action-toolbar merge"
+    *ngIf="activeMode === 'MERGE'"
+  >
+
+    <div class="toolbar-message">
+
+      <span class="toolbar-icon">
+        <i class="fa-solid fa-link"></i>
+      </span>
+
+      <div>
+
+        <strong>
+          Select two open tables
+        </strong>
+
+        <span>
+          {{ selectedTableIds.length }}/2 selected
+        </span>
+
+      </div>
+
+    </div>
+
+
+    <div class="toolbar-actions">
+
+      <button
+        type="button"
+        class="btn-light"
+        [disabled]="isMerging"
+        (click)="cancelMode()"
+      >
+        Cancel
+      </button>
+
+
+      <button
+        type="button"
+        class="btn-primary"
+        [disabled]="
+          selectedTableIds.length !== 2 ||
+          isMerging
+        "
+        (click)="confirmMerge()"
+      >
+
+        <i
+          class="fa-solid"
+          [ngClass]="
+            isMerging
+              ? 'fa-spinner fa-spin'
+              : 'fa-link'
+          "
+        ></i>
+
+        {{
+          isMerging
+            ? 'Merging...'
+            : 'Merge Tables'
+        }}
+
+      </button>
+
+    </div>
+
+  </section>
+
+
+  <!-- =====================================================
+       UNMERGE TOOLBAR
+  ====================================================== -->
+
+  <section
+    class="action-toolbar unmerge"
+    *ngIf="activeMode === 'UNMERGE'"
+  >
+
+    <div class="toolbar-message">
+
+      <span class="toolbar-icon">
+        <i class="fa-solid fa-link-slash"></i>
+      </span>
+
+      <div>
+
+        <strong>
+          Select two merged tables
+        </strong>
+
+        <span>
+          {{ selectedTableIds.length }}/2 selected
+        </span>
+
+      </div>
+
+    </div>
+
+
+    <div class="toolbar-actions">
+
+      <button
+        type="button"
+        class="btn-light"
+        [disabled]="isUnmerging"
+        (click)="cancelMode()"
+      >
+        Cancel
+      </button>
+
+
+      <button
+        type="button"
+        class="btn-danger"
+        [disabled]="
+          selectedTableIds.length !== 2 ||
+          isUnmerging
+        "
+        (click)="confirmUnmerge()"
+      >
+
+        <i
+          class="fa-solid"
+          [ngClass]="
+            isUnmerging
+              ? 'fa-spinner fa-spin'
+              : 'fa-link-slash'
+          "
+        ></i>
+
+        {{
+          isUnmerging
+            ? 'Unmerging...'
+            : 'Unmerge Tables'
+        }}
+
+      </button>
+
+    </div>
+
+  </section>
+
+
+  <!-- =====================================================
+       ASSIGN SERVER TOOLBAR
+  ====================================================== -->
+
+  <section
+    class="action-toolbar assign"
+    *ngIf="activeMode === 'ASSIGN'"
+  >
+
+    <div class="toolbar-message">
+
+      <span class="toolbar-icon">
+        <i class="fa-solid fa-user-tag"></i>
+      </span>
+
+      <div>
+
+        <strong>
+          Select one or more tables
+        </strong>
+
+        <span>
+          {{ selectedTableIds.length }} selected
+        </span>
+
+      </div>
+
+    </div>
+
+
+    <div class="assign-controls">
+
+      <select
+        [(ngModel)]="selectedServer"
+      >
+
+        <option value="">
+          Unassigned
+        </option>
+
+        <option
+          *ngFor="let server of servers"
+          [value]="server"
+        >
+          {{ server }}
+        </option>
+
+      </select>
+
+
+      <button
+        type="button"
+        class="btn-light"
+        (click)="cancelMode()"
+      >
+        Cancel
+      </button>
+
+
+      <button
+        type="button"
+        class="btn-primary"
+        [disabled]="
+          !selectedTableIds.length
+        "
+        (click)="assignServer()"
+      >
+        Assign
+      </button>
+
+    </div>
+
+  </section>
+
+
+  <!-- =====================================================
+       FLOOR CANVAS
+  ====================================================== -->
+
+  <section
+    class="floor-canvas"
+    [class.editing]="
+      activeMode === 'EDIT'
+    "
+  >
+
+    <!-- TABLES -->
+
+    <div
+      class="table-tile"
+      *ngFor="
+        let table of tables;
+        trackBy: trackById
+      "
+      cdkDrag
+      [cdkDragDisabled]="
+        activeMode !== 'EDIT' ||
+        table.status === 'OCCUPIED'
+      "
+      [cdkDragFreeDragPosition]="{
+        x: table.x || 0,
+        y: table.y || 0
+      }"
+      [style.transform]="
+        'rotate(' +
+        (table.rotation || 0) +
+        'deg)'
+      "
+      [ngClass]="[
+        table.status,
+        'seat-' + table.capacity,
+        isSelected(table.id)
+          ? 'selected'
+          : '',
+        isMerged(table.id)
+          ? 'merged'
+          : '',
+        activeMode === 'EDIT'
+          ? 'edit-mode'
+          : '',
+        activeMode === 'MERGE'
+          ? 'merge-mode'
+          : '',
+        activeMode === 'UNMERGE'
+          ? 'unmerge-mode'
+          : ''
+      ]"
+      (cdkDragEnded)="
+        onDragEnd(
+          $event,
+          table
+        )
+      "
+      (click)="onTableClick(table)"
+    >
+
+      <!-- ROTATE -->
+
+      <button
+        type="button"
+        class="rotate-lock"
+        *ngIf="
+          activeMode === 'EDIT' &&
+          table.status !== 'OCCUPIED'
+        "
+        (click)="
+          rotateTable(
+            table,
+            $event
+          )
+        "
+      >
+        <i class="fa-solid fa-rotate-right"></i>
+      </button>
+
+
+      <!-- CHAIRS -->
+
+      <ng-container
+        *ngFor="
+          let chair of
+          getChairs(table.capacity)
+        "
+      >
+
+        <div
+          class="chair"
+          [ngClass]="chair.position"
+          [style.--chair-index]="chair.index"
+          [style.--chair-total]="chair.total"
+        >
+        </div>
+
+      </ng-container>
+
+
+      <!-- TABLE NAME -->
+
+      <strong>
+
+        {{
+          table.customName ||
+          table.tableNumber
+        }}
+
+      </strong>
+
+
+      <!-- STATUS LABEL -->
+
+      <small class="table-status-label">
+
+        {{
+          table.status
+            .replace('_', ' ')
+        }}
+
+      </small>
+
+
+      <!-- MERGE BADGE -->
+
+      <span
+        class="merge-badge"
+        *ngIf="isMerged(table.id)"
+        title="Merged table"
+      >
+        <i class="fa-solid fa-link"></i>
+      </span>
+
+
+      <!-- OCCUPIED LOCK -->
+
+      <span
+        class="occupied-lock"
+        *ngIf="
+          activeMode === 'EDIT' &&
+          table.status === 'OCCUPIED'
+        "
+      >
+        <i class="fa-solid fa-lock"></i>
+      </span>
+
+    </div>
+
+
+    <!-- FIXTURES -->
+
+    <div
+      class="fixture"
+      *ngFor="let fixture of fixtures"
+      cdkDrag
+      [cdkDragDisabled]="
+        activeMode !== 'EDIT'
+      "
+      [cdkDragFreeDragPosition]="{
+        x: fixture.x,
+        y: fixture.y
+      }"
+      [style.transform]="
+        'rotate(' +
+        fixture.rotation +
+        'deg)'
+      "
+      [ngClass]="fixture.type"
+      (cdkDragEnded)="
+        onFixtureDragEnd(
+          $event,
+          fixture
+        )
+      "
+    >
+
+      <button
+        type="button"
+        class="fixture-rotate"
+        *ngIf="
+          activeMode === 'EDIT'
+        "
+        (click)="
+          rotateFixture(
+            fixture,
+            $event
+          )
+        "
+      >
+        <i class="fa-solid fa-rotate-right"></i>
       </button>
 
       {{ fixture.label }}
+
     </div>
 
-  </div>
 
-  <!-- DETAIL PANEL -->
-  <div class="detail-panel" *ngIf="selectedTable">
-    <div>
-      <h3>{{ selectedTable.customName || 'Table ' + selectedTable.tableNumber }}</h3>
-      <p>Status: {{ selectedTable.status }} · {{ selectedTable.capacity }} seats</p>
-      <p *ngIf="selectedTable.server">Server: {{ selectedTable.server }}</p>
+    <!-- EMPTY STATE -->
+
+    <div
+      class="floor-empty-state"
+      *ngIf="!tables.length"
+    >
+
+      <i class="fa-solid fa-chair"></i>
+
+      <h3>No tables found</h3>
+
+      <p>
+        Enter edit mode and add your first table.
+      </p>
+
     </div>
+
+  </section>
+
+
+  <!-- =====================================================
+       TABLE DETAIL PANEL
+  ====================================================== -->
+
+  <section
+    class="detail-panel"
+    *ngIf="
+      selectedTable &&
+      activeMode === 'LIVE'
+    "
+  >
+
+    <div class="detail-table-info">
+
+      <span class="detail-table-icon">
+        <i class="fa-solid fa-chair"></i>
+      </span>
+
+
+      <div>
+
+        <h3>
+
+          {{
+            selectedTable.customName ||
+            'Table ' +
+            selectedTable.tableNumber
+          }}
+
+        </h3>
+
+
+        <p>
+
+          Status:
+
+          <strong>
+            {{ selectedTable.status }}
+          </strong>
+
+          <span class="detail-divider">
+            ·
+          </span>
+
+          {{ selectedTable.capacity }}
+          seats
+
+        </p>
+
+
+        <p
+          class="merged-detail"
+          *ngIf="
+            isMerged(
+              selectedTable.id
+            )
+          "
+        >
+
+          <i class="fa-solid fa-link"></i>
+
+          This table is currently merged.
+
+        </p>
+
+
+        <p *ngIf="selectedTable.server">
+
+          Server:
+
+          <strong>
+            {{ selectedTable.server }}
+          </strong>
+
+        </p>
+
+      </div>
+
+    </div>
+
 
     <div class="detail-actions">
-      <button class="btn-primary" *ngIf="selectedTable.status === 'OPEN' && activeMode === 'LIVE'">
-        Seat next party
+
+      <button
+        type="button"
+        class="detail-status-button"
+        *ngFor="
+          let option of
+          getStatusOptions(
+            selectedTable
+          )
+        "
+        (click)="
+          changeTableStatus(
+            selectedTable,
+            option.value
+          )
+        "
+      >
+        {{ option.label }}
       </button>
 
-      <button class="btn-light" *ngIf="selectedTable.status === 'OCCUPIED' && activeMode === 'LIVE'">
-        Clear table
+
+      <button
+        type="button"
+        class="btn-light"
+        (click)="selectedTable = null"
+      >
+        Close
       </button>
 
-      <button class="btn-danger" *ngIf="activeMode === 'EDIT' && selectedTable.status !== 'OCCUPIED'"
-        (click)="removeTable(selectedTable)">
-        Remove table
-      </button>
-
-      <button class="btn-light" (click)="selectedTable = null">Close</button>
     </div>
-  </div>
+
+  </section>
+
+
+  <!-- =====================================================
+       EDIT DETAIL PANEL
+  ====================================================== -->
+
+  <section
+    class="detail-panel edit-detail-panel"
+    *ngIf="
+      selectedTable &&
+      activeMode === 'EDIT'
+    "
+  >
+
+    <div class="detail-table-info">
+
+      <span class="detail-table-icon">
+        <i class="fa-solid fa-pen-to-square"></i>
+      </span>
+
+
+      <div>
+
+        <h3>
+
+          {{
+            selectedTable.customName ||
+            'Table ' +
+            selectedTable.tableNumber
+          }}
+
+        </h3>
+
+        <p>
+
+          {{ selectedTable.capacity }}
+          seats
+
+          <span class="detail-divider">
+            ·
+          </span>
+
+          {{ selectedTable.status }}
+
+        </p>
+
+      </div>
+
+    </div>
+
+
+    <div class="detail-actions">
+
+      <button
+        type="button"
+        class="btn-danger"
+        [disabled]="
+          selectedTable.status ===
+          'OCCUPIED'
+        "
+        (click)="
+          removeTable(
+            selectedTable
+          )
+        "
+      >
+
+        <i class="fa-solid fa-trash"></i>
+
+        Remove Table
+
+      </button>
+
+
+      <button
+        type="button"
+        class="btn-light"
+        (click)="selectedTable = null"
+      >
+        Close
+      </button>
+
+    </div>
+
+  </section>
 
 </div>

@@ -21,6 +21,7 @@ import {
 
 import { NotificationService } from 'src/app/services/notification.service';
 import { WaitlistApiRestaurantService } from 'src/app/services/waitlist-api-restaurant.service';
+import { WaitlistAuthService } from 'src/app/services/waitlist-auth.service';
 import { WaitlistRestaurantModalService } from 'src/app/services/waitlist-restaurant-modal.service';
 
 interface DashboardLiveGuest {
@@ -240,6 +241,7 @@ export class WaitlistActiveListComponent
   editWaitingMinutes: number | null = null;
 
   isUpdatingSeatedGuest = false;
+  restaurantName: string = '';
 
   constructor(
     private router: Router,
@@ -248,10 +250,18 @@ export class WaitlistActiveListComponent
     private waitlistApi:
       WaitlistApiRestaurantService,
     private notificationService:
-      NotificationService
+      NotificationService,
+      private auth: WaitlistAuthService
   ) { }
 
   ngOnInit(): void {
+    this.restaurantId =
+
+      this.auth.getRestaurantId();
+
+    this.restaurantName =
+
+      this.auth.getRestaurantName();
     this.loadDashboardAllData();
 
     this.updateDateTime();
@@ -705,7 +715,6 @@ export class WaitlistActiveListComponent
     }).subscribe({
       next: ({ seatedGuest }) => {
         this.isLoading = false;
-
         const seated =
           seatedGuest.data;
 
@@ -2399,9 +2408,8 @@ export class WaitlistActiveListComponent
             this.restaurantId,
             this.selectedSeatedGuest.id,
             {
-              partySize:
-                this.requiredPartyCapacity,
 
+              partySize:this.requiredPartyCapacity,
               tableName:
                 this.selectedEditTable
                   .tableNumber
@@ -2494,6 +2502,7 @@ export class WaitlistActiveListComponent
             this.restaurantId,
             this.selectedSeatedGuest.id,
             {
+              status:'WAITING',
               partySize:
                 this.requiredPartyCapacity,
 

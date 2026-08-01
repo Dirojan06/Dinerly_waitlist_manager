@@ -460,7 +460,6 @@ registrationEmail = '';
 
       name:
         user.name ||
-        user.username ||
         'Guest',
 
       email:

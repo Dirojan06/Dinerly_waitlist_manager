@@ -2,18 +2,20 @@ export type UserRole = 'guest' | 'restaurant' | 'admin';
 
 export interface AuthUser {
   id: number;
-  name?: string;
-  username?: string;
   email: string;
-  phone?: string;
-  role?: string;
+  name: string;
+  phone: string;
+  role: string;
   restaurantId?: number;
+  restaurantName?: string;
 }
 
 
 export interface AuthData {
   token: string;
   user: AuthUser;
+
+  restaurantName: string;
 }
 
 

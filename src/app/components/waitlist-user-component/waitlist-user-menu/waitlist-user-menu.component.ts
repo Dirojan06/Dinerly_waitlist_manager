@@ -5,7 +5,11 @@ import {
   OnInit,
   SimpleChanges
 } from '@angular/core';
-import { Category, Dish } from 'src/app/models/waitlist-menu.model';
+
+import {
+  Category,
+  Dish
+} from 'src/app/models/waitlist-menu.model';
 
 import {
   MenuService
@@ -26,8 +30,10 @@ interface MenuRestaurant {
 
 @Component({
   selector: 'app-waitlist-user-menu',
+
   templateUrl:
     './waitlist-user-menu.component.html',
+
   styleUrls: [
     './waitlist-user-menu.component.css'
   ]
@@ -39,23 +45,18 @@ export class WaitlistUserMenuComponent
   isActive = false;
 
 
+  /* =====================================================
+     SEARCH
+  ====================================================== */
+
   searchText = '';
 
+
+  /* =====================================================
+     EXISTING RESTAURANT DEMO DATA
+  ====================================================== */
+
   selectedCuisine = 'All';
-
-  isLoadingMenu = false;
-
-  menuErrorMessage = '';
-
-  private menuLoaded = false;
-
-  categories: Category[] = [];
-  selectedCategoryId?: any;
-  selectedCategoryName = '';
-  isDirectMenuRoute = false;
-
-  dishes: Dish[] = [];
-
 
   cuisines = [
     'All',
@@ -112,10 +113,59 @@ export class WaitlistUserMenuComponent
     ];
 
 
+  /* =====================================================
+     MENU STATE
+  ====================================================== */
+
+  isLoadingMenu = false;
+
+  isLoadingDishes = false;
+
+  menuErrorMessage = '';
+
+  private menuLoaded = false;
+
+
+  /* =====================================================
+     CATEGORY DATA
+  ====================================================== */
+
+  categories: Category[] = [];
+
+  selectedCategoryId:
+    number | null = null;
+
+  selectedCategoryName = '';
+
+  isDirectMenuRoute = false;
+
+
+  /* =====================================================
+     DISH DATA
+  ====================================================== */
+
+  dishes: Dish[] = [];
+
+  activeDishes: Dish[] = [];
+
+
+  /* =====================================================
+     IMAGE
+  ====================================================== */
+
+  fallbackImage =
+    'assets/food-placeholder.png';
+
+
   constructor(
-    private menuService: MenuService
+    private menuService:
+      MenuService
   ) {}
 
+
+  /* =====================================================
+     LIFE CYCLE
+  ====================================================== */
 
   ngOnInit(): void {
 
@@ -124,7 +174,6 @@ export class WaitlistUserMenuComponent
     );
 
     this.loadMenuWhenActive();
-
   }
 
 
@@ -145,6 +194,10 @@ export class WaitlistUserMenuComponent
     }
   }
 
+
+  /* =====================================================
+     FILTERED RESTAURANTS
+  ====================================================== */
 
   get filteredRestaurants():
     MenuRestaurant[] {
@@ -181,6 +234,54 @@ export class WaitlistUserMenuComponent
   }
 
 
+  /* =====================================================
+     FILTERED DISHES
+  ====================================================== */
+
+  get filteredDishes():
+    Dish[] {
+
+    const search =
+      this.searchText
+        .trim()
+        .toLowerCase();
+
+    if (!search) {
+      return this.activeDishes;
+    }
+
+    return this.activeDishes.filter(
+      dish => {
+
+        const dishName =
+          String(
+            dish.name || ''
+          )
+            .trim()
+            .toLowerCase();
+
+        const categoryName =
+          String(
+            dish.category ||
+            this.selectedCategoryName ||
+            ''
+          )
+            .trim()
+            .toLowerCase();
+
+        return (
+          dishName.includes(search) ||
+          categoryName.includes(search)
+        );
+      }
+    );
+  }
+
+
+  /* =====================================================
+     INITIAL MENU LOAD
+  ====================================================== */
+
   private loadMenuWhenActive(): void {
 
     if (!this.isActive) {
@@ -211,22 +312,46 @@ export class WaitlistUserMenuComponent
         next: response => {
 
           console.log(
-            'Menu response:',
+            'Menu category response:',
             response
           );
-          this.categories = response;
+
+          this.categories =
+            Array.isArray(response)
+              ? response
+              : [];
+
           this.menuLoaded = true;
 
           this.isLoadingMenu = false;
-          if (response.length > 0) {
-          this.onCategorySelect(response[0].id, response[0].name);
-        }
 
           /*
-           * Map the API response here when
-           * your category response structure
-           * is confirmed.
+           * Existing flow remains unchanged:
+           * select the first category automatically.
            */
+          if (
+            this.categories.length > 0
+          ) {
+
+            const firstCategory =
+              this.categories[0];
+
+            this.onCategorySelect(
+              firstCategory.id,
+              firstCategory.name
+            );
+          } else {
+
+            this.selectedCategoryId =
+              null;
+
+            this.selectedCategoryName =
+              '';
+
+            this.dishes = [];
+
+            this.activeDishes = [];
+          }
         },
 
         error: error => {
@@ -240,6 +365,12 @@ export class WaitlistUserMenuComponent
 
           this.isLoadingMenu = false;
 
+          this.categories = [];
+
+          this.dishes = [];
+
+          this.activeDishes = [];
+
           this.menuErrorMessage =
             error?.error?.message ||
             'Unable to load menu.';
@@ -247,29 +378,248 @@ export class WaitlistUserMenuComponent
       });
   }
 
-  onCategorySelect(categoryId: number, categoryName: string): void {
-    this.selectedCategoryId = categoryId;
-    this.selectedCategoryName = categoryName;
 
-      this.menuService.getDishesByCategory(categoryName).subscribe(res => {
-        this.dishes = res;
+  /* =====================================================
+     CATEGORY SELECTION
+  ====================================================== */
 
-        this.dishes = res.filter(dish => dish.status?.toLowerCase() === 'active');
+  onCategorySelect(
+    categoryId: number,
+    categoryName: string
+  ): void {
+
+    if (
+      this.isLoadingDishes
+    ) {
+      return;
+    }
+
+    this.selectedCategoryId =
+      categoryId;
+
+    this.selectedCategoryName =
+      categoryName;
+
+    this.menuErrorMessage = '';
+
+    this.isLoadingDishes = true;
+
+    this.menuService
+      .getDishesByCategory(
+        categoryName
+      )
+      .subscribe({
+        next: response => {
+
+          console.log(
+            'Menu dishes response:',
+            response
+          );
+
+          this.isLoadingDishes = false;
+
+          this.dishes =
+            Array.isArray(response)
+              ? response
+              : [];
+
+          /*
+           * Existing flow remains unchanged:
+           * only active dishes are shown.
+           */
+          this.activeDishes =
+            this.dishes.filter(
+              dish =>
+                String(
+                  dish.status || ''
+                )
+                  .trim()
+                  .toLowerCase() ===
+                'active'
+            );
+        },
+
+        error: error => {
+
+          this.isLoadingDishes = false;
+
+          console.error(
+            'Dish API error:',
+            error
+          );
+
+          this.dishes = [];
+
+          this.activeDishes = [];
+
+          this.menuErrorMessage =
+            error?.error?.message ||
+            `Unable to load ${categoryName} dishes.`;
+        }
       });
-    
-
-  }
-  onImageLoad(event: Event) {
-    const img = event.target as HTMLImageElement;
-    img.classList.remove('loading');
-    img.classList.add('loaded');
   }
 
+
+  /* =====================================================
+     SEARCH
+  ====================================================== */
+
+  clearSearch(): void {
+
+    this.searchText = '';
+  }
+
+
+  /* =====================================================
+     IMAGE HELPERS
+  ====================================================== */
+
+  getImageBackgroundClass(
+    index: number
+  ): string {
+
+    const classes = [
+      'food-bg-peach',
+      'food-bg-purple',
+      'food-bg-mint',
+      'food-bg-pink'
+    ];
+
+    return classes[
+      index % classes.length
+    ];
+  }
+
+
+  onImageLoad(
+    event: Event
+  ): void {
+
+    const image =
+      event.target as
+        HTMLImageElement;
+
+    image.classList.remove(
+      'loading'
+    );
+
+    image.classList.add(
+      'loaded'
+    );
+  }
+
+
+  onImageError(
+    event: Event
+  ): void {
+
+    const image =
+      event.target as
+        HTMLImageElement;
+
+    const fallbackUrl =
+      this.fallbackImage;
+
+    if (
+      image
+        .getAttribute('src') ===
+      fallbackUrl
+    ) {
+      image.classList.remove(
+        'loading'
+      );
+
+      image.classList.add(
+        'loaded'
+      );
+
+      return;
+    }
+
+    image.src =
+      fallbackUrl;
+  }
+
+
+  /* =====================================================
+     PRICE
+  ====================================================== */
+
+  formatPrice(
+    price:
+      number |
+      string |
+      null |
+      undefined
+  ): string {
+
+    const numericPrice =
+      Number(price);
+
+    if (
+      Number.isNaN(
+        numericPrice
+      )
+    ) {
+      return '0.00';
+    }
+
+    return numericPrice
+      .toFixed(2);
+  }
+
+
+  /* =====================================================
+     TRACK BY
+  ====================================================== */
+
+  trackByCategory(
+    index: number,
+    category: Category
+  ): number | string {
+
+    return (
+      category.id ??
+      `${category.name}-${index}`
+    );
+  }
+
+
+  trackByDish(
+    index: number,
+    dish: Dish
+  ): number | string {
+
+    return (
+      dish.id ??
+      `${dish.name}-${index}`
+    );
+  }
+
+
+  /* =====================================================
+     REFRESH
+  ====================================================== */
 
   refreshMenu(): void {
 
     this.menuLoaded = false;
 
+    this.categories = [];
+
+    this.dishes = [];
+
+    this.activeDishes = [];
+
+    this.selectedCategoryId =
+      null;
+
+    this.selectedCategoryName =
+      '';
+
+    this.menuErrorMessage = '';
+
     this.getMenuMethod();
   }
+
 }

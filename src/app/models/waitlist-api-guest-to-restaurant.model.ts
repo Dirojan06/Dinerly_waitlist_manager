@@ -184,11 +184,18 @@ export interface seatedGuestcallRequest {
   tableName: string
 }
 
+export interface updateSeatedGuestcallRequest {
+  partySize:number
+  tableName: string
+}
+
+
 export interface tableList {
   id: number,
   tableNumber: string,
   capacity: number,
   status: string
+  mergedTableId?: number | null;
 }
 
 export interface TablelistResponse {
@@ -196,6 +203,20 @@ export interface TablelistResponse {
   message: string;
   data: tableList[];
 }
+export interface mergerTableRequest{
+
+  tableId:number ,
+  mergedTableId: number
+
+}
+
+export interface unMergerTableRequest{
+
+  tableId:number ,
+  mergedTableId: number
+
+}
+
 
 export interface guestReportsPage {
   averageWaitTime: number,

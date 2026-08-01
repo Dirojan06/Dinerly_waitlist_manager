@@ -1,72 +1,227 @@
 <section class="food-page">
 
-  <div class="page-heading">
-    <div>
-      <p>DISCOVER FOOD</p>
-      <h1>Find something delicious</h1>
-    </div>
-  </div>
+  <!-- HEADER -->
+  <header class="food-header">
 
+    <p class="food-eyebrow">
+      DISCOVER FOOD
+    </p>
+
+    <h1>
+      Find something delicious
+    </h1>
+
+  </header>
+
+
+  <!-- SEARCH -->
   <div class="food-search">
+
     <i class="fa-solid fa-magnifying-glass"></i>
 
     <input
       type="text"
       [(ngModel)]="searchText"
-      placeholder="Search restaurants or cuisines"
+      placeholder="Search dishes or categories"
+      aria-label="Search menu"
     />
-  </div>
 
-  <div class="food-categories">
     <button
       type="button"
-      *ngFor="let 
-        category of categories"
+      class="clear-search"
+      *ngIf="searchText"
+      aria-label="Clear search"
+      (click)="clearSearch()"
+    >
+      <i class="fa-solid fa-xmark"></i>
+    </button>
+
+  </div>
+
+
+  <!-- CATEGORIES -->
+  <div
+    class="food-categories"
+    *ngIf="categories.length > 0"
+  >
+
+    <button
+      type="button"
+      *ngFor="
+        let category of categories;
+        trackBy: trackByCategory
+      "
       [class.active]="
         category.id === selectedCategoryId
       "
-      (click)="onCategorySelect(category.id, category.name)"
+      [disabled]="isLoadingDishes"
+      (click)="
+        onCategorySelect(
+          category.id,
+          category.name
+        )
+      "
     >
       {{ category.name }}
     </button>
+
   </div>
 
-  <div class="food-grid">
+
+  <!-- MENU LOADING -->
+  <div
+    class="menu-state"
+    *ngIf="
+      isLoadingMenu ||
+      isLoadingDishes
+    "
+  >
+
+    <i class="fa-solid fa-spinner fa-spin"></i>
+
+    <p>
+      {{
+        isLoadingMenu
+          ? 'Loading menu...'
+          : 'Loading dishes...'
+      }}
+    </p>
+
+  </div>
+
+
+  <!-- ERROR -->
+  <div
+    class="menu-state error-state"
+    *ngIf="
+      !isLoadingMenu &&
+      !isLoadingDishes &&
+      menuErrorMessage
+    "
+  >
+
+    <i class="fa-solid fa-circle-exclamation"></i>
+
+    <h3>
+      Unable to load menu
+    </h3>
+
+    <p>
+      {{ menuErrorMessage }}
+    </p>
+
+    <button
+      type="button"
+      class="retry-menu-btn"
+      (click)="refreshMenu()"
+    >
+      Try again
+    </button>
+
+  </div>
+
+
+  <!-- EMPTY STATE -->
+  <div
+    class="menu-state"
+    *ngIf="
+      !isLoadingMenu &&
+      !isLoadingDishes &&
+      !menuErrorMessage &&
+      filteredDishes.length === 0
+    "
+  >
+
+    <i class="fa-solid fa-utensils"></i>
+
+    <h3>
+      No dishes found
+    </h3>
+
+    <p>
+      Try another category or search term.
+    </p>
+
+  </div>
+
+
+  <!-- FOOD GRID -->
+  <div
+    class="food-grid"
+    *ngIf="
+      !isLoadingMenu &&
+      !isLoadingDishes &&
+      !menuErrorMessage &&
+      filteredDishes.length > 0
+    "
+  >
 
     <article
       class="food-card"
-      *ngFor="let item of dishes; let i = index"
+      *ngFor="
+        let item of filteredDishes;
+        let i = index;
+        trackBy: trackByDish
+      "
     >
 
+      <!-- IMAGE -->
       <div
-        class="food-image">
-        <div class="food-plate">
-          <img [src]="item.imageUrl " [alt]="item.name" class="food-img loading" loading="lazy"
-                    decoding="async" (load)="onImageLoad($event)">
-        </div>
+        class="food-image"
+        [ngClass]="
+          getImageBackgroundClass(i)
+        "
+      >
+
+        <div class="food-shape"></div>
+
+        <img
+          [src]="
+            item.imageUrl ||
+            fallbackImage
+          "
+          [alt]="item.name"
+          class="food-img loading"
+          loading="lazy"
+          decoding="async"
+          (load)="onImageLoad($event)"
+          (error)="onImageError($event)"
+        />
+
       </div>
 
+
+      <!-- BODY -->
       <div class="food-body">
 
         <h3>
           {{ item.name }}
         </h3>
 
-        <p>
-          CAD{{ item.price }}$
-          ·
-          {{ item.calories }} Calories
+        <p class="food-price">
+
+          CAD{{ formatPrice(item.price) }}
+
+          <span>·</span>
+
+          {{ item.calories || 0 }}
+          Calories
+
         </p>
 
         <div class="food-meta">
+
+          <i class="fa-solid fa-star"></i>
+
           <span>
-            ★ {{ item.category }}
+            {{
+              item.category ||
+              selectedCategoryName ||
+              'Menu'
+            }}
           </span>
 
-
         </div>
-
-       
 
       </div>
 

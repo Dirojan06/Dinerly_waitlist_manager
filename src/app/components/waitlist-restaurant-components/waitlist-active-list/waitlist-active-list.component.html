@@ -23,9 +23,15 @@
       </button>
 
       <button class="restaurant-btn" type="button">
-        <span>B</span>
-        Brothers Cafe
+
+        <span>
+          {{ restaurantName.charAt(0) }}
+        </span>
+
+        {{ restaurantName }}
+
         <i class="fa-solid fa-chevron-down"></i>
+
       </button>
 
       <button class="walkin-btn" (click)="logout()">Logout</button>
