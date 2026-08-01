@@ -3,6 +3,7 @@
   grid-template-columns: 1fr 1fr;
   gap: 24px;
   width: 100%;
+  margin-top: 20px;
 }
 
 .action-card {
@@ -85,6 +86,7 @@
       #f4efff);
   box-shadow:
     0 14px 35px rgba(91, 33, 182, 0.1);
+  margin-top: 30px;
 }
 
 .restore-card-content {

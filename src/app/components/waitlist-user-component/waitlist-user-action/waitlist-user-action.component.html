@@ -66,25 +66,13 @@
 
   </div>
 
-  <button *ngIf="!restoreRequestSent" class="restore-btn" type="button" [disabled]="isRestoring"
-    (click)="requestRestore()">
-    <i class="fa-solid fa-rotate-left" *ngIf="!isRestoring"></i>
+  
 
-    {{
-    isRestoring
-    ? 'Sending request...'
-    : 'Restore waitlist'
-    }}
-  </button>
-
-  <div class="restore-pending" *ngIf="restoreRequestSent">
-    <i class="fa-regular fa-clock"></i>
-    Awaiting restaurant approval
+  <div class="restore-pending">
+    Please Contact Restaurant
   </div>
 
-  <p class="restore-error" *ngIf="restoreError">
-    {{ restoreError }}
-  </p>
+  
 
 </section>
 

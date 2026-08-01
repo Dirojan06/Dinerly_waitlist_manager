@@ -45,6 +45,8 @@ export class WaitlistUserComponentComponent
 
     accountSuccessMessage='';
 
+    restaurant: any = null;
+
 
     constructor(
   private route: ActivatedRoute,
@@ -369,6 +371,20 @@ export class WaitlistUserComponentComponent
       return;
     }
 
+    if (
+
+    tab === 'PROFILE' &&
+
+    !this.hasAccountAccess
+
+  ) {
+
+    this.openAccountLoginPopup();
+
+    return;
+
+  }
+
 
     /* MENU / OFFERS / REWARDS */
 
@@ -583,6 +599,7 @@ export class WaitlistUserComponentComponent
      * immediately after logout.
      */
     if (
+      this.activeTab === 'PROFILE' ||
       this.activeTab === 'MENU' ||
       this.activeTab === 'OFFERS' ||
       this.activeTab === 'REWARDS'
@@ -736,4 +753,28 @@ export class WaitlistUserComponentComponent
       JSON.stringify(restoredGuest)
     );
   }
+
+  getCustomerInitial(): string {
+
+  const name =
+    this.customerAccount?.name?.trim();
+
+  if (!name) {
+    return 'U';
+  }
+
+  return name.charAt(0).toUpperCase();
+}
+
+
+editCustomerProfile(): void {
+
+  // Open your edit profile popup here.
+  console.log(
+    'Edit customer profile',
+    this.customerAccount
+  );
+}
+
+
 }

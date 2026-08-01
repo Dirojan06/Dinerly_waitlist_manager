@@ -120,6 +120,32 @@
 
     </button>
 
+    <button
+
+        *ngIf="hasAccountAccess && customerAccount"
+
+        type="button"
+
+        class="profile-nav-button"
+
+        [class.active]="activeTab === 'PROFILE'"
+
+        (click)="selectTab('PROFILE')"
+
+      >
+
+        <span class="nav-icon profile-nav-avatar">
+
+          Profile
+
+        </span>
+
+       
+
+        <i class="fa-solid fa-chevron-right profile-arrow"></i>
+
+      </button>
+
   </nav>
 
 
@@ -128,60 +154,60 @@
 
   <!-- NOT LOGGED IN -->
 
- <div
-  class="sidebar-login-card"
-  *ngIf="!hasAccountAccess">
+  <div class="sidebar-login-card" *ngIf="!hasAccountAccess">
 
-  <div class="login-card-icon">
-    <i class="fa-regular fa-user"></i>
-  </div>
-
-  <div class="login-card-content">
-    <strong>Unlock rewards</strong>
-
-    <p>
-      Join a waitlist and login with email
-      for offers, rewards and food.
-    </p>
-  </div>
-
-  <button
-    type="button"
-    class="sidebar-login-button"
-    (click)="loginWithEmail($event)">
-
-    Login
-  </button>
-
-</div>
-
-
-  <!-- LOGGED-IN PROFILE -->
-
-  <div class="sidebar-profile" *ngIf="hasAccountAccess && customerAccount">
-
-    <div class="profile-avatar">
-      {{ getInitial() }}
+    <div class="login-card-icon">
+      <i class="fa-regular fa-user"></i>
     </div>
 
-    <div class="profile-info">
-      <strong>
-        {{ customerAccount.name }}
-      </strong>
+    <div class="login-card-content">
+      <strong>Unlock rewards</strong>
 
       <p>
-        {{ customerAccount.email }}
+        Join a waitlist and login with email
+        for offers, rewards and food.
       </p>
     </div>
 
-    <button type="button" class="profile-logout" aria-label="Logout" title="Logout" (click)="logoutAccount($event)">
+    <button type="button" class="sidebar-login-button" (click)="loginWithEmail($event)">
 
-      <i class="fa-solid fa-arrow-right-from-bracket">
-      </i>
+      Login
+    </button>
+
+  </div>
+
+  <div class="compact-user-card" *ngIf="hasAccountAccess && customerAccount" (click)="selectTab('PROFILE')"
+    role="button" tabindex="0" (keydown.enter)="selectTab('PROFILE')">
+
+    <div class="compact-user-avatar">
+
+     
+
+    </div>
+
+    <div class="compact-user-content">
+
+
+      <strong>
+
+        {{ customerAccount.name }}
+
+      </strong>
+
+    </div>
+
+    <button type="button" class="sidebar-login-button"  aria-label="Logout" title="Logout" (click)="logoutAccount($event)">
+
+      Logout
 
     </button>
 
   </div>
+
+
+
+
+ 
 
 
   <!-- RESTAURANT DETAILS -->

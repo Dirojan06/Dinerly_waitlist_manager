@@ -3,7 +3,7 @@ export type GuestPortalTab =
   | 'WAITLIST'
   | 'MENU'
   | 'OFFERS'
-  | 'REWARDS';
+  | 'REWARDS'| 'PROFILE';
 
 export interface GuestAccount {
   id?: number;

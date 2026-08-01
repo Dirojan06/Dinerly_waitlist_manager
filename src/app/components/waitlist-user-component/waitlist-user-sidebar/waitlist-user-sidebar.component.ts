@@ -2,173 +2,139 @@ import {
   Component,
   EventEmitter,
   Input,
-  OnInit,
   Output
 } from '@angular/core';
 
-import {
-  GuestAccount,
-  GuestPortalTab
-} from 'src/app/models/guest-portal.model';
 
-import {
-  Restaurant
-} from 'src/app/models/waitlist-api-guest-to-restaurant.model';
+export type CustomerTab =
+  | 'HOME'
+  | 'WAITLIST'
+  | 'OFFERS'
+  | 'MENU'
+  | 'REWARDS'
+  | 'PROFILE';
 
-import {
-  WaitlistApiRestaurantService
-} from 'src/app/services/waitlist-api-restaurant.service';
+
+export interface CustomerAccount {
+  id?: number | string;
+  name: string;
+  email: string;
+  phone?: string;
+  address?: string;
+  createdAt?: string;
+}
+
+
+export interface RestaurantDetails {
+  id?: number | string;
+  name?: string;
+  address?: string;
+  phone?: string;
+  email?: string;
+}
 
 
 @Component({
   selector: 'app-waitlist-user-sidebar',
-  templateUrl:
-    './waitlist-user-sidebar.component.html',
-  styleUrls: [
-    './waitlist-user-sidebar.component.css'
-  ]
+  templateUrl: './waitlist-user-sidebar.component.html',
+  styleUrls: ['./waitlist-user-sidebar.component.css']
 })
-export class WaitlistUserSidebarComponent
-  implements OnInit {
+export class WaitlistUserSidebarComponent {
 
   @Input()
-  activeTab: GuestPortalTab = 'HOME';
-
+  activeTab: CustomerTab = 'HOME';
 
   @Input()
   hasWaitlistAccess = false;
 
-
   @Input()
   hasAccountAccess = false;
 
+  @Input()
+  customerAccount: CustomerAccount | null = null;
 
   @Input()
-  canAccessAccountFeatures = false;
-
-
-  @Input()
-  customerAccount:
-    GuestAccount | null = null;
+  restaurant: RestaurantDetails | null = null;
 
 
   @Output()
-  tabChange =
-    new EventEmitter<GuestPortalTab>();
-
+  tabChange = new EventEmitter<CustomerTab>();
 
   @Output()
-  accountLogin =
-    new EventEmitter<void>();
-
+  accountLogin = new EventEmitter<void>();
 
   @Output()
-  accountLogout =
-    new EventEmitter<void>();
+  accountLogout = new EventEmitter<void>();
 
 
-  restaurant?: Restaurant;
-
-  restaurantId = 1;
-
-
-  constructor(
-    private waitlistApi:
-      WaitlistApiRestaurantService
-  ) { }
-
-
-  ngOnInit(): void {
-
-    this.restaurantId =
-      Number(
-        localStorage.getItem(
-          'waitlistRestaurantId'
-        )
-      ) || 1;
-
-    this.loadRestaurantDetails();
+  get canAccessAccountFeatures(): boolean {
+    return Boolean(
+      this.hasAccountAccess &&
+      this.customerAccount
+    );
   }
 
 
   selectTab(
-    tab: GuestPortalTab
+    tab: CustomerTab
   ): void {
+
+    if (
+      tab === 'WAITLIST' &&
+      !this.hasWaitlistAccess
+    ) {
+      return;
+    }
+
+    const accountOnlyTabs: CustomerTab[] = [
+      'OFFERS',
+      'MENU',
+      'REWARDS',
+      'PROFILE'
+    ];
+
+    if (
+      accountOnlyTabs.includes(tab) &&
+      !this.canAccessAccountFeatures
+    ) {
+      this.accountLogin.emit();
+      return;
+    }
 
     this.tabChange.emit(tab);
   }
 
 
   loginWithEmail(
-  event: MouseEvent
-): void {
-
-  event.preventDefault();
-  event.stopPropagation();
-
-  console.log(
-    'Sidebar login clicked'
-  );
-
-  this.accountLogin.emit();
-}
-
-
-  logoutAccount(event: MouseEvent): void {
-
-    event.preventDefault();
+    event: MouseEvent
+  ): void {
 
     event.stopPropagation();
 
-    alert('Logout button clicked');
+    this.accountLogin.emit();
+  }
 
-    console.log('Logout button clicked');
+
+  logoutAccount(
+    event: MouseEvent
+  ): void {
+
+    event.stopPropagation();
 
     this.accountLogout.emit();
-
   }
 
 
   getInitial(): string {
 
-    return (
-      this.customerAccount?.name
-        ?.charAt(0)
-        ?.toUpperCase() ||
-      'G'
-    );
+    const name =
+      this.customerAccount?.name?.trim();
+
+    if (!name) {
+      return 'U';
+    }
+
+    return name.charAt(0).toUpperCase();
   }
 
-
-  loadRestaurantDetails(): void {
-
-    this.waitlistApi
-      .getRestaurantDetails()
-      .subscribe({
-        next: res => {
-
-          if (
-            res?.success &&
-            res?.data?.length
-          ) {
-
-            this.restaurant =
-              res.data.find(
-                item =>
-                  item.id ===
-                  this.restaurantId
-              ) ||
-              res.data[0];
-          }
-        },
-
-        error: error => {
-
-          console.error(
-            'Unable to load restaurant details',
-            error
-          );
-        }
-      });
-  }
 }

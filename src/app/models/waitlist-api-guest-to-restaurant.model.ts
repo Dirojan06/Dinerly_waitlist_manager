@@ -257,6 +257,10 @@ export interface Restaurant {
   phone: string;
   address: string;
   totalTables: number;
+  acceptOnlineJoin?: boolean;
+  walkInsOnly?: boolean;
+  openTime?: string;
+  closeTime?: string;
   createdAt: string;
   updatedAt: string;
 }
