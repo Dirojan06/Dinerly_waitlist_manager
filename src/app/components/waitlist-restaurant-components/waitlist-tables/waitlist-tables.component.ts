@@ -4,9 +4,11 @@ import {
 
 import {
   Component,
+  HostListener,
   OnDestroy,
   OnInit
 } from '@angular/core';
+import { Router } from '@angular/router';
 
 import {
   Subscription
@@ -85,6 +87,7 @@ export class WaitlistTablesComponent
 
   restaurantName = '';
 
+  showRestaurantMenu = false
   isLoading = false;
 
   isMerging = false;
@@ -119,7 +122,8 @@ export class WaitlistTablesComponent
       WaitlistAuthService,
 
     public modalService:
-      WaitlistRestaurantModalService
+      WaitlistRestaurantModalService,
+      private router: Router
   ) { }
 
 
@@ -218,25 +222,7 @@ export class WaitlistTablesComponent
   }
 
 
-  get currentTimeOnly(): string {
-
-    return new Date()
-      .toLocaleTimeString(
-        'en-CA',
-        {
-          timeZone:
-            'America/Toronto',
-
-          hour:
-            '2-digit',
-
-          minute:
-            '2-digit',
-
-          hour12: true
-        }
-      );
-  }
+  
 
 
   /* =====================================================
@@ -1626,6 +1612,42 @@ export class WaitlistTablesComponent
 
     return table.id;
   }
+
+  @HostListener('document:click')
+    closeContactActions(): void {
+      this.showRestaurantMenu = false;
+    }
+  
+    toggleRestaurantMenu(
+      event: MouseEvent
+    ): void {
+  
+      event.stopPropagation();
+  
+      this.showRestaurantMenu =
+        !this.showRestaurantMenu;
+    }
+  
+  
+  
+    logoutFromMenu(
+      event: MouseEvent
+    ): void {
+  
+      event.stopPropagation();
+  
+      this.logout();
+    }
+  
+    logout(): void {
+      localStorage.removeItem(
+        'authToken'
+      );
+  
+      this.router.navigate([
+        '/login'
+      ]);
+    }
 
 
   ngOnDestroy(): void {

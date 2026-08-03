@@ -1,5 +1,6 @@
 import {
   Component,
+  HostListener,
   OnDestroy,
   OnInit
 } from '@angular/core';
@@ -34,6 +35,7 @@ import {
 import {
   SettingService
 } from 'src/app/services/setting.service';
+import { WaitlistAuthService } from 'src/app/services/waitlist-auth.service';
 
 type SettingsTab =
   | 'profile'
@@ -74,14 +76,14 @@ export class WaitlistSettingsComponent
   isSavingWaitlist = false;
   isSavingAdvanced = false;
   isCreatingHoliday = false;
-
+  showRestaurantMenu = false;
   profileSaveMessage = '';
   notificationSaveMessage = '';
   waitlistSaveMessage = '';
   advancedSaveMessage = '';
   holidaySaveMessage = '';
   private savedRestaurant: SettingsRestaurant | null = null;
-
+  restaurantName = ''
   private savedNotificationConfiguration:
     NotificationSettingsResponse | null = null;
 
@@ -98,7 +100,7 @@ export class WaitlistSettingsComponent
 
   currentTimeOnly = '';
 
-  restaurantId = '';
+  restaurantId :any;
 
   isLoading = false;
 
@@ -227,12 +229,18 @@ export class WaitlistSettingsComponent
   constructor(
     private route: ActivatedRoute,
     private router: Router,
-    private settingApi: SettingService
+    private settingApi: SettingService,
+    private auth: WaitlistAuthService
   ) { }
 
   ngOnInit(): void {
     this.restaurantId =
-      localStorage.getItem('restaurantId') || '1';
+
+      this.auth.getRestaurantId();
+
+    this.restaurantName =
+
+      this.auth.getRestaurantName();
 
     this.subscription.add(
       this.route.queryParamMap.subscribe(params => {
@@ -1789,6 +1797,44 @@ export class WaitlistSettingsComponent
     }
 
   }
+
+  
+
+   @HostListener('document:click')
+    closeContactActions(): void {
+      this.showRestaurantMenu = false;
+    }
+  
+    toggleRestaurantMenu(
+      event: MouseEvent
+    ): void {
+  
+      event.stopPropagation();
+  
+      this.showRestaurantMenu =
+        !this.showRestaurantMenu;
+    }
+  
+  
+  
+    logoutFromMenu(
+      event: MouseEvent
+    ): void {
+  
+      event.stopPropagation();
+  
+      this.logout();
+    }
+  
+    logout(): void {
+      localStorage.removeItem(
+        'authToken'
+      );
+  
+      this.router.navigate([
+        '/login'
+      ]);
+    }
 
   ngOnDestroy(): void {
     this.subscription.unsubscribe();

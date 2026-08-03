@@ -39,6 +39,7 @@ import { WaitlistUserHomeComponent } from './components/waitlist-user-component/
 import { WaitlistUserDiscountsComponent } from './components/waitlist-user-component/waitlist-user-discounts/waitlist-user-discounts.component';
 import { WaitlistUserRewardsComponent } from './components/waitlist-user-component/waitlist-user-offers/waitlist-user-rewards.component';
 import { WaitlistUserEmailVerifyComponent } from './components/waitlist-user-component/waitlist-user-email-verify/waitlist-user-email-verify.component';
+import { WaitlistHelpComponent } from './components/waitlist-restaurant-components/waitlist-help/waitlist-help.component';
 
 @NgModule({
   declarations: [
@@ -70,7 +71,8 @@ import { WaitlistUserEmailVerifyComponent } from './components/waitlist-user-com
     WaitlistUserHomeComponent,
     WaitlistUserDiscountsComponent,
     WaitlistUserRewardsComponent,
-    WaitlistUserEmailVerifyComponent
+    WaitlistUserEmailVerifyComponent,
+    WaitlistHelpComponent
   ],
   imports: [
     BrowserModule,
@@ -100,106 +102,3 @@ import { WaitlistUserEmailVerifyComponent } from './components/waitlist-user-com
   bootstrap: [AppComponent]
 })
 export class AppModule { }
-
-
-//////////////////
-
-// {
-//   "success": true,
-//   "message": "Tables retrieved",
-//   "data": [
-//     {
-//       "id": 1,
-//       "tableNumber": "T01",
-//       "capacity": 4,
-//       "status": "OPEN"
-//     },
-//     {
-//       "id": 2,
-//       "tableNumber": "T02",
-//       "capacity": 6,
-//       "status": "OPEN"
-//     },
-//     {
-//       "id": 3,
-//       "tableNumber": "T03",
-//       "capacity": 2,
-//       "status": "OCCUPIED"
-//     },
-//     {
-//       "id": 4,
-//       "tableNumber": "T04",
-//       "capacity": 8,
-//       "status": "OCCUPIED"
-//     },
-//     {
-//       "id": 5,
-//       "tableNumber": "T05",
-//       "capacity": 4,
-//       "status": "OPEN"
-//     },
-//     {
-//       "id": 6,
-//       "tableNumber": "T6",
-//       "capacity": 2,
-//       "status": "OCCUPIED"
-//     },
-//     {
-//       "id": 7,
-//       "tableNumber": "T7",
-//       "capacity": 2,
-//       "status": "OPEN"
-//     },
-//     {
-//       "id": 8,
-//       "tableNumber": "T8",
-//       "capacity": 2,
-//       "status": "OCCUPIED"
-//     },
-//     {
-//       "id": 10,
-//       "tableNumber": "T10",
-//       "capacity": 2,
-//       "status": "OCCUPIED"
-//     },
-//     {
-//       "id": 11,
-//       "tableNumber": "T11",
-//       "capacity": 4,
-//       "status": "OCCUPIED"
-//     },
-//     {
-//       "id": 12,
-//       "tableNumber": "T12",
-//       "capacity": 6,
-//       "status": "OCCUPIED"
-//     },
-//     {
-//       "id": 13,
-//       "tableNumber": "T13",
-//       "capacity": 8,
-//       "status": "OPEN"
-//     },
-//     {
-//       "id": 9,
-//       "tableNumber": "T9",
-//       "capacity": 2,
-//       "status": "OCCUPIED"
-//     }
-//   ]
-// }
-// https://dinerly.onrender.com/api/restaurants/1/tables
-
-
-
-// {
-//   "tableId": 9007199254740991,
-//   "mergedTableId": 9007199254740991
-// }
-
-// 'https://dinerly.onrender.com/api/restaurants/1/tables/merge'
-
-// {
-//   "tableId": 1,
-//   "mergedTableId": 3
-// }

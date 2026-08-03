@@ -14,27 +14,64 @@
     </div>
 
     <div class="header-actions">
-      <!-- <button class="simulate-btn" type="button" (click)="modalService.open()">
-        + Simulate online join
-      </button> -->
 
       <button class="walkin-btn" type="button" (click)="modalService.open()">
         Add Guest
       </button>
 
-      <button class="restaurant-btn" type="button">
+      <div class="restaurant-menu-wrapper" (click)="$event.stopPropagation()">
+        <button class="restaurant-btn" type="button" [class.menu-open]="showRestaurantMenu"
+          [attr.aria-expanded]="showRestaurantMenu" aria-haspopup="menu" (click)="toggleRestaurantMenu($event)">
+          <span>
+            {{
+            restaurantName
+            ? restaurantName.charAt(0)
+            : 'R'
+            }}
+          </span>
 
-        <span>
-          {{ restaurantName.charAt(0) }}
-        </span>
+          <strong>
+            {{ restaurantName }}
+          </strong>
 
-        {{ restaurantName }}
+          <i class="fa-solid fa-chevron-down" [class.rotate-chevron]="
+          showRestaurantMenu
+        "></i>
+        </button>
 
-        <i class="fa-solid fa-chevron-down"></i>
+        <div class="restaurant-dropdown" *ngIf="showRestaurantMenu" role="menu">
+          <div class="restaurant-dropdown-info">
+            <div class="restaurant-dropdown-avatar">
+              {{
+              restaurantName
+              ? restaurantName.charAt(0)
+              : 'R'
+              }}
+            </div>
 
-      </button>
+            <div>
+              <strong>
+                {{ restaurantName }}
+              </strong>
 
-      <button class="walkin-btn" (click)="logout()">Logout</button>
+              <span>
+                Restaurant account
+              </span>
+            </div>
+          </div>
+
+          <div class="restaurant-dropdown-divider">
+          </div>
+
+          <button type="button" class="restaurant-dropdown-action logout-action" role="menuitem"
+            (click)="logoutFromMenu($event)">
+            <i class="fa-solid fa-arrow-right-from-bracket"></i>
+
+            Logout
+          </button>
+        </div>
+      </div>
+
     </div>
 
   </header>

@@ -28,38 +28,62 @@
       </div>
 
 
-      <span class="time-pill">
-
-        <span class="online-dot"></span>
-
-        {{ currentTimeOnly }}
-
-      </span>
-
     </div>
 
 
-    <div class="top-actions">
+    <div class="header-actions">
+      <div class="restaurant-menu-wrapper" (click)="$event.stopPropagation()">
+        <button class="restaurant-btn" type="button" [class.menu-open]="showRestaurantMenu"
+          [attr.aria-expanded]="showRestaurantMenu" aria-haspopup="menu" (click)="toggleRestaurantMenu($event)">
+          <span>
+            {{
+            restaurantName
+            ? restaurantName.charAt(0)
+            : 'R'
+            }}
+          </span>
 
-      <button
-        type="button"
-        class="restaurant-pill"
-      >
+          <strong>
+            {{ restaurantName }}
+          </strong>
 
-        <span class="restaurant-initial">
-          {{ restaurantInitial }}
-        </span>
+          <i class="fa-solid fa-chevron-down" [class.rotate-chevron]="
+          showRestaurantMenu
+        "></i>
+        </button>
 
-        <span class="restaurant-name">
-          {{
-            restaurantName ||
-            'Restaurant'
-          }}
-        </span>
+        <div class="restaurant-dropdown" *ngIf="showRestaurantMenu" role="menu">
+          <div class="restaurant-dropdown-info">
+            <div class="restaurant-dropdown-avatar">
+              {{
+              restaurantName
+              ? restaurantName.charAt(0)
+              : 'R'
+              }}
+            </div>
 
-        <i class="fa-solid fa-chevron-down"></i>
+            <div>
+              <strong>
+                {{ restaurantName }}
+              </strong>
 
-      </button>
+              <span>
+                Restaurant account
+              </span>
+            </div>
+          </div>
+
+          <div class="restaurant-dropdown-divider">
+          </div>
+
+          <button type="button" class="restaurant-dropdown-action logout-action" role="menuitem"
+            (click)="logoutFromMenu($event)">
+            <i class="fa-solid fa-arrow-right-from-bracket"></i>
+
+            Logout
+          </button>
+        </div>
+      </div>
 
     </div>
 

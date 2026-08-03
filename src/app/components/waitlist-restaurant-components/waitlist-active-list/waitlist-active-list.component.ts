@@ -253,6 +253,8 @@ export class WaitlistActiveListComponent
 
   selectedFullReplyIndex = 0;
 
+  showRestaurantMenu = false;
+
   private fullReplyRotationInterval:
     ReturnType<typeof setInterval> | null =
     null;
@@ -1220,6 +1222,7 @@ export class WaitlistActiveListComponent
   @HostListener('document:click')
   closeContactActions(): void {
     this.selectedContactGuestId = null;
+    this.showRestaurantMenu = false;
   }
 
   closeCallingPopup(): void {
@@ -2791,6 +2794,29 @@ export class WaitlistActiveListComponent
         }
       );
   }
+
+  toggleRestaurantMenu(
+    event: MouseEvent
+  ): void {
+
+    event.stopPropagation();
+
+    this.showRestaurantMenu =
+      !this.showRestaurantMenu;
+  }
+
+ 
+
+  logoutFromMenu(
+    event: MouseEvent
+  ): void {
+
+    event.stopPropagation();
+
+    this.logout();
+  }
+
+
 
   ngOnDestroy(): void {
     this.sub.unsubscribe();
