@@ -585,7 +585,7 @@ textarea {
 ========================= */
 
 .editable-value-row input {
-  width: 90px;
+  width: 250px;
   text-align: right;
   border-color: transparent;
 }

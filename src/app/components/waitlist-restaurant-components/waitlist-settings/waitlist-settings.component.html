@@ -17,10 +17,6 @@
 
     <div class="header-actions">
 
-      <button type="button" class="simulate-btn">
-        + Simulate online join
-      </button>
-
       <button type="button" class="walkin-btn">
 
         <span>+</span>
@@ -756,11 +752,16 @@
         </div>
 
         <label class="switch">
-
-          <input type="checkbox" [(ngModel)]="waitlistRules.walkInsOnly" (ngModelChange)="updateWaitlistSetting()">
+          <input type="checkbox" [(ngModel)]="
+      waitlistRules.walkInsOnly
+    " [disabled]="isSavingWaitlist" (ngModelChange)="
+      onWaitlistModeChange(
+        'WALK_IN',
+        $event
+      )
+    " />
 
           <span></span>
-
         </label>
 
       </div>
@@ -833,13 +834,16 @@
         </div>
 
         <label class="switch">
-
           <input type="checkbox" [(ngModel)]="
-              waitlistRules.acceptOnlineJoin
-            " (ngModelChange)="updateWaitlistSetting()">
+      waitlistRules.acceptOnlineJoin
+    " [disabled]="isSavingWaitlist" (ngModelChange)="
+      onWaitlistModeChange(
+        'ONLINE',
+        $event
+      )
+    " />
 
           <span></span>
-
         </label>
 
       </div>

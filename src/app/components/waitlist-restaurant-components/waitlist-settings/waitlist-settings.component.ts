@@ -43,6 +43,10 @@ type SettingsTab =
   | 'holiday'
   | 'advanced';
 
+type WaitlistMode =
+  | 'ONLINE'
+  | 'WALK_IN';
+
 interface StaffMember {
   id: number;
   name: string;
@@ -783,6 +787,40 @@ export class WaitlistSettingsComponent
           }
         })
     );
+  }
+
+  onWaitlistModeChange(
+    mode: WaitlistMode,
+    enabled: boolean
+  ): void {
+
+    if (!this.waitlistRules) {
+      return;
+    }
+
+    if (mode === 'ONLINE') {
+      this.waitlistRules
+        .acceptOnlineJoin =
+        enabled;
+
+      if (enabled) {
+        this.waitlistRules
+          .walkInsOnly = false;
+      }
+    }
+
+    if (mode === 'WALK_IN') {
+      this.waitlistRules
+        .walkInsOnly =
+        enabled;
+
+      if (enabled) {
+        this.waitlistRules
+          .acceptOnlineJoin = false;
+      }
+    }
+
+    this.updateWaitlistSetting();
   }
 
   updateWaitlistSetting(): void {

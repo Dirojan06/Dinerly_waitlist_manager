@@ -175,23 +175,29 @@
     hasCustomerReply(guest)
   ">
             <ng-container *ngIf="
-      getVisibleReply(guest)
-        as visibleReply
-    ">
-              <div class="reply-preview" [ngClass]="
-        getReplyViewClass(visibleReply)
-      ">
+    getVisibleReply(guest)
+      as visibleReply
+  ">
+              <button type="button" class="reply-preview" [ngClass]="
+      getReplyViewClass(visibleReply)
+    " (click)="
+      openFullReplyPopup(
+        guest,
+        visibleReply,
+        $event
+      )
+    " title="Click to view full response">
                 <div class="reply-slide-content" [attr.data-rotation]="
-          replyRotationIndex
-        ">
+        replyRotationIndex
+      ">
                   <div class="reply-source-icon">
                     <i *ngIf="
-              visibleReply.source === 'SMS'
-            " class="fa-solid fa-comment-sms"></i>
+            visibleReply.source === 'SMS'
+          " class="fa-solid fa-comment-sms"></i>
 
                     <i *ngIf="
-              visibleReply.source === 'VOICE'
-            " class="fa-solid fa-phone-volume"></i>
+            visibleReply.source === 'VOICE'
+          " class="fa-solid fa-phone-volume"></i>
                   </div>
 
                   <div class="reply-preview-text">
@@ -208,13 +214,17 @@
                     </strong>
                   </div>
 
-                  <div class="reply-rotation-icon" *ngIf="
+                  <div class="reply-preview-right">
+                    <div class="reply-rotation-icon" *ngIf="
             getGuestReplies(guest).length > 1
           " title="SMS and call responses">
-                    <i class="fa-solid fa-arrows-rotate"></i>
+                      <i class="fa-solid fa-arrows-rotate"></i>
+                    </div>
+
+                    <!-- <i class="fa-solid fa-up-right-from-square reply-open-icon"></i> -->
                   </div>
                 </div>
-              </div>
+              </button>
             </ng-container>
           </ng-container>
         </div>
@@ -1062,6 +1072,160 @@
 
   </div>
 
+</div>
+
+
+<!-- Full customer response popup -->
+<!-- Full customer response popup -->
+<div class="full-reply-backdrop" *ngIf="
+    showFullReplyPopup &&
+    selectedFullReply &&
+    selectedFullReplyGuest
+  " (click)="closeFullReplyPopup()">
+  <div class="full-reply-popup" [ngClass]="
+      getReplyViewClass(
+        selectedFullReply
+      )
+    " (click)="$event.stopPropagation()">
+    <button type="button" class="full-reply-close" aria-label="Close full response" (click)="closeFullReplyPopup()">
+      <i class="fa-solid fa-xmark"></i>
+    </button>
+
+    <div class="full-reply-slide" [attr.data-reply-index]="
+        selectedFullReplyIndex
+      ">
+      <!-- <div class="full-reply-header">
+        <div class="full-reply-icon">
+          <i [ngClass]="
+              getFullReplyIcon(
+                selectedFullReply
+              )
+            "></i>
+        </div>
+
+        <div>
+          <span class="full-reply-source">
+            {{
+            selectedFullReply.source ===
+            'VOICE'
+            ? 'Call response'
+            : 'SMS response'
+            }}
+          </span>
+
+          <h2>
+            Customer response
+          </h2>
+        </div>
+      </div> -->
+
+      <!-- <div class="full-reply-guest">
+        <div class="full-reply-avatar">
+          {{
+          getGuestInitials(
+          selectedFullReplyGuest
+          .guestName
+          )
+          }}
+        </div>
+
+        <div>
+          <strong>
+            {{
+            selectedFullReplyGuest
+            .guestName
+            }}
+          </strong>
+
+          <span>
+            {{
+            selectedFullReplyGuest
+            .guestPhone
+            }}
+          </span>
+        </div>
+      </div> -->
+
+      <div class="full-reply-message">
+        <span>
+          {{
+          selectedFullReply.source ===
+          'VOICE'
+          ? 'Phone reply'
+          : 'Text message'
+          }}
+        </span>
+
+        <p>
+          {{ selectedFullReply.text }}
+        </p>
+      </div>
+
+      <!-- <div class="full-reply-meta" *ngIf="
+          selectedFullReply.receivedAt
+        ">
+        <i class="fa-regular fa-clock"></i>
+
+        Received
+        {{
+        formatReplyDateTime(
+        selectedFullReply.receivedAt
+        )
+        }}
+      </div> -->
+    </div>
+
+    <!-- Rotation controls -->
+    <!-- <div class="full-reply-navigation" *ngIf="
+        hasMultipleSelectedReplies()
+      ">
+      <button type="button" class="full-reply-nav-btn" aria-label="Show previous response"
+        (click)="showPreviousFullReply()">
+        <i class="fa-solid fa-chevron-left"></i>
+      </button>
+
+      <div class="full-reply-dots">
+        <button type="button" *ngFor="
+            let reply of getGuestReplies(
+              selectedFullReplyGuest
+            );
+            let index = index
+          " [class.active]="
+            selectedFullReplyIndex === index
+          " [attr.aria-label]="
+            'Show ' +
+            (
+              reply.source === 'VOICE'
+                ? 'call response'
+                : 'SMS response'
+            )
+          " (click)="
+            selectedFullReplyIndex = index;
+            updateSelectedFullReply()
+          "></button>
+      </div>
+
+      <span class="full-reply-position">
+        {{ getSelectedReplyPosition() }}
+      </span>
+
+      <button type="button" class="full-reply-nav-btn" aria-label="Show next response" (click)="showNextFullReply()">
+        <i class="fa-solid fa-chevron-right"></i>
+      </button>
+    </div> -->
+
+    <!-- <p class="full-reply-auto-rotate" *ngIf="
+        hasMultipleSelectedReplies()
+      ">
+      <i class="fa-solid fa-arrows-rotate"></i>
+      Switching automatically every 4 seconds
+    </p> -->
+
+    <!-- <button type="button" class="full-reply-done" (click)="closeFullReplyPopup()">
+      <i class="fa-solid fa-check"></i>
+      Close
+    </button> -->
+  </div>
 </div>
 
 <!-- <div class="modal-backdrop" *ngIf="showRestorePopup">

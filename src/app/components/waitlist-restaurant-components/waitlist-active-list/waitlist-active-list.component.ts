@@ -243,6 +243,20 @@ export class WaitlistActiveListComponent
   isUpdatingSeatedGuest = false;
   restaurantName: string = '';
 
+  showFullReplyPopup = false;
+
+  selectedFullReply:
+    GuestReplyView | null = null;
+
+  selectedFullReplyGuest:
+    DashboardLiveGuest | null = null;
+
+  selectedFullReplyIndex = 0;
+
+  private fullReplyRotationInterval:
+    ReturnType<typeof setInterval> | null =
+    null;
+
   constructor(
     private router: Router,
     public modalService:
@@ -251,7 +265,7 @@ export class WaitlistActiveListComponent
       WaitlistApiRestaurantService,
     private notificationService:
       NotificationService,
-      private auth: WaitlistAuthService
+    private auth: WaitlistAuthService
   ) { }
 
   ngOnInit(): void {
@@ -2409,7 +2423,7 @@ export class WaitlistActiveListComponent
             this.selectedSeatedGuest.id,
             {
 
-              partySize:this.requiredPartyCapacity,
+              partySize: this.requiredPartyCapacity,
               tableName:
                 this.selectedEditTable
                   .tableNumber
@@ -2502,7 +2516,7 @@ export class WaitlistActiveListComponent
             this.restaurantId,
             this.selectedSeatedGuest.id,
             {
-              status:'WAITING',
+              status: 'WAITING',
               partySize:
                 this.requiredPartyCapacity,
 
@@ -2557,6 +2571,225 @@ export class WaitlistActiveListComponent
         );
       }
     });
+  }
+
+  openFullReplyPopup(
+    guest: DashboardLiveGuest,
+    reply: GuestReplyView,
+    event?: MouseEvent
+  ): void {
+
+    event?.stopPropagation();
+
+    this.stopFullReplyRotation();
+
+    this.selectedFullReplyGuest = {
+      ...guest
+    };
+
+    const replies =
+      this.getGuestReplies(
+        this.selectedFullReplyGuest
+      );
+
+    /*
+     * Open the popup using the reply that
+     * the user clicked.
+     */
+    const clickedReplyIndex =
+      replies.findIndex(
+        item =>
+          item.source === reply.source &&
+          item.text === reply.text
+      );
+
+    this.selectedFullReplyIndex =
+      clickedReplyIndex >= 0
+        ? clickedReplyIndex
+        : 0;
+
+    this.updateSelectedFullReply();
+
+    this.showFullReplyPopup = true;
+
+    /*
+     * Rotate only when both SMS and voice
+     * responses are available.
+     */
+    if (replies.length > 1) {
+      this.startFullReplyRotation();
+    }
+  }
+
+  closeFullReplyPopup(): void {
+    this.stopFullReplyRotation();
+
+    this.showFullReplyPopup = false;
+
+    this.selectedFullReply = null;
+    this.selectedFullReplyGuest = null;
+
+    this.selectedFullReplyIndex = 0;
+  }
+
+  private startFullReplyRotation(): void {
+    this.stopFullReplyRotation();
+
+    this.fullReplyRotationInterval =
+      setInterval(() => {
+        this.showNextFullReply();
+      }, 4000);
+  }
+
+  private stopFullReplyRotation(): void {
+    if (
+      this.fullReplyRotationInterval
+    ) {
+      clearInterval(
+        this.fullReplyRotationInterval
+      );
+
+      this.fullReplyRotationInterval =
+        null;
+    }
+  }
+
+  updateSelectedFullReply(): void {
+    if (!this.selectedFullReplyGuest) {
+      this.selectedFullReply = null;
+      return;
+    }
+
+    const replies =
+      this.getGuestReplies(
+        this.selectedFullReplyGuest
+      );
+
+    if (!replies.length) {
+      this.selectedFullReply = null;
+      return;
+    }
+
+    this.selectedFullReplyIndex =
+      this.selectedFullReplyIndex %
+      replies.length;
+
+    this.selectedFullReply = {
+      ...replies[
+      this.selectedFullReplyIndex
+      ]
+    };
+  }
+
+  showNextFullReply(): void {
+    if (!this.selectedFullReplyGuest) {
+      return;
+    }
+
+    const replies =
+      this.getGuestReplies(
+        this.selectedFullReplyGuest
+      );
+
+    if (replies.length <= 1) {
+      return;
+    }
+
+    this.selectedFullReplyIndex =
+      (
+        this.selectedFullReplyIndex + 1
+      ) % replies.length;
+
+    this.updateSelectedFullReply();
+  }
+
+  showPreviousFullReply(): void {
+    if (!this.selectedFullReplyGuest) {
+      return;
+    }
+
+    const replies =
+      this.getGuestReplies(
+        this.selectedFullReplyGuest
+      );
+
+    if (replies.length <= 1) {
+      return;
+    }
+
+    this.selectedFullReplyIndex =
+      (
+        this.selectedFullReplyIndex -
+        1 +
+        replies.length
+      ) % replies.length;
+
+    this.updateSelectedFullReply();
+  }
+
+  getSelectedReplyPosition(): string {
+    if (!this.selectedFullReplyGuest) {
+      return '';
+    }
+
+    const replies =
+      this.getGuestReplies(
+        this.selectedFullReplyGuest
+      );
+
+    if (replies.length <= 1) {
+      return '';
+    }
+
+    return `${this.selectedFullReplyIndex + 1
+      } of ${replies.length}`;
+  }
+
+  hasMultipleSelectedReplies(): boolean {
+    if (!this.selectedFullReplyGuest) {
+      return false;
+    }
+
+    return (
+      this.getGuestReplies(
+        this.selectedFullReplyGuest
+      ).length > 1
+    );
+  }
+
+  getFullReplyIcon(
+    reply: GuestReplyView | null
+  ): string {
+
+    if (!reply) {
+      return 'fa-solid fa-message';
+    }
+
+    return reply.source === 'VOICE'
+      ? 'fa-solid fa-phone-volume'
+      : 'fa-solid fa-comment-sms';
+  }
+
+  formatReplyDateTime(
+    date?: string
+  ): string {
+
+    if (!date) {
+      return '-';
+    }
+
+    return new Date(date)
+      .toLocaleString(
+        'en-IN',
+        {
+          day: '2-digit',
+          month: 'short',
+          year: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit',
+          hour12: true
+        }
+      );
   }
 
   ngOnDestroy(): void {
