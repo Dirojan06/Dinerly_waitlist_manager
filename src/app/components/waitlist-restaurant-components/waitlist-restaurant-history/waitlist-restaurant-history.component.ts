@@ -1,15 +1,17 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, HostListener, OnInit } from '@angular/core';
+import { Router } from '@angular/router';
 import { GetGuestHistory } from 'src/app/models/waitlist-api-guest-to-restaurant.model';
 import { WaitlistApiRestaurantService } from 'src/app/services/waitlist-api-restaurant.service';
+import { WaitlistAuthService } from 'src/app/services/waitlist-auth.service';
 
 @Component({
   selector: 'app-waitlist-restaurant-history',
   templateUrl: './waitlist-restaurant-history.component.html',
   styleUrls: ['./waitlist-restaurant-history.component.css']
 })
- export class WaitlistRestaurantHistoryComponent implements OnInit{
+export class WaitlistRestaurantHistoryComponent implements OnInit {
 
-  restaurantId = 1;
+  restaurantId: any;
   history: GetGuestHistory[] = [];
   isLoading = false;
   selectedStatus = '';
@@ -22,14 +24,21 @@ import { WaitlistApiRestaurantService } from 'src/app/services/waitlist-api-rest
   totalElements = 0;
   jumpPageInput: number | null = null;
   isDownloadingCSV: boolean = false;
-
-  
-
+  showRestaurantMenu = false;
   searchText = '';
+  restaurantName = '';
+  expandedHistoryId: number | null = null;
 
-  constructor(private waitlistService: WaitlistApiRestaurantService) { }
+  constructor(private waitlistService: WaitlistApiRestaurantService, private router: Router, private auth: WaitlistAuthService) { }
 
   ngOnInit(): void {
+    this.restaurantId =
+
+      this.auth.getRestaurantId();
+
+    this.restaurantName =
+
+      this.auth.getRestaurantName();
     this.loadGuestHistory();
   }
 
@@ -53,23 +62,90 @@ import { WaitlistApiRestaurantService } from 'src/app/services/waitlist-api-rest
 
   }
 
+  toggleHistoryAccordion(
+    entry: GetGuestHistory
+  ): void {
+
+    if (
+      this.expandedHistoryId ===
+      entry.id
+    ) {
+      this.expandedHistoryId = null;
+      return;
+    }
+
+    this.expandedHistoryId = entry.id;
+  }
+
+  isHistoryExpanded(
+    entry: GetGuestHistory
+  ): boolean {
+
+    return (
+      this.expandedHistoryId ===
+      entry.id
+    );
+  }
+
   onFilterChange(): void {
-    this.selectedDateCSV = this.selectedDate;
-    this.selectedStatusCSV = this.selectedStatus
+    this.expandedHistoryId = null;
+
+    this.selectedDateCSV =
+      this.selectedDate;
+
+    this.selectedStatusCSV =
+      this.selectedStatus;
+
     this.currentPage = 0;
+
     this.loadGuestHistory();
+  }
+
+  formatHistoryDateTime(
+    date: string | null | undefined
+  ): string {
+
+    if (!date) {
+      return '—';
+    }
+
+    return new Date(date)
+      .toLocaleString(
+        'en-IN',
+        {
+          day: '2-digit',
+          month: 'short',
+          year: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit',
+          hour12: true
+        }
+      );
   }
 
   prevPage(): void {
     if (this.currentPage > 0) {
+      this.expandedHistoryId = null;
       this.currentPage--;
       this.loadGuestHistory();
     }
   }
 
   nextPage(): void {
-    if (this.currentPage < this.totalPages - 1) {
+    if (
+      this.currentPage <
+      this.totalPages - 1
+    ) {
+      this.expandedHistoryId = null;
       this.currentPage++;
+      this.loadGuestHistory();
+    }
+  }
+
+  goToPage(page: number): void {
+    if (page !== this.currentPage) {
+      this.expandedHistoryId = null;
+      this.currentPage = page;
       this.loadGuestHistory();
     }
   }
@@ -127,12 +203,7 @@ import { WaitlistApiRestaurantService } from 'src/app/services/waitlist-api-rest
     return Math.min((this.currentPage + 1) * this.pageSize, this.totalElements);
   }
 
-  goToPage(page: number): void {
-    if (page !== this.currentPage) {
-      this.currentPage = page;
-      this.loadGuestHistory();
-    }
-  }
+
 
   getWaitTime(entry: GetGuestHistory): string {
     if (!entry.joinedAt || !entry.seatedAt) {
@@ -208,12 +279,17 @@ import { WaitlistApiRestaurantService } from 'src/app/services/waitlist-api-rest
   }
 
   clearFilters(): void {
+    this.expandedHistoryId = null;
+
     this.searchText = '';
     this.selectedStatus = '';
     this.selectedDate = '';
+
     this.selectedStatusCSV = '';
     this.selectedDateCSV = '';
+
     this.currentPage = 0;
+
     this.loadGuestHistory();
   }
 
@@ -241,6 +317,87 @@ import { WaitlistApiRestaurantService } from 'src/app/services/waitlist-api-rest
     return '';
   }
 
+  formatPreference(
+    preference?: string | null
+  ): string {
+
+    if (!preference) {
+      return 'No preference';
+    }
+
+    return preference
+      .replace(/_/g, ' ')
+      .toLowerCase()
+      .replace(
+        /\b\w/g,
+        character =>
+          character.toUpperCase()
+      );
+  }
+
+  hasSmsReply(
+    entry: GetGuestHistory
+  ): boolean {
+
+    return Boolean(
+      entry.latestCustomerReply ||
+      entry.customerReplyDescription
+    );
+  }
+
+  hasVoiceReply(
+    entry: GetGuestHistory
+  ): boolean {
+
+    return Boolean(
+      entry.latestVoiceReply ||
+      entry.callResponse ||
+      entry.voiceReplyDigits
+    );
+  }
+
+  getVoiceReplyText(
+    entry: GetGuestHistory
+  ): string {
+
+    if (entry.latestVoiceReply) {
+      return entry.latestVoiceReply;
+    }
+
+    if (entry.callResponse) {
+      return entry.callResponse;
+    }
+
+    if (
+      String(
+        entry.voiceReplyDigits || ''
+      ) === '1'
+    ) {
+      return 'Confirmed attending';
+    }
+
+    if (
+      String(
+        entry.voiceReplyDigits || ''
+      ) === '2'
+    ) {
+      return 'Cannot attend';
+    }
+
+    return '—';
+  }
+
+  getSmsReplyText(
+    entry: GetGuestHistory
+  ): string {
+
+    return (
+      entry.customerReplyDescription ||
+      entry.latestCustomerReply ||
+      '—'
+    );
+  }
+
   get filteredHistory(): GetGuestHistory[] {
     const search = this.searchText.trim().toLowerCase();
 
@@ -255,5 +412,41 @@ import { WaitlistApiRestaurantService } from 'src/app/services/waitlist-api-rest
 
   trackById(_: number, entry: GetGuestHistory): number {
     return entry.id;
+  }
+
+  @HostListener('document:click')
+  closeContactActions(): void {
+    this.showRestaurantMenu = false;
+  }
+
+  toggleRestaurantMenu(
+    event: MouseEvent
+  ): void {
+
+    event.stopPropagation();
+
+    this.showRestaurantMenu =
+      !this.showRestaurantMenu;
+  }
+
+
+
+  logoutFromMenu(
+    event: MouseEvent
+  ): void {
+
+    event.stopPropagation();
+
+    this.logout();
+  }
+
+  logout(): void {
+    localStorage.removeItem(
+      'authToken'
+    );
+
+    this.router.navigate([
+      '/login'
+    ]);
   }
 }

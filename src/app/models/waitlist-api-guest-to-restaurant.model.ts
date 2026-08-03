@@ -126,7 +126,7 @@ export interface SeatedGuest {
   notes: string;
   status: string;
   seatedAt: string;
-  tableName:string;
+  tableName: string;
 }
 
 export interface SeatedGuestResponse {
@@ -185,7 +185,7 @@ export interface seatedGuestcallRequest {
 }
 
 export interface updateSeatedGuestcallRequest {
-  partySize:number
+  partySize: number
   tableName: string
 }
 
@@ -203,16 +203,16 @@ export interface TablelistResponse {
   message: string;
   data: tableList[];
 }
-export interface mergerTableRequest{
+export interface mergerTableRequest {
 
-  tableId:number ,
+  tableId: number,
   mergedTableId: number
 
 }
 
-export interface unMergerTableRequest{
+export interface unMergerTableRequest {
 
-  tableId:number ,
+  tableId: number,
   mergedTableId: number
 
 }
@@ -244,13 +244,30 @@ export interface GetGuestHistory {
   guestName: string;
   guestPhone: string;
   partySize: number;
+
   preference: string;
   notes: string;
   status: string;
+
   joinedAt: string | null;
   approvedAt: string | null;
   notifiedAt: string | null;
   seatedAt: string | null;
+
+  smsStatus?: string | null;
+  smsMessage?: string | null;
+
+  latestCustomerReply?: string | null;
+  customerReplyDescription?: string | null;
+  customerReplyReceivedAt?: string | null;
+  customerReplySid?: string | null;
+
+  latestVoiceReply?: string | null;
+  callStatus?: string | null;
+  callResponse?: string | null;
+  voiceReplyReceivedAt?: string | null;
+  voiceReplyDigits?: string | null;
+
   tableName?: string | null;
 }
 

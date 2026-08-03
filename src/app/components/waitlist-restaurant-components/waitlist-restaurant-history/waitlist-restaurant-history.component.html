@@ -6,47 +6,88 @@
     <div class="title-wrap">
       <h1>History</h1>
 
-      <div class="time-pill">
-        <span></span>
-        {{ currentTimeOnly }}
+
+    </div>
+
+    <div class="header-actions">
+      <div class="restaurant-menu-wrapper" (click)="$event.stopPropagation()">
+        <button class="restaurant-btn" type="button" [class.menu-open]="showRestaurantMenu"
+          [attr.aria-expanded]="showRestaurantMenu" aria-haspopup="menu" (click)="toggleRestaurantMenu($event)">
+          <span>
+            {{
+            restaurantName
+            ? restaurantName.charAt(0)
+            : 'R'
+            }}
+          </span>
+
+          <strong>
+            {{ restaurantName }}
+          </strong>
+
+          <i class="fa-solid fa-chevron-down" [class.rotate-chevron]="
+          showRestaurantMenu
+        "></i>
+        </button>
+
+        <div class="restaurant-dropdown" *ngIf="showRestaurantMenu" role="menu">
+          <div class="restaurant-dropdown-info">
+            <div class="restaurant-dropdown-avatar">
+              {{
+              restaurantName
+              ? restaurantName.charAt(0)
+              : 'R'
+              }}
+            </div>
+
+            <div>
+              <strong>
+                {{ restaurantName }}
+              </strong>
+
+              <span>
+                Restaurant account
+              </span>
+            </div>
+          </div>
+
+          <div class="restaurant-dropdown-divider">
+          </div>
+
+          <button type="button" class="restaurant-dropdown-action logout-action" role="menuitem"
+            (click)="logoutFromMenu($event)">
+            <i class="fa-solid fa-arrow-right-from-bracket"></i>
+
+            Logout
+          </button>
+        </div>
       </div>
+
     </div>
   </div>
 
-  
 
- 
+
+
 
   <!-- TOOLBAR -->
   <div class="history-toolbar">
     <h3>Today — {{ todayLabel }}</h3>
 
     <div class="status-tabs">
-      <button
-        type="button"
-        [class.active]="selectedStatus === ''"
-        (click)="setStatusFilter('')">
+      <button type="button" [class.active]="selectedStatus === ''" (click)="setStatusFilter('')">
         All
       </button>
 
-      <button
-        type="button"
-        [class.active]="selectedStatus === 'SEATED'"
-        (click)="setStatusFilter('SEATED')">
+      <button type="button" [class.active]="selectedStatus === 'SEATED'" (click)="setStatusFilter('SEATED')">
         Seated
       </button>
 
-      <button
-        type="button"
-        [class.active]="selectedStatus === 'CANCELLED'"
-        (click)="setStatusFilter('CANCELLED')">
+      <button type="button" [class.active]="selectedStatus === 'CANCELLED'" (click)="setStatusFilter('CANCELLED')">
         Removed
       </button>
 
-      <button
-        type="button"
-        [class.active]="selectedStatus === 'NO_SHOW'"
-        (click)="setStatusFilter('NO_SHOW')">
+      <button type="button" [class.active]="selectedStatus === 'NO_SHOW'" (click)="setStatusFilter('NO_SHOW')">
         No-show
       </button>
     </div>
@@ -54,11 +95,7 @@
 
   <!-- FILTERS -->
   <div class="filters-row">
-    <input
-      type="text"
-      placeholder="Search by guest name"
-      [(ngModel)]="searchText"
-    />
+    <input type="text" placeholder="Search by guest name" [(ngModel)]="searchText" />
 
     <select [(ngModel)]="selectedStatus" (change)="onFilterChange()">
       <option value="">All Status</option>
@@ -70,27 +107,20 @@
       <option value="NO_SHOW">No-show</option>
     </select>
 
-    <input
-      type="date"
-      [(ngModel)]="selectedDate"
-      (change)="onFilterChange()"
-    />
+    <input type="date" [(ngModel)]="selectedDate" (change)="onFilterChange()" />
 
     <button class="clear-btn" type="button" (click)="clearFilters()">
       Clear filters
     </button>
 
-    <button
-      class="export-btn"
-      type="button"
-      [disabled]="isDownloadingCSV"
-      (click)="exportHistoryCsv()">
+    <button class="export-btn" type="button" [disabled]="isDownloadingCSV" (click)="exportHistoryCsv()">
       <i class="fa-solid fa-download"></i>
       {{ isDownloadingCSV ? 'Downloading...' : 'Export' }}
     </button>
   </div>
 
   <!-- TABLE -->
+  <!-- HISTORY TABLE -->
   <div class="history-table-card">
 
     <div *ngIf="isLoading" class="empty-state">
@@ -98,59 +128,353 @@
     </div>
 
     <ng-container *ngIf="!isLoading">
+
+      <!-- Main table heading -->
       <div class="table-head">
         <div>PARTY</div>
         <div>SIZE</div>
-        <div>ADDED</div>
-        <div>SEATED</div>
-        <div>WAITED</div>
+        <div>MOBILE NUMBER</div>
         <div>TABLE</div>
         <div>STATUS</div>
+        <div>DETAILS</div>
       </div>
 
-      <div
-        class="table-row"
-        *ngFor="let entry of filteredHistory; trackBy: trackById">
+      <div class="history-accordion-item" *ngFor="
+        let entry of filteredHistory;
+        trackBy: trackById
+      " [class.expanded]="
+        isHistoryExpanded(entry)
+      ">
 
-        <div class="party-cell">
-          <div class="avatar">
-            {{ getInitial(entry.guestName) }}
+        <!-- Main visible row -->
+        <div class="table-row">
+
+          <!-- PARTY -->
+          <div class="party-cell">
+
+            <div class="avatar">
+              {{ getInitial(entry.guestName) }}
+            </div>
+
+            <div class="party-information">
+              <strong>
+                {{ entry.guestName }}
+              </strong>
+
+              <span>
+                {{ formatPreference(entry.preference) }}
+              </span>
+            </div>
+
           </div>
 
-          <strong>{{ entry.guestName }}</strong>
+          <!-- SIZE -->
+          <div class="table-value">
+            {{ entry.partySize }}
+          </div>
+
+          <!-- MOBILE -->
+          <div class="mobile-cell">
+            <i class="fa-solid fa-phone"></i>
+
+            <span>
+              {{ entry.guestPhone || '—' }}
+            </span>
+          </div>
+
+          <!-- TABLE -->
+          <div class="table-name-cell">
+            <i class="fa-solid fa-chair"></i>
+
+            <span>
+              {{ entry.tableName || '—' }}
+            </span>
+          </div>
+
+          <!-- STATUS -->
+          <div>
+            <span class="status-pill" [ngClass]="
+              getStatusClass(entry.status)
+            ">
+              <b></b>
+
+              {{ formatStatus(entry.status) }}
+            </span>
+          </div>
+
+          <!-- ACCORDION BUTTON -->
+          <div class="accordion-action-cell">
+
+            <button type="button" class="accordion-toggle" [class.active]="
+              isHistoryExpanded(entry)
+            " [attr.aria-expanded]="
+              isHistoryExpanded(entry)
+            " (click)="
+              toggleHistoryAccordion(entry)
+            ">
+              <span>
+                {{
+                isHistoryExpanded(entry)
+                ? 'Hide'
+                : 'View'
+                }}
+              </span>
+
+              <i class="fa-solid fa-chevron-down" [class.rotate]="
+                isHistoryExpanded(entry)
+              "></i>
+            </button>
+
+          </div>
+
         </div>
 
-        <div>{{ entry.partySize }}</div>
+        <!-- Expanded accordion content -->
+        <div class="history-accordion-content" *ngIf="isHistoryExpanded(entry)">
 
-        <div>
-          <div class="date-text">{{ entry.joinedAt | date:'dd MMM yyyy' }}</div>
-          <div class="time-text">{{ entry.joinedAt | date:'hh:mm a' }}</div>
+          <div class="accordion-content-inner">
+
+            <!-- TIMELINE -->
+            <section class="accordion-section">
+
+              <div class="accordion-section-title">
+                <i class="fa-regular fa-clock"></i>
+
+                <h4>Waitlist timeline</h4>
+              </div>
+
+              <div class="history-detail-grid">
+
+                <div class="history-detail-item">
+                  <span>Added</span>
+
+                  <strong>
+                    {{
+                    formatHistoryDateTime(
+                    entry.joinedAt
+                    )
+                    }}
+                  </strong>
+                </div>
+
+                <div class="history-detail-item">
+                  <span>Approved</span>
+
+                  <strong>
+                    {{
+                    formatHistoryDateTime(
+                    entry.approvedAt
+                    )
+                    }}
+                  </strong>
+                </div>
+
+                <div class="history-detail-item">
+                  <span>Notified</span>
+
+                  <strong>
+                    {{
+                    formatHistoryDateTime(
+                    entry.notifiedAt
+                    )
+                    }}
+                  </strong>
+                </div>
+
+                <div class="history-detail-item">
+                  <span>Seated</span>
+
+                  <strong>
+                    {{
+                    formatHistoryDateTime(
+                    entry.seatedAt
+                    )
+                    }}
+                  </strong>
+                </div>
+
+                <div class="history-detail-item">
+                  <span>Total waited</span>
+
+                  <strong>
+                    {{ getWaitTime(entry) }}
+                  </strong>
+                </div>
+
+              </div>
+
+            </section>
+
+            <!-- GUEST INFORMATION -->
+            <section class="accordion-section">
+
+              <div class="accordion-section-title">
+                <i class="fa-regular fa-user"></i>
+
+                <h4>Guest information</h4>
+              </div>
+
+              <div class="history-detail-grid">
+
+                <div class="history-detail-item">
+                  <span>Phone number</span>
+
+                  <strong>
+                    {{ entry.guestPhone || '—' }}
+                  </strong>
+                </div>
+
+                <div class="history-detail-item">
+                  <span>Party size</span>
+
+                  <strong>
+                    {{ entry.partySize }}
+                  </strong>
+                </div>
+
+                <div class="history-detail-item">
+                  <span>Preference</span>
+
+                  <strong>
+                    {{
+                    formatPreference(
+                    entry.preference
+                    )
+                    }}
+                  </strong>
+                </div>
+
+                <div class="history-detail-item">
+                  <span>Table</span>
+
+                  <strong>
+                    {{ entry.tableName || '—' }}
+                  </strong>
+                </div>
+
+              </div>
+
+              <div class="history-notes" *ngIf="entry.notes">
+                <span>Notes</span>
+
+                <p>
+                  {{ entry.notes }}
+                </p>
+              </div>
+
+            </section>
+
+            <!-- CUSTOMER RESPONSES -->
+            <section class="accordion-section" *ngIf="
+              hasSmsReply(entry) ||
+              hasVoiceReply(entry)
+            ">
+
+              <div class="accordion-section-title">
+                <i class="fa-regular fa-message"></i>
+
+                <h4>Customer responses</h4>
+              </div>
+
+              <div class="customer-responses-grid">
+
+                <!-- SMS RESPONSE -->
+                <div class="history-response-card sms-response" *ngIf="hasSmsReply(entry)">
+                  <div class="response-card-header">
+
+                    <div class="response-icon">
+                      <i class="fa-solid fa-comment-sms"></i>
+                    </div>
+
+                    <div>
+                      <strong>SMS response</strong>
+
+                      <span>
+                        {{
+                        formatHistoryDateTime(
+                        entry.customerReplyReceivedAt
+                        )
+                        }}
+                      </span>
+                    </div>
+
+                  </div>
+
+                  <p>
+                    {{ getSmsReplyText(entry) }}
+                  </p>
+
+                </div>
+
+                <!-- VOICE RESPONSE -->
+                <div class="history-response-card voice-response" *ngIf="hasVoiceReply(entry)">
+                  <div class="response-card-header">
+
+                    <div class="response-icon">
+                      <i class="fa-solid fa-phone-volume"></i>
+                    </div>
+
+                    <div>
+                      <strong>Call response</strong>
+
+                      <span>
+                        {{
+                        formatHistoryDateTime(
+                        entry.voiceReplyReceivedAt
+                        )
+                        }}
+                      </span>
+                    </div>
+
+                  </div>
+
+                  <p>
+                    {{ getVoiceReplyText(entry) }}
+                  </p>
+
+                </div>
+
+              </div>
+
+            </section>
+
+            <!-- SMS MESSAGE SENT -->
+            <section class="accordion-section" *ngIf="entry.smsMessage">
+
+              <div class="accordion-section-title">
+                <i class="fa-solid fa-paper-plane"></i>
+
+                <h4>Notification message</h4>
+              </div>
+
+              <div class="notification-message-box">
+
+                <div class="notification-status-line">
+                  <span>SMS status</span>
+
+                  <strong>
+                    {{ entry.smsStatus || '—' }}
+                  </strong>
+                </div>
+
+                <p>
+                  {{ entry.smsMessage }}
+                </p>
+
+              </div>
+
+            </section>
+
+          </div>
+
         </div>
 
-        <div>
-          <ng-container *ngIf="entry.seatedAt; else noSeated">
-            <div class="date-text">{{ entry.seatedAt | date:'dd MMM yyyy' }}</div>
-            <div class="time-text">{{ entry.seatedAt | date:'hh:mm a' }}</div>
-          </ng-container>
-
-          <ng-template #noSeated>—</ng-template>
-        </div>
-
-        <div>{{ getWaitTime(entry) }}</div>
-
-        <div>{{ entry.tableName || '—' }}</div>
-
-        <div>
-          <span class="status-pill" [ngClass]="getStatusClass(entry.status)">
-            <b></b>
-            {{ formatStatus(entry.status) }}
-          </span>
-        </div>
       </div>
 
-      <div *ngIf="history.length === 0" class="empty-state">
-        No history yet
+      <div *ngIf="filteredHistory.length === 0" class="empty-state">
+        No history found
       </div>
+
     </ng-container>
 
   </div>
@@ -164,37 +488,21 @@
 
     <div class="pagination">
 
-      <button
-        class="page-btn arrow"
-        [disabled]="currentPage === 0"
-        (click)="prevPage()">
+      <button class="page-btn arrow" [disabled]="currentPage === 0" (click)="prevPage()">
         ‹
       </button>
 
-      <button
-        class="page-btn"
-        *ngFor="let page of pages"
-        [class.active]="currentPage === page"
+      <button class="page-btn" *ngFor="let page of pages" [class.active]="currentPage === page"
         (click)="goToPage(page)">
         {{ page + 1 }}
       </button>
 
-      <button
-        class="page-btn arrow"
-        [disabled]="currentPage === totalPages - 1"
-        (click)="nextPage()">
+      <button class="page-btn arrow" [disabled]="currentPage === totalPages - 1" (click)="nextPage()">
         ›
       </button>
 
-      <input
-        type="number"
-        class="jump-input"
-        placeholder="Page"
-        [(ngModel)]="jumpPageInput"
-        min="1"
-        [max]="totalPages"
-        (keyup.enter)="jumpToPage()"
-      />
+      <input type="number" class="jump-input" placeholder="Page" [(ngModel)]="jumpPageInput" min="1" [max]="totalPages"
+        (keyup.enter)="jumpToPage()" />
 
       <button class="page-btn go-btn" (click)="jumpToPage()">
         Go
