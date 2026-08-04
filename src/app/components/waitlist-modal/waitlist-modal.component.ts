@@ -28,6 +28,15 @@ import {
   WaitlistApiRestaurantService
 } from 'src/app/services/waitlist-api-restaurant.service';
 
+interface CountryCodeOption {
+  iso: string;
+  name: string;
+  dialCode: string;
+  flag: string;
+  minLength: number;
+  maxLength: number;
+  placeholder: string;
+}
 @Component({
   selector: 'app-waitlist-modal',
   templateUrl: './waitlist-modal.component.html',
@@ -42,22 +51,10 @@ export class WaitlistModalComponent
   @Input()
   restaurants: Restaurant[] = [];
 
-  /*
-   * Restaurant ID received from the QR route.
-   *
-   * Example:
-   * /join/1
-   *
-   * Login component passes:
-   * [initialRestaurantId]="scannedRestaurantId"
-   */
+
   @Input()
   initialRestaurantId: number | null = null;
 
-  /*
-   * When opened from the QR code, the restaurant
-   * dropdown can be locked.
-   */
   @Input()
   lockRestaurantSelection = false;
 
@@ -88,6 +85,47 @@ export class WaitlistModalComponent
     8
   ];
 
+  countries: CountryCodeOption[] = [
+    {
+      iso: 'IN',
+      name: 'India',
+      dialCode: '+91',
+      flag: '🇮🇳',
+      minLength: 10,
+      maxLength: 10,
+      placeholder: '9876543210'
+    },
+    {
+      iso: 'US',
+      name: 'United States',
+      dialCode: '+1',
+      flag: '🇺🇸',
+      minLength: 10,
+      maxLength: 10,
+      placeholder: '2025550123'
+    },
+    {
+      iso: 'CA',
+      name: 'Canada',
+      dialCode: '+1',
+      flag: '🇨🇦',
+      minLength: 10,
+      maxLength: 10,
+      placeholder: '4165550123'
+    },
+    {
+      iso: 'GB',
+      name: 'United Kingdom',
+      dialCode: '+44',
+      flag: '🇬🇧',
+      minLength: 10,
+      maxLength: 10,
+      placeholder: '7123456789'
+    },
+
+
+  ];
+
   isSubmitting = false;
   isRestaurantLoading = false;
 
@@ -96,14 +134,14 @@ export class WaitlistModalComponent
 
   showWaitConfirmPopup = false;
 
-waitPopupType:
-  | 'WAIT_CONFIRMATION'
-  | 'ONLINE_JOIN_DISABLED'
-  = 'WAIT_CONFIRMATION';
+  waitPopupType:
+    | 'WAIT_CONFIRMATION'
+    | 'ONLINE_JOIN_DISABLED'
+    = 'WAIT_CONFIRMATION';
 
-isWaitStatusLoading = false;
+  isWaitStatusLoading = false;
 
-waitStatusLoaded = false;
+  waitStatusLoaded = false;
 
   /*
    * This becomes true after the user confirms
@@ -172,14 +210,15 @@ waitStatusLoaded = false;
             Validators.minLength(2)
           ]
         ],
-
+        phoneCountry: [
+          'CA',
+          Validators.required
+        ],
         phone: [
           '',
           [
             Validators.required,
-            Validators.pattern(
-              '^\\+?[0-9]{10,15}$'
-            )
+            Validators.pattern('^[0-9]{10}$')
           ]
         ],
 
@@ -200,6 +239,10 @@ waitStatusLoaded = false;
       this.fb.group({
         restaurantId: [
           null,
+          Validators.required
+        ],
+        phoneCountry: [
+          'CA',
           Validators.required
         ],
 
@@ -267,165 +310,94 @@ waitStatusLoaded = false;
   }
 
   private setInitialRestaurant(): void {
-  if (
-    !this.restaurants ||
-    this.restaurants.length === 0
-  ) {
-    this.selectedRestaurant = null;
-    this.selectedRestaurantId = 0;
-    this.restaurantId = 0;
+    if (
+      !this.restaurants ||
+      this.restaurants.length === 0
+    ) {
+      this.selectedRestaurant = null;
+      this.selectedRestaurantId = 0;
+      this.restaurantId = 0;
 
-    this.waitStatusLoaded = false;
+      this.waitStatusLoaded = false;
 
-    return;
-  }
+      return;
+    }
 
-  let restaurant:
-    Restaurant | undefined;
+    let restaurant:
+      Restaurant | undefined;
 
-
-  /*
-   * First preference:
-   * restaurant received from QR route.
-   */
-  if (this.initialRestaurantId) {
-    restaurant =
-      this.restaurants.find(
-        item =>
-          Number(item.id) ===
-          Number(
-            this.initialRestaurantId
-          )
-      );
-  }
-
-
-  /*
-   * Second preference:
-   * current form selection.
-   */
-  if (!restaurant) {
-    const currentRestaurantId =
-      Number(
-        this.waitlistForm
-          .get('restaurantId')
-          ?.value
-      );
-
-    if (currentRestaurantId) {
+    if (this.initialRestaurantId) {
       restaurant =
         this.restaurants.find(
           item =>
             Number(item.id) ===
-            currentRestaurantId
-        );
-    }
-  }
-
-
-  /*
-   * For Join modal:
-   * prefer the first restaurant that accepts
-   * online joins.
-   *
-   * For Status modal:
-   * any restaurant can be selected.
-   */
-  if (!restaurant) {
-    if (this.type === 'join') {
-      restaurant =
-        this.restaurants.find(
-          item =>
-            this.canRestaurantAcceptOnlineJoin(
-              item
+            Number(
+              this.initialRestaurantId
             )
         );
     }
 
-    restaurant =
-      restaurant ||
-      this.restaurants[0];
-  }
+    if (!restaurant) {
+      const currentRestaurantId =
+        Number(
+          this.waitlistForm
+            .get('restaurantId')
+            ?.value
+        );
 
-
-  const restaurantId =
-    Number(restaurant.id);
-
-  this.selectedRestaurant =
-    restaurant;
-
-  this.selectedRestaurantId =
-    restaurantId;
-
-  this.restaurantId =
-    restaurantId;
-
-
-  this.waitlistForm.patchValue(
-    {
-      restaurantId
-    },
-    {
-      emitEvent: true
+      if (currentRestaurantId) {
+        restaurant =
+          this.restaurants.find(
+            item =>
+              Number(item.id) ===
+              currentRestaurantId
+          );
+      }
     }
-  );
 
+    if (!restaurant) {
+      if (this.type === 'join') {
+        restaurant =
+          this.restaurants.find(
+            item =>
+              this.canRestaurantAcceptOnlineJoin(
+                item
+              )
+          );
+      }
 
-  this.statusForm.patchValue(
-    {
-      restaurantId
-    },
-    {
-      emitEvent: false
+      restaurant =
+        restaurant ||
+        this.restaurants[0];
     }
-  );
-}
-
-  onRestaurantChange(
-  restaurantId:
-    number | string | null
-): void {
-
-  const selectedId =
-    Number(restaurantId);
-
-  if (
-    !selectedId ||
-    Number.isNaN(selectedId)
-  ) {
-    this.selectedRestaurant = null;
-    this.selectedRestaurantId = 0;
-    this.restaurantId = 0;
-
-    return;
-  }
 
 
-  this.selectedRestaurantId =
-    selectedId;
+    const restaurantId =
+      Number(restaurant.id);
 
-  this.restaurantId =
-    selectedId;
+    this.selectedRestaurant =
+      restaurant;
 
+    this.selectedRestaurantId =
+      restaurantId;
 
-  this.selectedRestaurant =
-    this.restaurants.find(
-      restaurant =>
-        Number(restaurant.id) ===
-        selectedId
-    ) ?? null;
+    this.restaurantId =
+      restaurantId;
 
 
-  if (
-    Number(
-      this.statusForm
-        .get('restaurantId')
-        ?.value
-    ) !== selectedId
-  ) {
+    this.waitlistForm.patchValue(
+      {
+        restaurantId
+      },
+      {
+        emitEvent: true
+      }
+    );
+
+
     this.statusForm.patchValue(
       {
-        restaurantId: selectedId
+        restaurantId
       },
       {
         emitEvent: false
@@ -433,33 +405,224 @@ waitStatusLoaded = false;
     );
   }
 
+  get selectedJoinCountry(): CountryCodeOption {
+    const selectedIso =
+      this.waitlistForm
+        .get('phoneCountry')
+        ?.value;
 
-  this.pendingSubmit = false;
-  this.showWaitConfirmPopup = false;
-
-  this.waitPopupType =
-    'WAIT_CONFIRMATION';
-
-
-  /*
-   * There is no need to request dashboard
-   * status for a restaurant that does not
-   * accept online joining.
-   */
-  if (
-    !this.canSelectedRestaurantAcceptOnlineJoin
-  ) {
-    this.partiesWaiting = 0;
-    this.waitMinutes = 0;
-    this.waitStatusLoaded = true;
-    this.isWaitStatusLoading = false;
-
-    return;
+    return (
+      this.countries.find(
+        country =>
+          country.iso === selectedIso
+      ) ||
+      this.countries[0]
+    );
   }
 
+  get selectedStatusCountry(): CountryCodeOption {
+    const selectedIso =
+      this.statusForm
+        .get('phoneCountry')
+        ?.value;
 
-  this.getWaitlistDashboardStatus();
-}
+    return (
+      this.countries.find(
+        country =>
+          country.iso === selectedIso
+      ) ||
+      this.countries[0]
+    );
+  }
+
+  onPhoneCountryChange(
+    formType: 'join' | 'status'
+  ): void {
+
+    const form =
+      formType === 'join'
+        ? this.waitlistForm
+        : this.statusForm;
+
+    const phoneControlName =
+      formType === 'join'
+        ? 'phone'
+        : 'phoneNumber';
+
+    const countryIso =
+      form.get('phoneCountry')?.value;
+
+    const country =
+      this.countries.find(
+        item =>
+          item.iso === countryIso
+      );
+
+    const phoneControl =
+      form.get(phoneControlName);
+
+    if (!country || !phoneControl) {
+      return;
+    }
+
+    phoneControl.setValidators([
+      Validators.required,
+      Validators.pattern(
+        `^[0-9]{${country.minLength},${country.maxLength}}$`
+      )
+    ]);
+
+    phoneControl.setValue('');
+
+    phoneControl.updateValueAndValidity();
+  }
+
+  onPhoneInput(
+    event: Event,
+    formType: 'join' | 'status'
+  ): void {
+
+    const input =
+      event.target as HTMLInputElement;
+
+    const form =
+      formType === 'join'
+        ? this.waitlistForm
+        : this.statusForm;
+
+    const controlName =
+      formType === 'join'
+        ? 'phone'
+        : 'phoneNumber';
+
+    const country =
+      formType === 'join'
+        ? this.selectedJoinCountry
+        : this.selectedStatusCountry;
+
+    const numbersOnly =
+      input.value.replace(/\D/g, '');
+
+    const limitedValue =
+      numbersOnly.slice(
+        0,
+        country.maxLength
+      );
+
+    input.value = limitedValue;
+
+    form.get(controlName)?.setValue(
+      limitedValue,
+      {
+        emitEvent: false
+      }
+    );
+  }
+
+  private buildFullPhoneNumber(
+    countryIso: string,
+    phoneNumber: unknown
+  ): string {
+
+    const selectedCountry =
+      this.countries.find(
+        country =>
+          country.iso === countryIso
+      );
+
+    const dialCode =
+      selectedCountry?.dialCode || '';
+
+    let cleanedPhone =
+      String(phoneNumber || '')
+        .replace(/\D/g, '');
+
+
+    cleanedPhone =
+      cleanedPhone.replace(/^0+/, '');
+
+    return `${dialCode}${cleanedPhone}`;
+  }
+
+  onRestaurantChange(
+    restaurantId:
+      number | string | null
+  ): void {
+
+    const selectedId =
+      Number(restaurantId);
+
+    if (
+      !selectedId ||
+      Number.isNaN(selectedId)
+    ) {
+      this.selectedRestaurant = null;
+      this.selectedRestaurantId = 0;
+      this.restaurantId = 0;
+
+      return;
+    }
+
+
+    this.selectedRestaurantId =
+      selectedId;
+
+    this.restaurantId =
+      selectedId;
+
+
+    this.selectedRestaurant =
+      this.restaurants.find(
+        restaurant =>
+          Number(restaurant.id) ===
+          selectedId
+      ) ?? null;
+
+
+    if (
+      Number(
+        this.statusForm
+          .get('restaurantId')
+          ?.value
+      ) !== selectedId
+    ) {
+      this.statusForm.patchValue(
+        {
+          restaurantId: selectedId
+        },
+        {
+          emitEvent: false
+        }
+      );
+    }
+
+
+    this.pendingSubmit = false;
+    this.showWaitConfirmPopup = false;
+
+    this.waitPopupType =
+      'WAIT_CONFIRMATION';
+
+
+    /*
+     * There is no need to request dashboard
+     * status for a restaurant that does not
+     * accept online joining.
+     */
+    if (
+      !this.canSelectedRestaurantAcceptOnlineJoin
+    ) {
+      this.partiesWaiting = 0;
+      this.waitMinutes = 0;
+      this.waitStatusLoaded = true;
+      this.isWaitStatusLoading = false;
+
+      return;
+    }
+
+
+    this.getWaitlistDashboardStatus();
+  }
   onStatusRestaurantChange(
     restaurantId:
       number | string | null
@@ -510,161 +673,161 @@ waitStatusLoaded = false;
     this.getWaitlistDashboardStatus();
   }
 
- getWaitlistDashboardStatus(): void {
-  if (!this.restaurantId) {
-    this.partiesWaiting = 0;
-    this.waitMinutes = 0;
+  getWaitlistDashboardStatus(): void {
+    if (!this.restaurantId) {
+      this.partiesWaiting = 0;
+      this.waitMinutes = 0;
+      this.waitStatusLoaded = false;
+
+      return;
+    }
+
+
+    this.isWaitStatusLoading = true;
     this.waitStatusLoaded = false;
 
-    return;
-  }
+
+    this.waitlistApi
+      .getwaitlistdashBoardStatus(
+        this.restaurantId
+      )
+      .pipe(
+        takeUntil(this.destroy$)
+      )
+      .subscribe({
+        next: (response: any) => {
+
+          this.isWaitStatusLoading = false;
+          this.waitStatusLoaded = true;
 
 
-  this.isWaitStatusLoading = true;
-  this.waitStatusLoaded = false;
+          /*
+           * Supports both:
+           *
+           * {
+           *   success: true,
+           *   data: {...}
+           * }
+           *
+           * and:
+           *
+           * {
+           *   totalWaiting: 2,
+           *   averageWaitTime: 15
+           * }
+           */
+          const data =
+            response?.data ??
+            response;
 
 
-  this.waitlistApi
-    .getwaitlistdashBoardStatus(
-      this.restaurantId
-    )
-    .pipe(
-      takeUntil(this.destroy$)
-    )
-    .subscribe({
-      next: (response: any) => {
-
-        this.isWaitStatusLoading = false;
-        this.waitStatusLoaded = true;
+          this.partiesWaiting =
+            Number(
+              data?.totalWaiting ??
+              data?.partiesWaiting ??
+              0
+            );
 
 
-        /*
-         * Supports both:
-         *
-         * {
-         *   success: true,
-         *   data: {...}
-         * }
-         *
-         * and:
-         *
-         * {
-         *   totalWaiting: 2,
-         *   averageWaitTime: 15
-         * }
-         */
-        const data =
-          response?.data ??
-          response;
+          this.waitMinutes =
+            Number(
+              data?.averageWaitTime ??
+              data?.estimatedWaitTime ??
+              data?.waitMinutes ??
+              0
+            );
 
 
-        this.partiesWaiting =
-          Number(
-            data?.totalWaiting ??
-            data?.partiesWaiting ??
-            0
-          );
-
-
-        this.waitMinutes =
-          Number(
-            data?.averageWaitTime ??
-            data?.estimatedWaitTime ??
-            data?.waitMinutes ??
-            0
-          );
-
-
-        if (
-          Number.isNaN(
-            this.partiesWaiting
-          )
-        ) {
-          this.partiesWaiting = 0;
-        }
-
-
-        if (
-          Number.isNaN(
-            this.waitMinutes
-          )
-        ) {
-          this.waitMinutes = 0;
-        }
-
-
-        console.log(
-          'Waitlist dashboard response:',
-          response
-        );
-
-        console.log(
-          'Waitlist dashboard values:',
-          {
-            partiesWaiting:
-              this.partiesWaiting,
-
-            waitMinutes:
-              this.waitMinutes
+          if (
+            Number.isNaN(
+              this.partiesWaiting
+            )
+          ) {
+            this.partiesWaiting = 0;
           }
-        );
-      },
 
 
-      error: (error) => {
+          if (
+            Number.isNaN(
+              this.waitMinutes
+            )
+          ) {
+            this.waitMinutes = 0;
+          }
 
-        this.isWaitStatusLoading = false;
-        this.waitStatusLoaded = true;
 
-        this.partiesWaiting = 0;
-        this.waitMinutes = 0;
+          console.log(
+            'Waitlist dashboard response:',
+            response
+          );
+
+          console.log(
+            'Waitlist dashboard values:',
+            {
+              partiesWaiting:
+                this.partiesWaiting,
+
+              waitMinutes:
+                this.waitMinutes
+            }
+          );
+        },
 
 
-        console.error(
-          'Waitlist dashboard status error:',
-          error
-        );
-      }
-    });
-}
+        error: (error) => {
 
- confirmWaitAndJoin(): void {
+          this.isWaitStatusLoading = false;
+          this.waitStatusLoaded = true;
 
-  if (
-    this.waitPopupType ===
-    'ONLINE_JOIN_DISABLED'
-  ) {
-    this.closeUnavailableRestaurantPopup();
+          this.partiesWaiting = 0;
+          this.waitMinutes = 0;
 
-    return;
+
+          console.error(
+            'Waitlist dashboard status error:',
+            error
+          );
+        }
+      });
+  }
+
+  confirmWaitAndJoin(): void {
+
+    if (
+      this.waitPopupType ===
+      'ONLINE_JOIN_DISABLED'
+    ) {
+      this.closeUnavailableRestaurantPopup();
+
+      return;
+    }
+
+
+    this.showWaitConfirmPopup = false;
+
+    this.pendingSubmit = true;
+
+
+    this.submitJoinWaitlist();
   }
 
 
-  this.showWaitConfirmPopup = false;
+  cancelWaitConfirm(): void {
+    this.showWaitConfirmPopup = false;
+    this.pendingSubmit = false;
 
-  this.pendingSubmit = true;
-
-
-  this.submitJoinWaitlist();
-}
-
-
-cancelWaitConfirm(): void {
-  this.showWaitConfirmPopup = false;
-  this.pendingSubmit = false;
-
-  this.waitPopupType =
-    'WAIT_CONFIRMATION';
-}
+    this.waitPopupType =
+      'WAIT_CONFIRMATION';
+  }
 
 
-closeUnavailableRestaurantPopup(): void {
-  this.showWaitConfirmPopup = false;
-  this.pendingSubmit = false;
+  closeUnavailableRestaurantPopup(): void {
+    this.showWaitConfirmPopup = false;
+    this.pendingSubmit = false;
 
-  this.waitPopupType =
-    'WAIT_CONFIRMATION';
-}
+    this.waitPopupType =
+      'WAIT_CONFIRMATION';
+  }
 
   selectPartySize(
     size: number
@@ -736,204 +899,209 @@ closeUnavailableRestaurantPopup(): void {
 
   submitJoinWaitlist(): void {
 
-  if (this.waitlistForm.invalid) {
-    this.waitlistForm
-      .markAllAsTouched();
+    if (this.waitlistForm.invalid) {
+      this.waitlistForm
+        .markAllAsTouched();
 
-    return;
-  }
-
-
-  if (this.isSubmitting) {
-    return;
-  }
+      return;
+    }
 
 
-  const formValue =
-    this.waitlistForm
-      .getRawValue();
+    if (this.isSubmitting) {
+      return;
+    }
 
 
-  const restaurantId =
-    Number(
-      formValue.restaurantId
-    );
+    const formValue =
+      this.waitlistForm
+        .getRawValue();
 
 
-  const selectedRestaurant =
-    this.restaurants.find(
-      restaurant =>
-        Number(restaurant.id) ===
-        restaurantId
-    ) ?? this.selectedRestaurant;
-
-
-  this.selectedRestaurant =
-    selectedRestaurant ?? null;
-
-  this.selectedRestaurantId =
-    restaurantId;
-
-  this.restaurantId =
-    restaurantId;
-
-
-  /*
-   * First validation:
-   * restaurant has disabled online joining.
-   */
-  if (
-    !this.canRestaurantAcceptOnlineJoin(
-      selectedRestaurant
-    )
-  ) {
-    this.waitPopupType =
-      'ONLINE_JOIN_DISABLED';
-
-    this.showWaitConfirmPopup =
-      true;
-
-    this.pendingSubmit =
-      false;
-
-    return;
-  }
-
-
-  /*
-   * Prevent submission while dashboard
-   * status is still loading.
-   */
-  if (this.isWaitStatusLoading) {
-    return;
-  }
-
-
-  /*
-   * Show wait confirmation when there
-   * are customers already waiting.
-   */
-  if (
-    this.partiesWaiting > 0 &&
-    !this.pendingSubmit
-  ) {
-    this.waitPopupType =
-      'WAIT_CONFIRMATION';
-
-    this.showWaitConfirmPopup =
-      true;
-
-    return;
-  }
-
-
-  this.isSubmitting = true;
-
-
-  const payload = {
-    restaurantId,
-
-    name:
-      String(
-        formValue.name || ''
-      ).trim(),
-
-    phone:
-      String(
-        formValue.phone || ''
-      ).trim(),
-
-    partySize:
+    const restaurantId =
       Number(
-        formValue.partySize
-      ),
+        formValue.restaurantId
+      );
 
-    preference:
-      formValue.preference,
 
-    notes:
-      this.buildNotesValue(
-        formValue.notes
+    const selectedRestaurant =
+      this.restaurants.find(
+        restaurant =>
+          Number(restaurant.id) ===
+          restaurantId
+      ) ?? this.selectedRestaurant;
+
+
+    this.selectedRestaurant =
+      selectedRestaurant ?? null;
+
+    this.selectedRestaurantId =
+      restaurantId;
+
+    this.restaurantId =
+      restaurantId;
+
+
+    /*
+     * First validation:
+     * restaurant has disabled online joining.
+     */
+    if (
+      !this.canRestaurantAcceptOnlineJoin(
+        selectedRestaurant
       )
-  };
+    ) {
+      this.waitPopupType =
+        'ONLINE_JOIN_DISABLED';
+
+      this.showWaitConfirmPopup =
+        true;
+
+      this.pendingSubmit =
+        false;
+
+      return;
+    }
 
 
-  this.waitlistApi
-    .joinWaitlist(payload)
-    .pipe(
-      takeUntil(this.destroy$)
-    )
-    .subscribe({
-      next: (response: any) => {
-
-        this.isSubmitting = false;
-        this.pendingSubmit = false;
+    /*
+     * Prevent submission while dashboard
+     * status is still loading.
+     */
+    if (this.isWaitStatusLoading) {
+      return;
+    }
 
 
-        const responseData =
-          response?.data ??
-          response;
+    /*
+     * Show wait confirmation when there
+     * are customers already waiting.
+     */
+    if (
+      this.partiesWaiting > 0 &&
+      !this.pendingSubmit
+    ) {
+      this.waitPopupType =
+        'WAIT_CONFIRMATION';
+
+      this.showWaitConfirmPopup =
+        true;
+
+      return;
+    }
 
 
-        const isSuccessful =
-          response?.success !== false &&
-          responseData;
+    this.isSubmitting = true;
 
 
-        if (isSuccessful) {
+    const payload = {
+      restaurantId,
 
-          localStorage.setItem(
-            'waitlistGuest',
-            JSON.stringify(
+      name:
+        String(
+          formValue.name || ''
+        ).trim(),
+
+      phone:
+
+        this.buildFullPhoneNumber(
+
+          formValue.phoneCountry,
+
+          formValue.phone
+
+        ),
+
+      partySize:
+        Number(
+          formValue.partySize
+        ),
+
+      preference:
+        formValue.preference,
+
+      notes:
+        this.buildNotesValue(
+          formValue.notes
+        )
+    };
+
+
+    this.waitlistApi
+      .joinWaitlist(payload)
+      .pipe(
+        takeUntil(this.destroy$)
+      )
+      .subscribe({
+        next: (response: any) => {
+
+          this.isSubmitting = false;
+          this.pendingSubmit = false;
+
+
+          const responseData =
+            response?.data ??
+            response;
+
+
+          const isSuccessful =
+            response?.success !== false &&
+            responseData;
+
+
+          if (isSuccessful) {
+
+            localStorage.setItem(
+              'waitlistGuest',
+              JSON.stringify(
+                responseData
+              )
+            );
+
+
+            localStorage.setItem(
+              'waitlistRestaurantId',
+              String(
+                restaurantId
+              )
+            );
+
+
+            this.joinedWaitlist.emit(
               responseData
-            )
+            );
+
+
+            this.closeModal.emit();
+
+          } else {
+
+            alert(
+              response?.message ||
+              'Unable to join waitlist'
+            );
+          }
+        },
+
+
+        error: (error) => {
+
+          this.isSubmitting = false;
+          this.pendingSubmit = false;
+
+
+          console.error(
+            'Join waitlist error:',
+            error
           );
 
-
-          localStorage.setItem(
-            'waitlistRestaurantId',
-            String(
-              restaurantId
-            )
-          );
-
-
-          this.joinedWaitlist.emit(
-            responseData
-          );
-
-
-          this.closeModal.emit();
-
-        } else {
 
           alert(
-            response?.message ||
-            'Unable to join waitlist'
+            error?.error?.message ||
+            'Unable to join waitlist. Please try again.'
           );
         }
-      },
-
-
-      error: (error) => {
-
-        this.isSubmitting = false;
-        this.pendingSubmit = false;
-
-
-        console.error(
-          'Join waitlist error:',
-          error
-        );
-
-
-        alert(
-          error?.error?.message ||
-          'Unable to join waitlist. Please try again.'
-        );
-      }
-    });
-}
+      });
+  }
 
   private buildNotesValue(
     typedNotes: unknown
@@ -990,9 +1158,10 @@ closeUnavailableRestaurantPopup(): void {
     }
 
     const phone =
-      String(
-        formValue.phoneNumber || ''
-      ).trim();
+      this.buildFullPhoneNumber(
+        formValue.phoneCountry,
+        formValue.phoneNumber
+      );
 
     const payload = {
       restaurantId,
@@ -1060,58 +1229,58 @@ closeUnavailableRestaurantPopup(): void {
   }
 
   get canSelectedRestaurantAcceptOnlineJoin(): boolean {
-  if (!this.selectedRestaurant) {
-    return false;
+    if (!this.selectedRestaurant) {
+      return false;
+    }
+
+    return this.selectedRestaurant.acceptOnlineJoin !== false;
   }
 
-  return this.selectedRestaurant.acceptOnlineJoin !== false;
-}
 
+  get waitPopupTitle(): string {
+    if (
+      this.waitPopupType ===
+      'ONLINE_JOIN_DISABLED'
+    ) {
+      return 'Online waitlist unavailable';
+    }
 
-get waitPopupTitle(): string {
-  if (
-    this.waitPopupType ===
-    'ONLINE_JOIN_DISABLED'
-  ) {
-    return 'Online waitlist unavailable';
+    return 'Estimated Wait Time';
   }
 
-  return 'Estimated Wait Time';
-}
 
+  get isOnlineJoinDisabledPopup(): boolean {
+    return (
+      this.waitPopupType ===
+      'ONLINE_JOIN_DISABLED'
+    );
+  }
 
-get isOnlineJoinDisabledPopup(): boolean {
-  return (
-    this.waitPopupType ===
-    'ONLINE_JOIN_DISABLED'
-  );
-}
+  canRestaurantAcceptOnlineJoin(
+    restaurant: Restaurant | null | undefined
+  ): boolean {
+    return Boolean(
+      restaurant &&
+      restaurant.acceptOnlineJoin !== false
+    );
+  }
 
-canRestaurantAcceptOnlineJoin(
-  restaurant: Restaurant | null | undefined
-): boolean {
-  return Boolean(
-    restaurant &&
-    restaurant.acceptOnlineJoin !== false
-  );
-}
+  getRestaurantOptionText(
+    restaurant: Restaurant
+  ): string {
+    const availability =
+      this.canRestaurantAcceptOnlineJoin(
+        restaurant
+      )
+        ? ''
+        : ' — Online join unavailable';
 
-getRestaurantOptionText(
-  restaurant: Restaurant
-): string {
-  const availability =
-    this.canRestaurantAcceptOnlineJoin(
-      restaurant
-    )
-      ? ''
-      : ' — Online join unavailable';
-
-  return (
-    `${restaurant.name} — ` +
-    `${restaurant.address}` +
-    availability
-  );
-}
+    return (
+      `${restaurant.name} — ` +
+      `${restaurant.address}` +
+      availability
+    );
+  }
 
   close(): void {
     if (this.isSubmitting) {

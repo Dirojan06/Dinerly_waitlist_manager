@@ -9,7 +9,7 @@ export interface JoinWaitlistRequest {
 
 export interface addGuestToWaitlistRequest {
   name: string,
-  phone: number,
+  phone: string,
   partySize: number,
   preference: string,
   notes: string,

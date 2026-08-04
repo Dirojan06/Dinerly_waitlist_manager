@@ -119,15 +119,44 @@
 
             <div class="input-box phone-box">
 
-              <input type="text" formControlName="phone" placeholder="Enter your phone number">
+              <div class="country-code-select">
+
+                <select formControlName="phoneCountry" aria-label="Select country code"
+                  (change)="onPhoneCountryChange('join')">
+
+                  <option *ngFor="let country of countries" [value]="country.iso">
+                    {{ country.flag }}
+                    {{ country.dialCode }}
+                    {{ country.name }}
+                  </option>
+
+                </select>
+
+                <i class="fa-solid fa-chevron-down"></i>
+
+              </div>
+
+
+              <div class="phone-divider"></div>
+
+
+              <span class="selected-dial-code">
+                {{ selectedJoinCountry.dialCode }}
+              </span>
+
+
+              <input type="tel" inputmode="numeric" autocomplete="tel-national" formControlName="phone"
+                [placeholder]="selectedJoinCountry.placeholder" [attr.maxlength]="selectedJoinCountry.maxLength"
+                (input)="onPhoneInput($event, 'join')">
 
             </div>
 
             <small class="error" *ngIf="
-                waitlistForm.get('phone')?.invalid &&
-                waitlistForm.get('phone')?.touched
-              ">
-              Enter valid phone number
+    waitlistForm.get('phone')?.invalid &&
+    waitlistForm.get('phone')?.touched
+  ">
+              Enter a valid phone number for
+              {{ selectedJoinCountry.name }}
             </small>
 
           </div>
@@ -397,15 +426,44 @@
 
           <div class="input-box phone-box">
 
-            <input type="text" formControlName="phoneNumber" placeholder="Enter your phone number">
+            <div class="country-code-select">
+
+              <select formControlName="phoneCountry" aria-label="Select country code"
+                (change)="onPhoneCountryChange('status')">
+
+                <option *ngFor="let country of countries" [value]="country.iso">
+                  {{ country.flag }}
+                  {{ country.dialCode }}
+                  {{ country.name }}
+                </option>
+
+              </select>
+
+              <i class="fa-solid fa-chevron-down"></i>
+
+            </div>
+
+
+            <div class="phone-divider"></div>
+
+
+            <span class="selected-dial-code">
+              {{ selectedStatusCountry.dialCode }}
+            </span>
+
+
+            <input type="tel" inputmode="numeric" autocomplete="tel-national" formControlName="phoneNumber"
+              [placeholder]="selectedStatusCountry.placeholder" [attr.maxlength]="selectedStatusCountry.maxLength"
+              (input)="onPhoneInput($event, 'status')">
 
           </div>
 
           <small class="error" *ngIf="
-              statusForm.get('phoneNumber')?.invalid &&
-              statusForm.get('phoneNumber')?.touched
-            ">
-            Enter valid phone number
+    statusForm.get('phoneNumber')?.invalid &&
+    statusForm.get('phoneNumber')?.touched
+  ">
+            Enter a valid phone number for
+            {{ selectedStatusCountry.name }}
           </small>
 
         </div>
