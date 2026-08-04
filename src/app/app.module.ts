@@ -40,6 +40,7 @@ import { WaitlistUserDiscountsComponent } from './components/waitlist-user-compo
 import { WaitlistUserRewardsComponent } from './components/waitlist-user-component/waitlist-user-offers/waitlist-user-rewards.component';
 import { WaitlistUserEmailVerifyComponent } from './components/waitlist-user-component/waitlist-user-email-verify/waitlist-user-email-verify.component';
 import { WaitlistHelpComponent } from './components/waitlist-restaurant-components/waitlist-help/waitlist-help.component';
+import { WaitlistRestaurantPendingRequestComponent } from './components/waitlist-restaurant-components/waitlist-restaurant-pending-request/waitlist-restaurant-pending-request.component';
 
 @NgModule({
   declarations: [
@@ -72,7 +73,8 @@ import { WaitlistHelpComponent } from './components/waitlist-restaurant-componen
     WaitlistUserDiscountsComponent,
     WaitlistUserRewardsComponent,
     WaitlistUserEmailVerifyComponent,
-    WaitlistHelpComponent
+    WaitlistHelpComponent,
+    WaitlistRestaurantPendingRequestComponent
   ],
   imports: [
     BrowserModule,

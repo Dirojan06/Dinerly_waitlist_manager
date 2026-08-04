@@ -23,7 +23,7 @@ export class WaitlistUserComponentComponent
   implements OnInit {
 
   isDarkMode = false;
-
+  showMobileSidebar = false;
   activeTab: GuestPortalTab = 'HOME';
 
   waitlistGuest: any = null;
@@ -341,6 +341,7 @@ export class WaitlistUserComponentComponent
     tab: GuestPortalTab
   ): void {
 
+    this.closeMobileSidebar();
     this.showWaitlistAccessPopup = false;
 
     this.showAccountLoginPopup = false;
@@ -563,6 +564,8 @@ export class WaitlistUserComponentComponent
 
   logoutWaitlistGuest(): void {
 
+    this.closeMobileSidebar();
+
     this.clearWaitlistStorage();
 
     this.waitlistGuest = null;
@@ -586,11 +589,10 @@ export class WaitlistUserComponentComponent
   ====================================================== */
 
   logoutCustomerAccount(): void {
-    this.auth.signOutGuest(
 
-      false
+    this.closeMobileSidebar();
 
-    );
+    this.auth.signOutGuest(false);
 
     this.clearCustomerAccountStorage();
 
@@ -600,17 +602,12 @@ export class WaitlistUserComponentComponent
 
     this.showAccountLoginPopup = false;
 
-    /*
-     * Account protected pages must close
-     * immediately after logout.
-     */
     if (
       this.activeTab === 'PROFILE' ||
       this.activeTab === 'MENU' ||
       this.activeTab === 'OFFERS' ||
       this.activeTab === 'REWARDS'
     ) {
-
       this.activeTab = 'HOME';
     }
   }
@@ -782,5 +779,47 @@ export class WaitlistUserComponentComponent
     );
   }
 
+  toggleMobileSidebar(): void {
+
+    this.showMobileSidebar =
+      !this.showMobileSidebar;
+
+    document.body.classList.toggle(
+      'guest-mobile-menu-open',
+      this.showMobileSidebar
+    );
+  }
+
+
+  closeMobileSidebar(): void {
+
+    this.showMobileSidebar = false;
+
+    document.body.classList.remove(
+      'guest-mobile-menu-open'
+    );
+  }
+
+
+  onNavbarTabChange(
+    tab: GuestPortalTab
+  ): void {
+
+    this.closeMobileSidebar();
+
+    this.changeTab(tab);
+  }
+
+
+  onSidebarTabChange(
+    tab: GuestPortalTab
+  ): void {
+
+    this.closeMobileSidebar();
+
+    this.changeTab(tab);
+  }
+
 
 }
+

@@ -1,273 +1,634 @@
-.topbar {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 28px;
+:host {
+  display: block;
+  width: 100%;
+  min-width: 0;
+
+  font-family:
+    'DM Sans',
+    sans-serif;
+
+  box-sizing: border-box;
 }
 
-.topbar h4 {
-  margin: 0;
-  color: #6f6a77;
-  font-size: 16px;
-}
 
-.top-actions {
-  display: flex;
-  gap: 14px;
-  align-items: center;
-}
-
-.cart-btn {
-  width: 46px;
-  height: 46px;
-  border: none;
-  border-radius: 13px;
-  background: #f7f3fb;
-  color: #111827;
-  font-size: 18px;
-  cursor: pointer;
-}
-
-.profile-pill {
-  height: 46px;
-  border-radius: 14px;
-  background: #f7f3fb;
-  padding: 0 14px 0 7px;
-  display: flex;
-  align-items: center;
-  gap: 9px;
-}
-
-.profile-pill span {
-  width: 34px;
-  height: 34px;
-  border-radius: 50%;
-  background: #5b16c9;
-  color: white;
-  display: grid;
-  place-items: center;
-  font-weight: 900;
-}
-
-.profile-pill b {
-  font-size: 13px;
-}
-
-.profile-pill i {
-  font-size: 11px;
-  color: #777383;
-}
+/* =====================================================
+   RESTAURANT HERO IMAGE
+===================================================== */
 
 .restaurant-hero {
-  height: 275px;
-  border-radius: 22px;
-  overflow: hidden;
   position: relative;
+
+  width: 100%;
+  height: 275px;
+
   margin-bottom: 24px;
-  background: #eee;
+
+  overflow: hidden;
+
+  border-radius: 22px;
+
+  background: #eeeaf3;
+
+  box-sizing: border-box;
 }
 
+
 .restaurant-hero img {
+  display: block;
+
   width: 100%;
   height: 100%;
+
   object-fit: cover;
+  object-position: center;
 }
+
 
 .restaurant-hero::after {
   content: '';
+
   position: absolute;
+  z-index: 1;
   inset: 0;
-  background: linear-gradient(180deg, transparent 45%, rgba(30, 10, 50, .55));
+
+  pointer-events: none;
+
+  background:
+    linear-gradient(
+      180deg,
+      transparent 42%,
+      rgba(30, 10, 50, 0.62)
+    );
 }
+
+
+/* =====================================================
+   IMAGE SLIDER BUTTONS
+===================================================== */
 
 .slider-btn {
   position: absolute;
+  z-index: 3;
   top: 50%;
-  z-index: 2;
-  transform: translateY(-50%);
-  border: none;
+
   width: 42px;
   height: 42px;
+
+  display: grid;
+  place-items: center;
+
+  padding: 0;
+
+  border: none;
   border-radius: 50%;
-  background: rgba(0,0,0,.35);
-  color: white;
+
+  color: #ffffff;
+  background:
+    rgba(0, 0, 0, 0.38);
+
+  font-size: 15px;
+
   cursor: pointer;
+
+  transform:
+    translateY(-50%);
+
+  transition:
+    background-color 0.2s ease,
+    transform 0.2s ease;
 }
+
+
+.slider-btn:hover {
+  background:
+    rgba(0, 0, 0, 0.58);
+
+  transform:
+    translateY(-50%)
+    scale(1.05);
+}
+
 
 .slider-btn.left {
   left: 18px;
 }
 
+
 .slider-btn.right {
   right: 18px;
 }
 
+
+/* =====================================================
+   IMAGE LABEL
+===================================================== */
+
 .chef-pill {
   position: absolute;
+  z-index: 3;
   left: 25px;
   bottom: 20px;
-  z-index: 2;
-  background: rgba(0,0,0,.45);
-  color: white;
+
   padding: 9px 17px;
+
   border-radius: 999px;
+
+  color: #ffffff;
+  background:
+    rgba(0, 0, 0, 0.48);
+
+  font-size: 14px;
   font-weight: 800;
+
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
 }
+
+
+/* =====================================================
+   IMAGE DOTS
+===================================================== */
 
 .dots {
   position: absolute;
+  z-index: 3;
   right: 25px;
   bottom: 20px;
-  z-index: 2;
+
   display: flex;
+  align-items: center;
   gap: 8px;
 }
+
 
 .dots span {
   width: 7px;
   height: 7px;
+
   border-radius: 50%;
-  background: rgba(255,255,255,.7);
+
+  background:
+    rgba(255, 255, 255, 0.72);
 }
+
 
 .dots span.active {
   width: 22px;
+
   border-radius: 99px;
-  background: white;
+
+  background: #ffffff;
 }
+
+
+/* =====================================================
+   RESTAURANT INFORMATION
+===================================================== */
 
 .restaurant-info {
+  width: 100%;
+  min-width: 0;
+
   display: flex;
-  justify-content: space-between;
   align-items: center;
+  justify-content: space-between;
+  gap: 28px;
+
   margin-bottom: 26px;
+
+  box-sizing: border-box;
 }
 
+
+/* =====================================================
+   RESTAURANT TITLE
+===================================================== */
+
 .restaurant-title {
+  min-width: 0;
+  flex: 1 1 auto;
+
   display: flex;
   align-items: center;
   gap: 18px;
 }
 
+
 .avatar {
   width: 58px;
   height: 58px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, #7b20e5, #4c0eb4);
-  color: white;
+  flex: 0 0 58px;
+
   display: grid;
   place-items: center;
-  font-size: 26px;
+
+  border-radius: 50%;
+
+  color: #ffffff;
+
+  background:
+    linear-gradient(
+      135deg,
+      #7b20e5,
+      #4c0eb4
+    );
+
+  font-size: 22px;
   font-weight: 900;
-  box-shadow: 0 12px 28px rgba(91,22,201,.3);
+
+  box-shadow:
+    0 12px 28px
+    rgba(91, 22, 201, 0.3);
 }
+
+
+.restaurant-title-content {
+  min-width: 0;
+}
+
 
 .restaurant-title h1 {
   margin: 0;
-  font-size: 38px;
+
+  overflow-wrap: anywhere;
+
+  color: #1f1b24;
+
+  font-size:
+    clamp(
+      28px,
+      3vw,
+      38px
+    );
+
   font-weight: 900;
+  line-height: 1.05;
 }
+
 
 .restaurant-title p {
-  margin: 6px 0 0;
+  margin: 8px 0 0;
+
   color: #777383;
+
+  font-size: 14px;
+  line-height: 1.45;
 }
 
+
+/* =====================================================
+   WAITLIST STATS
+===================================================== */
+
 .stats-boxes {
-  display: flex;
+  flex: 0 0 auto;
+
+  display: grid;
+  grid-template-columns:
+    repeat(2, 124px);
+
   gap: 14px;
 }
+
 
 .stat {
   width: 124px;
-  height: 78px;
-  border-radius: 14px;
+  min-height: 82px;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  padding: 10px;
+
+  border-radius: 15px;
+
+  color: #211d27;
   background: #f4f0fa;
-  display: grid;
-  place-items: center;
+
   text-align: center;
+
+  box-sizing: border-box;
 }
 
+
 .stat.purple {
-  background: #5b16c9;
-  color: white;
+  color: #ffffff;
+
+  background:
+    linear-gradient(
+      135deg,
+      #6d1ad4,
+      #5110b8
+    );
+
+  box-shadow:
+    0 12px 26px
+    rgba(91, 22, 201, 0.2);
 }
+
 
 .stat h2 {
   margin: 0;
+
   font-size: 28px;
+  font-weight: 900;
+  line-height: 1;
 }
+
 
 .stat p {
-  margin: 0;
+  margin: 8px 0 0;
+
   font-size: 12px;
+  font-weight: 700;
+  line-height: 1.25;
 }
 
-.profile-wrapper {
-  position: relative;
+
+/* =====================================================
+   DARK MODE
+===================================================== */
+
+:host-context(.dark-mode)
+.restaurant-title h1 {
+  color: #ffffff;
 }
 
-.profile-pill {
-  height: 64px;
-  padding: 0 24px 0 12px;
-  border-radius: 18px;
-  background: #f6f2fc;
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  cursor: pointer;
+
+:host-context(.dark-mode)
+.restaurant-title p {
+  color: #bbb2c6;
 }
 
-.profile-pill span {
-  width: 46px;
-  height: 46px;
-  border-radius: 50%;
-  background: #5b16c7;
-  color: #fff;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: 800;
-  font-size: 20px;
+
+:host-context(.dark-mode)
+.stat:not(.purple) {
+  color: #ffffff;
+
+  border:
+    1px solid
+    rgba(255, 255, 255, 0.09);
+
+  background:
+    rgba(255, 255, 255, 0.08);
 }
 
-.profile-pill b {
-  font-size: 18px;
-  color: #202027;
+
+/* =====================================================
+   TABLET
+===================================================== */
+
+@media (max-width: 1024px) {
+
+  .restaurant-hero {
+    height: 300px;
+  }
+
+
+  .restaurant-info {
+    align-items: flex-start;
+  }
+
+
+  .restaurant-title h1 {
+    font-size: 32px;
+  }
+
 }
 
-.profile-dropdown {
-  position: absolute;
-  right: 0;
-  top: 76px;
-  width: 300px;
-  background: #fff;
-  border-radius: 18px;
-  padding: 16px;
-  box-shadow: 0 20px 60px rgba(20, 20, 40, 0.18);
-  z-index: 100;
+
+/* =====================================================
+   MOBILE
+===================================================== */
+
+@media (max-width: 767px) {
+
+  .restaurant-hero {
+    height:
+      clamp(
+        230px,
+        65vw,
+        318px
+      );
+
+    margin-bottom: 22px;
+
+    border-radius: 22px;
+  }
+
+
+  /*
+   * Stack restaurant title and stats.
+   * This prevents the overlap visible in the screenshot.
+   */
+  .restaurant-info {
+    display: block;
+
+    margin-bottom: 26px;
+  }
+
+
+  .restaurant-title {
+    width: 100%;
+
+    align-items: center;
+    gap: 14px;
+
+    margin-bottom: 22px;
+  }
+
+
+  .avatar {
+    width: 54px;
+    height: 54px;
+    flex-basis: 54px;
+
+    font-size: 20px;
+  }
+
+
+  .restaurant-title-content {
+    flex: 1;
+  }
+
+
+  .restaurant-title h1 {
+    font-size:
+      clamp(
+        27px,
+        8vw,
+        36px
+      );
+
+    line-height: 1.02;
+  }
+
+
+  .restaurant-title p {
+    max-width: 290px;
+
+    margin-top: 7px;
+
+    font-size: 14px;
+  }
+
+
+  /*
+   * Stats occupy the complete width on a new row.
+   */
+  .stats-boxes {
+    width: 100%;
+
+    grid-template-columns:
+      repeat(
+        2,
+        minmax(0, 1fr)
+      );
+
+    gap: 12px;
+  }
+
+
+  .stat {
+    width: 100%;
+    min-width: 0;
+    min-height: 88px;
+
+    border-radius: 16px;
+  }
+
+
+  .stat h2 {
+    font-size: 29px;
+  }
+
+
+  .slider-btn {
+    width: 38px;
+    height: 38px;
+
+    font-size: 13px;
+  }
+
+
+  .slider-btn.left {
+    left: 12px;
+  }
+
+
+  .slider-btn.right {
+    right: 12px;
+  }
+
+
+  .chef-pill {
+    left: 16px;
+    bottom: 17px;
+
+    padding: 8px 14px;
+
+    font-size: 13px;
+  }
+
+
+  .dots {
+    right: 16px;
+    bottom: 19px;
+  }
+
 }
 
-.profile-dropdown button {
-  width: 100%;
-  height: 52px;
-  border: 0;
-  background: transparent;
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  font-size: 17px;
-  font-weight: 800;
-  cursor: pointer;
-  color: #202027;
+
+/* =====================================================
+   SMALL MOBILE
+===================================================== */
+
+@media (max-width: 480px) {
+
+  .restaurant-title {
+    align-items: flex-start;
+  }
+
+
+  .avatar {
+    width: 48px;
+    height: 48px;
+    flex-basis: 48px;
+
+    margin-top: 3px;
+
+    font-size: 18px;
+  }
+
+
+  .restaurant-title h1 {
+    font-size:
+      clamp(
+        26px,
+        9vw,
+        34px
+      );
+  }
+
+
+  .restaurant-title p {
+    font-size: 13px;
+  }
+
+
+  .stat {
+    min-height: 82px;
+
+    padding: 9px 6px;
+  }
+
+
+  .stat h2 {
+    font-size: 27px;
+  }
+
+
+  .stat p {
+    font-size: 11px;
+  }
+
 }
 
-.profile-dropdown hr {
-  border: 0;
-  border-top: 1px solid #eee8f7;
-  margin: 12px 0;
-}
 
-.profile-dropdown .logout-btn {
-  color: #c0392b;
+/* =====================================================
+   VERY SMALL MOBILE
+===================================================== */
+
+@media (max-width: 360px) {
+
+  .restaurant-title {
+    gap: 10px;
+  }
+
+
+  .avatar {
+    width: 44px;
+    height: 44px;
+    flex-basis: 44px;
+
+    font-size: 16px;
+  }
+
+
+  .restaurant-title h1 {
+    font-size: 25px;
+  }
+
+
+  .stats-boxes {
+    gap: 8px;
+  }
+
+
+  .stat h2 {
+    font-size: 24px;
+  }
+
 }
