@@ -308,14 +308,9 @@
             </button>
 
             <button type="button" class="tooltip-action sms-option" [disabled]="isSendingSms"
-              (click)="sendSmsToGuest(guest)">
-              <i class="fa-solid" [ngClass]="
-            isSendingSms
-              ? 'fa-spinner fa-spin'
-              : 'fa-comment-sms'
-          "></i>
-
-              {{ isSendingSms ? 'Sending...' : 'SMS' }}
+              (click)="openSmsPopup(guest, $event)">
+              <i class="fa-solid fa-comment-sms"></i>
+              SMS
             </button>
 
           </div>
@@ -346,49 +341,6 @@
 
   </section>
 
-
-  <!-- <section class="restore-request-section" *ngIf="restoreRequestedGuests.length">
-
-  <div class="restore-section-title">
-    <div>
-      <p>RESTORE REQUESTS</p>
-      <h3>
-        Guests requesting to rejoin
-      </h3>
-    </div>
-
-    <span>
-      {{ restoreRequestedGuests.length }}
-    </span>
-  </div>
-
-  <div class="restore-request-row" *ngFor="
-      let guest of restoreRequestedGuests
-    ">
-    <div class="guest-avatar">
-      {{ getGuestInitials(guest.guestName) }}
-    </div>
-
-    <div class="restore-guest-details">
-      <strong>{{ guest.guestName }}</strong>
-
-      <p>
-        {{ guest.guestPhone }}
-        · Party of {{ guest.partySize }}
-      </p>
-    </div>
-
-    <div class="restore-request-message">
-      <i class="fa-solid fa-rotate-left"></i>
-      Wants to restore the waitlist
-    </div>
-
-    <button type="button" class="restore-action-btn" (click)="openRestorePopup(guest)">
-      Review
-    </button>
-  </div>
-
-</section> -->
 
   <section class="history-summary-grid">
 
@@ -578,55 +530,7 @@
   </div>
 </div>
 
-<!-- notification section -->
-<!-- custom notification -->
-<!-- <div class="modal-backdrop" *ngIf="shownotificationPopup">
 
-  <div class="leave-modal">
-    <div class="modal-title-row">
-      <h2>Send Notification</h2>
-      <button type="button" class="close-modal" (click)="closeNotificationPopup()">×</button>
-    </div>
-
-    <h2>Send Notification Instantly</h2>
-    
-    <div class="actions">
-      <button class="btn-danger" type="button" [disabled]="isNotifying" (click)="notifyGuest(selectedGuest);">
-        {{ isNotifying ? 'Sending...' : 'Send' }}
-      </button>
-    </div>
-
-    <p>or</p>
-
-    <h2>Send Custom Notification </h2>
-
-    <div class="form-field">
-        <label for="specificMessage">
-          Send a specific message
-        </label>
-
-        <textarea id="specificMessage" name="specificMessage" rows="4" maxlength="250"
-          placeholder="Example: Wait for another 10 minutes or call us." [(ngModel)]="specificMessage" [class.field-error]="showMessageValidationError"></textarea>
-
-        <div class="field-footer">
-          <small>You can select a time or enter your own message.</small>
-
-          <small>
-            {{ specificMessage.length }}/250
-          </small>
-        </div>
-      </div>
-
-    <div class="actions">
-      <button class="btn-cancel" type="button" (click)="closeLeaveConfirm()">No</button>
-
-      <button class="btn-danger" type="button" [disabled]="isNotifying" >
-        {{ isNotifying ? 'Sending...' : 'Send' }}
-      </button>
-    </div>
-  </div>
-
-</div> -->
 
 
 <!-- cancel pop up -->
@@ -708,127 +612,7 @@
   </div>
 </div>
 
-<!-- shpw customer reply modal -->
 
-<!-- <div class="customer-reply-backdrop" *ngIf="
-    showCustomerReplyPopup &&
-    selectedReplyGuest
-  " (click)="closeCustomerReplyPopup()">
-
-  <div class="customer-reply-popup" (click)="$event.stopPropagation()">
-
-    <button type="button" class="close-reply-popup" aria-label="Close customer reply"
-      (click)="closeCustomerReplyPopup()">
-      <i class="fa-solid fa-xmark"></i>
-    </button>
-
-    <div class="reply-popup-icon" [ngClass]="
-        getCustomerReplyClass(
-          selectedReplyGuest
-        )
-      ">
-      <i [ngClass]="
-          getCustomerReplyIcon(
-            selectedReplyGuest
-          )
-        "></i>
-    </div>
-
-    <p class="reply-popup-label">
-      Customer response
-    </p>
-
-    <h2>
-      {{ selectedReplyGuest.guestName }}
-    </h2>
-
-    <p class="reply-popup-phone">
-      {{ selectedReplyGuest.guestPhone }}
-    </p>
-
-    <div class="reply-message-box" [ngClass]="
-        getCustomerReplyClass(
-          selectedReplyGuest
-        )
-      ">
-      <span>Customer replied</span>
-
-      <strong>
-        {{
-        getCustomerReplyText(
-        selectedReplyGuest
-        )
-        }}
-      </strong>
-    </div>
-
-    <div class="reply-details">
-
-      <div>
-        <span>Party size</span>
-
-        <strong>
-          {{
-          selectedReplyGuest.partySize
-          }}
-        </strong>
-      </div>
-
-      <div>
-        <span>Current status</span>
-
-        <strong>
-          {{
-          selectedReplyGuest.status
-          }}
-        </strong>
-      </div>
-
-      <div *ngIf="
-          selectedReplyGuest
-            .customerReplyReceivedAt
-        ">
-        <span>Received at</span>
-
-        <strong>
-          {{
-          formatTime(
-          selectedReplyGuest
-          .customerReplyReceivedAt
-          )
-          }}
-        </strong>
-      </div>
-
-    </div>
-
-    <div class="custom-reply-content" *ngIf="
-        selectedReplyGuest
-          .customerReplyDescription &&
-        selectedReplyGuest
-          .customerReplyDescription !==
-          getCustomerReplyText(
-            selectedReplyGuest
-          )
-      ">
-      <span>Additional message</span>
-
-      <p>
-        {{
-        selectedReplyGuest
-        .customerReplyDescription
-        }}
-      </p>
-    </div>
-
-    <button type="button" class="reply-popup-done" (click)="closeCustomerReplyPopup()">
-      <i class="fa-solid fa-check"></i>
-      Got it
-    </button>
-
-  </div>
-
-</div> -->
 
 <!-- show edit customer modal -->
 
@@ -1131,57 +915,7 @@
     <div class="full-reply-slide" [attr.data-reply-index]="
         selectedFullReplyIndex
       ">
-      <!-- <div class="full-reply-header">
-        <div class="full-reply-icon">
-          <i [ngClass]="
-              getFullReplyIcon(
-                selectedFullReply
-              )
-            "></i>
-        </div>
 
-        <div>
-          <span class="full-reply-source">
-            {{
-            selectedFullReply.source ===
-            'VOICE'
-            ? 'Call response'
-            : 'SMS response'
-            }}
-          </span>
-
-          <h2>
-            Customer response
-          </h2>
-        </div>
-      </div> -->
-
-      <!-- <div class="full-reply-guest">
-        <div class="full-reply-avatar">
-          {{
-          getGuestInitials(
-          selectedFullReplyGuest
-          .guestName
-          )
-          }}
-        </div>
-
-        <div>
-          <strong>
-            {{
-            selectedFullReplyGuest
-            .guestName
-            }}
-          </strong>
-
-          <span>
-            {{
-            selectedFullReplyGuest
-            .guestPhone
-            }}
-          </span>
-        </div>
-      </div> -->
 
       <div class="full-reply-message">
         <span>
@@ -1198,162 +932,125 @@
         </p>
       </div>
 
-      <!-- <div class="full-reply-meta" *ngIf="
-          selectedFullReply.receivedAt
-        ">
-        <i class="fa-regular fa-clock"></i>
 
-        Received
-        {{
-        formatReplyDateTime(
-        selectedFullReply.receivedAt
-        )
-        }}
-      </div> -->
     </div>
 
-    <!-- Rotation controls -->
-    <!-- <div class="full-reply-navigation" *ngIf="
-        hasMultipleSelectedReplies()
-      ">
-      <button type="button" class="full-reply-nav-btn" aria-label="Show previous response"
-        (click)="showPreviousFullReply()">
-        <i class="fa-solid fa-chevron-left"></i>
-      </button>
 
-      <div class="full-reply-dots">
-        <button type="button" *ngFor="
-            let reply of getGuestReplies(
-              selectedFullReplyGuest
-            );
-            let index = index
-          " [class.active]="
-            selectedFullReplyIndex === index
-          " [attr.aria-label]="
-            'Show ' +
-            (
-              reply.source === 'VOICE'
-                ? 'call response'
-                : 'SMS response'
-            )
-          " (click)="
-            selectedFullReplyIndex = index;
-            updateSelectedFullReply()
-          "></button>
-      </div>
-
-      <span class="full-reply-position">
-        {{ getSelectedReplyPosition() }}
-      </span>
-
-      <button type="button" class="full-reply-nav-btn" aria-label="Show next response" (click)="showNextFullReply()">
-        <i class="fa-solid fa-chevron-right"></i>
-      </button>
-    </div> -->
-
-    <!-- <p class="full-reply-auto-rotate" *ngIf="
-        hasMultipleSelectedReplies()
-      ">
-      <i class="fa-solid fa-arrows-rotate"></i>
-      Switching automatically every 4 seconds
-    </p> -->
-
-    <!-- <button type="button" class="full-reply-done" (click)="closeFullReplyPopup()">
-      <i class="fa-solid fa-check"></i>
-      Close
-    </button> -->
   </div>
 </div>
 
-<!-- <div class="modal-backdrop" *ngIf="showRestorePopup">
 
-  <div class="guest-modal restore-modal" *ngIf="selectedRestoreGuest">
+<!-- CUSTOM SMS POPUP -->
+<div class="sms-popup-backdrop" *ngIf="showSmsPopup" (click)="closeSmsPopup()">
+  <div class="sms-popup" (click)="$event.stopPropagation()">
 
-    <div class="modal-title-row">
-      <h2>Restore waitlist request</h2>
+    <!-- Close button -->
+    <button type="button" class="close-sms-popup" aria-label="Close SMS popup" [disabled]="isSendingSms"
+      (click)="closeSmsPopup()">
+      <i class="fa-solid fa-xmark"></i>
+    </button>
 
-      <button type="button" class="close-modal" [disabled]="isRestoringGuest" (click)="closeRestorePopup()">
-        ×
-      </button>
-    </div>
-
-    <div class="restore-alert">
-      <div class="restore-alert-icon">
-        <i class="fa-solid fa-rotate-left"></i>
+    <!-- Header -->
+    <div class="sms-popup-header">
+      <div class="sms-popup-icon">
+        <i class="fa-solid fa-comment-sms"></i>
       </div>
 
       <div>
-        <h3>
-          Hey, this guest wants to restore their waitlist
-        </h3>
+        <span>Send SMS</span>
+
+        <h2>
+          {{ selectedSmsGuest?.guestName || 'Guest' }}
+        </h2>
 
         <p>
-          Review the request and assign a new estimated
-          wait time.
+          {{ selectedSmsGuest?.guestPhone || '-' }}
         </p>
       </div>
     </div>
 
-    <div class="guest-preview">
-      <div class="guest-avatar large">
-        {{getGuestInitials(selectedRestoreGuest.guestName)}}
-      </div>
-      <div>
-        <h3>
-          {{ selectedRestoreGuest.guestName }}
-        </h3>
+    <!-- Message input -->
+    <div class="sms-message-field">
 
-        <p>
-          {{ selectedRestoreGuest.guestPhone }}
-        </p>
+      <label for="customSmsMessage">
+        Message
+      </label>
+
+      <textarea id="customSmsMessage" name="customSmsMessage" rows="5" maxlength="250"
+        placeholder="Enter the message you want to send..." [(ngModel)]="customSmsMessage" [disabled]="isSendingSms"
+        [class.sms-input-error]="
+          smsFormSubmitted &&
+          !customSmsMessage.trim()
+        "></textarea>
+
+      <div class="sms-field-footer">
+        <small class="sms-error-message" *ngIf="
+            smsFormSubmitted &&
+            !customSmsMessage.trim()
+          ">
+          Message is required.
+        </small>
+
+        <small *ngIf="
+            !smsFormSubmitted ||
+            customSmsMessage.trim()
+          ">
+          The guest will receive this message by SMS.
+        </small>
+
+        <span>
+          {{ customSmsMessage.length }}/250
+        </span>
+      </div>
+
+    </div>
+
+    <!-- Optional quick messages -->
+    <div class="quick-message-section">
+      <label>Quick messages</label>
+
+      <div class="quick-message-options">
+
+        <button type="button" [disabled]="isSendingSms" (click)="selectQuickSmsMessage('TABLE_READY')">
+          Table ready
+        </button>
+
+        <button type="button" [disabled]="isSendingSms" (click)="selectQuickSmsMessage('WAIT_5_MINUTES')">
+          Wait 5 minutes
+        </button>
+
+        <button type="button" [disabled]="isSendingSms" (click)="selectQuickSmsMessage('PLEASE_CONFIRM')">
+          Please confirm
+        </button>
+
       </div>
     </div>
 
-    <div class="detail-grid">
-      <div>
-        <span>Party size</span>
-        <b>
-          {{ selectedRestoreGuest.partySize }}
-        </b>
-      </div>
+    <!-- Actions -->
+    <div class="sms-popup-actions">
 
-      <div>
-        <span>Preference</span>
-        <b>
-          {{getPreferenceLabel(selectedRestoreGuest.preference)}}
-        </b>
-      </div>
-
-      <div>
-        <span>Previous status</span>
-        <b>
-          {{selectedRestoreGuest.previousStatus || 'Cancelled'}}
-        </b>
-      </div>
-    </div>
-
-    <label class="time-label">
-      New estimated wait time
-    </label>
-
-    <div class="time-options">
-      <button type="button" *ngFor="let time of waitTimeOptions" [class.active]="
-          selectedRestoreWaitTime === time" (click)="selectedRestoreWaitTime = time">
-        {{ time }} min
+      <button type="button" class="sms-cancel-btn" [disabled]="isSendingSms" (click)="closeSmsPopup()">
+        Cancel
       </button>
-    </div>
 
-    <div class="modal-actions">
+      <button type="button" class="sms-send-btn" [disabled]="
+          isSendingSms ||
+          !customSmsMessage.trim()
+        " (click)="sendCustomSms()">
+        <i class="fa-solid" [ngClass]="
+            isSendingSms
+              ? 'fa-spinner fa-spin'
+              : 'fa-paper-plane'
+          "></i>
 
-      <button type="button" class="cancel-btn" [disabled]="isRestoringGuest" (click)="closeRestorePopup()">
-        Not now
-      </button>
-
-      <button type="button" class="modal-approve-btn" [disabled]="isRestoringGuest" (click)="approveRestoreRequest()">
-        {{isRestoringGuest ? 'Restoring...': 'Restore guest'}}
+        {{
+        isSendingSms
+        ? 'Sending...'
+        : 'Send SMS'
+        }}
       </button>
 
     </div>
 
   </div>
-</div> -->
+</div>

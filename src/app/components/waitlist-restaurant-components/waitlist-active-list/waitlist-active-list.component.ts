@@ -184,6 +184,15 @@ export class WaitlistActiveListComponent
   callingGuest: DashboardLiveGuest | null =
     null;
 
+  showSmsPopup = false;
+
+  selectedSmsGuest:
+    DashboardLiveGuest | null = null;
+
+  customSmsMessage = '';
+
+  smsFormSubmitted = false;
+
   isSendingSms = false;
 
   callRequestStarted = false;
@@ -1386,20 +1395,32 @@ export class WaitlistActiveListComponent
     }
   }
 
-  sendSmsToGuest(
-    guest: any
-  ): void {
+  sendCustomSms(): void {
 
-    if (this.isSendingSms) {
+    this.smsFormSubmitted = true;
+
+    if (
+      this.isSendingSms ||
+      !this.selectedSmsGuest
+    ) {
+      return;
+    }
+
+    const message =
+      this.customSmsMessage.trim();
+
+    if (!message) {
       return;
     }
 
     const guestId =
-      guest?.id;
+      Number(
+        this.selectedSmsGuest.id
+      );
 
     const phoneNumber =
-      guest?.guestPhone ||
-      guest?.phone;
+      this.selectedSmsGuest
+        .guestPhone;
 
     if (!guestId) {
       alert(
@@ -1421,12 +1442,7 @@ export class WaitlistActiveListComponent
 
     const payload = {
       phone: phoneNumber,
-
-      message:
-        `Hello ${guest?.guestName ||
-        guest?.name ||
-        'Guest'
-        }, your table is ready.`
+      message
     };
 
     this.waitlistApi
@@ -1436,11 +1452,10 @@ export class WaitlistActiveListComponent
         payload
       )
       .subscribe({
-        next: (response: any) => {
-          this.isSendingSms = false;
 
-          this.selectedContactGuestId =
-            null;
+        next: (response: any) => {
+
+          this.isSendingSms = false;
 
           if (
             response?.success === false
@@ -1453,13 +1468,19 @@ export class WaitlistActiveListComponent
             return;
           }
 
-          alert(
+          const successMessage =
             response?.message ||
-            'SMS sent successfully'
-          );
+            'SMS sent successfully';
+
+          this.closeSmsPopup();
+
+          alert(successMessage);
+
+          this.loadDashboardAllData(false);
         },
 
         error: (error: any) => {
+
           this.isSendingSms = false;
 
           alert(
@@ -1468,6 +1489,7 @@ export class WaitlistActiveListComponent
             'Unable to send SMS. Please try again.'
           );
         }
+
       });
   }
 
@@ -2805,7 +2827,7 @@ export class WaitlistActiveListComponent
       !this.showRestaurantMenu;
   }
 
- 
+
 
   logoutFromMenu(
     event: MouseEvent
@@ -2816,9 +2838,100 @@ export class WaitlistActiveListComponent
     this.logout();
   }
 
+  openSmsPopup(
+    guest: DashboardLiveGuest,
+    event?: MouseEvent
+  ): void {
+
+    event?.stopPropagation();
+
+    const guestId =
+      Number(guest?.id);
+
+    const phoneNumber =
+      guest?.guestPhone;
+
+    if (!guestId) {
+      alert(
+        'Guest details are not available'
+      );
+
+      return;
+    }
+
+    if (!phoneNumber) {
+      alert(
+        'Guest phone number is not available'
+      );
+
+      return;
+    }
+
+    this.selectedContactGuestId = null;
+
+    this.selectedSmsGuest = {
+      ...guest
+    };
+
+    this.customSmsMessage =
+      `Hello ${guest.guestName || 'Guest'}, your table is ready. Please reply to confirm your arrival.`;
+
+    this.smsFormSubmitted = false;
+    this.showSmsPopup = true;
+  }
+
+  closeSmsPopup(): void {
+
+    if (this.isSendingSms) {
+      return;
+    }
+
+    this.showSmsPopup = false;
+    this.selectedSmsGuest = null;
+    this.customSmsMessage = '';
+    this.smsFormSubmitted = false;
+  }
+
+  selectQuickSmsMessage(
+    messageType:
+      | 'TABLE_READY'
+      | 'WAIT_5_MINUTES'
+      | 'PLEASE_CONFIRM'
+  ): void {
+
+    const guestName =
+      this.selectedSmsGuest
+        ?.guestName ||
+      'Guest';
+
+    switch (messageType) {
+
+      case 'TABLE_READY':
+        this.customSmsMessage =
+          `Hello ${guestName}, your table is ready. Please come to the restaurant entrance.`;
+
+        break;
+
+      case 'WAIT_5_MINUTES':
+        this.customSmsMessage =
+          `Hello ${guestName}, please wait for another 5 minutes. We will notify you once your table is ready.`;
+
+        break;
+
+      case 'PLEASE_CONFIRM':
+        this.customSmsMessage =
+          `Hello ${guestName}, please reply to confirm whether you are still joining us today.`;
+
+        break;
+    }
+
+    this.smsFormSubmitted = false;
+  }
+
 
 
   ngOnDestroy(): void {
+
     this.sub.unsubscribe();
 
     if (this.clockInterval) {
@@ -2832,6 +2945,24 @@ export class WaitlistActiveListComponent
         this.refreshInterval
       );
     }
+
+    if (this.replyRotationInterval) {
+      clearInterval(
+        this.replyRotationInterval
+      );
+
+      this.replyRotationInterval = null;
+    }
+
+    if (this.fullReplyRotationInterval) {
+      clearInterval(
+        this.fullReplyRotationInterval
+      );
+
+      this.fullReplyRotationInterval = null;
+    }
+
+    this.clearCallPopupTimeout();
 
     this.replyShakeTimeouts.forEach(
       timeout =>
